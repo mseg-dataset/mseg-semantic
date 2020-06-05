@@ -128,12 +128,12 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 | SUN RGB-D (1M)          | SUN RGBD train  | Universal               | 10.2          |  4.3                          | 0.1              | 1.4          | 0.7             | 42.2         | 0.3     | [Google Drive](https://drive.google.com/file/d/1YRyJGe4gz4IHAKhuDUATqvaKRdR7gyAn/view?usp=sharing) |
 | Naive Mix Baseline (1M) | MSeg train.     | Naive                   |               |                               |                  |              |                 |              |         | [Google Drive]() | 
 | Oracle (1M)             |                 |                         | 77.0          | 46.0                          | 79.1             | –            | 57.5            | 62.2         | –       | [Google Drive]() |
-|    Model                |     |   | [Oracle <br>VOC2012 <br> 1M Model <br> Model](https://drive.google.com/file/d/1S5DuNCiRlaqTdXJ1TGups0kYEiEohZqC/view?usp=sharing) | [PASCAL <br> Context <br> 1M Model](https://drive.google.com/file/d/1-V4OOst1Ud9ohPWb-tSFNY2W44fMyZ_i/view?usp=sharing) | [Oracle <br> Camvid <br> 1M Model ](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing) | WD <br> mIoU | KITTI <br> mIoU | [ScanNet-20 <br>1M Model](https://drive.google.com/file/d/1njQkFTQ6F9p0nFTBLs2C4LGjAvm0Hydd/view?usp=sharing) | h. mean | Download <br> Link        |
+|    Model                |     |   | [Oracle <br>VOC2012 <br> 1M Model](https://drive.google.com/file/d/1S5DuNCiRlaqTdXJ1TGups0kYEiEohZqC/view?usp=sharing) | [PASCAL <br> Context <br> 1M Model](https://drive.google.com/file/d/1-V4OOst1Ud9ohPWb-tSFNY2W44fMyZ_i/view?usp=sharing) | [Oracle <br> Camvid <br> 1M Model ](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing) | N/A** | [KITTI <br> 1M Model](https://drive.google.com/file/d/14OkwxoaPK5mrxyL8CeUqGQOFW5U33b8J/view?usp=sharing) | [ScanNet-20 <br>1M Model](https://drive.google.com/file/d/1njQkFTQ6F9p0nFTBLs2C4LGjAvm0Hydd/view?usp=sharing) | h. mean | Download <br> Link        |
+
+**WildDash has no training set, so an "oracle" model cannot be trained.
 
 
 
-
-[KITTI-1M Model]()
 
 
 ## Experiment Settings
