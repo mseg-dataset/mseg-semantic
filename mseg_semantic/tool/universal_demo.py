@@ -13,7 +13,6 @@ import time
 from typing import List, Optional, Tuple
 
 from mseg.utils.names_utils import load_class_names, get_universal_class_names
-from mseg.utils.dir_utils import create_leading_fpath_dirs
 
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode

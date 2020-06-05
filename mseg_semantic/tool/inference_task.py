@@ -13,7 +13,7 @@ import torch.utils.data
 import torch.backends.cudnn as cudnn
 from typing import List, Tuple
 
-from mseg.utils.dir_utils import check_mkdir
+from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
 from mseg.utils.names_utils import get_universal_class_names
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.resize_util import resize_img_by_short_side
@@ -30,6 +30,7 @@ from mseg_semantic.utils.normalization_utils import (
 from mseg_semantic.utils.cv2_video_utils import VideoWriter, VideoReader
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.img_path_utils import dump_relpath_txt
+
 
 """
 Given a specified task, run inference on it using a pre-trained network.
@@ -48,6 +49,8 @@ screen resolution is generally described by shorter side length.
 "base_size" is a very important parameter and will
 affect results significantly.
 """
+
+_ROOT = Path(__file__).resolve().parent.parent.parent
 
 def get_logger():
     """
@@ -316,7 +319,7 @@ class InferenceTask:
 			-	None
 		"""
 		self.args.data_root = self.input_file
-		txt_output_dir = str(Path('./temp_files').resolve())
+		txt_output_dir = str(Path(f'{_ROOT}/temp_files').resolve())
 		txt_save_fpath = dump_relpath_txt(self.input_file, txt_output_dir)
 		self.args.test_list = txt_save_fpath
 
@@ -397,7 +400,8 @@ class InferenceTask:
 		out_fname = f'{in_fname_stem}_{self.args.model_name}_universal'
 		out_fname += f'_scales_{self.scales_str}_base_sz_{self.args.base_size}.mp4'
 
-		output_video_fpath = str(Path(f'./temp_files/{out_fname}').resolve())
+		output_video_fpath = f'{_ROOT}/temp_files/{out_fname}'
+		create_leading_fpath_dirs(output_video_fpath)
 		logger.info(f'Write video to {output_video_fpath}')
 		writer = VideoWriter(output_video_fpath)
 
@@ -435,7 +439,7 @@ class InferenceTask:
 			-   None
 		"""
 		if self.args.save_folder == 'default':
-			self.args.save_folder = f'temp_files/{self.args.model_name}_{self.args.dataset}_universal_{self.scales_str}/{self.args.base_size}'
+			self.args.save_folder = f'{_ROOT}/temp_files/{self.args.model_name}_{self.args.dataset}_universal_{self.scales_str}/{self.args.base_size}'
 
 		os.makedirs(self.args.save_folder, exist_ok=True)
 		gray_folder = os.path.join(self.args.save_folder, 'gray')
