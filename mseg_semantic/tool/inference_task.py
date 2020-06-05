@@ -15,6 +15,8 @@ from typing import List, Tuple
 
 from mseg.utils.names_utils import get_universal_class_names
 from mseg.utils.mask_utils_detectron2 import Visualizer
+from mseg.utils.resize_util import resize_img_by_short_side
+
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
@@ -25,10 +27,9 @@ from mseg_semantic.utils.normalization_utils import (
 	get_imagenet_mean_std,
 	normalize_img
 )
-from mseg_semantic.tool.create_video_dataset import dump_relpath_txt
 from mseg_semantic.utils.cv2_video_utils import VideoWriter, VideoReader
 from mseg_semantic.utils import dataset, transform, config
-
+from mseg_semantic.utils.img_path_utils import dump_relpath_txt
 
 """
 Given a specified task, run inference on it using a pre-trained network.
@@ -380,7 +381,7 @@ class InferenceTask:
 		gray_img = np.uint8(prediction)
 		return gray_img
 
-	def execute_on_video(self, max_num_frames: int = 5000) -> None:
+	def execute_on_video(self, max_num_frames: int = 5000, min_resolution: 1080) -> None:
 		"""
 		input_file is a path to a video file.
 		Read frames from an RGB video file, and write overlaid
@@ -408,6 +409,11 @@ class InferenceTask:
 			if frame_idx > max_num_frames:
 				break
 			pred_label_img = self.execute_on_img(rgb_img)
+
+			# avoid blurry images by upsampling RGB before overlaying text
+			if np.amin(output_img.shape[:2]) < min_resolution:
+				rgb_img = resize_img_by_short_side(rgb_img, min_resolution, 'rgb')
+				pred_label_img = resize_img_by_short_side(pred_label_img, min_resolution, 'label')
 
 			metadata = None
 			frame_visualizer = Visualizer(rgb_img, metadata)
