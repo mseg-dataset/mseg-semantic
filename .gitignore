@@ -1,0 +1,8 @@
+## General
+__pycache__/
+mseg.egg-info/*
+temp_files/*
+
+# OSX dir files
+*.DS_Store
+.DS_Store
