@@ -381,7 +381,7 @@ class InferenceTask:
 		gray_img = np.uint8(prediction)
 		return gray_img
 
-	def execute_on_video(self, max_num_frames: int = 5000, min_resolution: 1080) -> None:
+	def execute_on_video(self, max_num_frames: int = 5000, min_resolution: int = 1080) -> None:
 		"""
 		input_file is a path to a video file.
 		Read frames from an RGB video file, and write overlaid
