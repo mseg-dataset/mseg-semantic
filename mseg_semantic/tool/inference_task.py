@@ -13,6 +13,7 @@ import torch.utils.data
 import torch.backends.cudnn as cudnn
 from typing import List, Tuple
 
+from mseg.utils.dir_utils import check_mkdir
 from mseg.utils.names_utils import get_universal_class_names
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.resize_util import resize_img_by_short_side
@@ -22,7 +23,6 @@ from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
 from mseg_semantic.model.pspnet import PSPNet
 from mseg_semantic.utils.avg_meter import AverageMeter
-from mseg_semantic.utils.util import check_makedirs
 from mseg_semantic.utils.normalization_utils import (
 	get_imagenet_mean_std,
 	normalize_img
@@ -456,7 +456,7 @@ class InferenceTask:
 
 			batch_time.update(time.time() - end)
 			end = time.time()
-			check_makedirs(self.gray_folder)
+			check_mkdir(self.gray_folder)
 			image_path, _ = self.data_list[i]
 
 			if self.args.img_name_unique:
