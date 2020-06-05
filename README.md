@@ -12,18 +12,33 @@ This repo includes the **semantic segmentation pre-trained models, training and 
 <br>
 Presented at [CVPR 2020](http://cvpr2018.thecvf.com/)
 
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83895683-094caa00-a721-11ea-8905-2183df60bc4f.gif" height="250">
+  <img src="https://user-images.githubusercontent.com/62491525/83893966-aeb24e80-a71e-11ea-84cc-80e591f91ec0.gif" height="250">
+</p>
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83895915-57fa4400-a721-11ea-8fa9-3c2ff0361080.gif" height="250">
+  <img src="https://user-images.githubusercontent.com/62491525/83895972-73654f00-a721-11ea-8438-7bd43b695355.gif" height="250"> 
+</p>
+
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83893958-abb75e00-a71e-11ea-978c-ab4080b4e718.gif" height="250">
+  <img src="https://user-images.githubusercontent.com/62491525/83895490-c094f100-a720-11ea-9f85-cf4c6b030e73.gif" height="250">
+</p>
+
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83895811-35682b00-a721-11ea-9641-38e3b2c1ad0e.gif" height="250">
+  <img src="https://user-images.githubusercontent.com/62491525/83896026-8710b580-a721-11ea-86d2-a0fff9c6e26e.gif" height="250">
+</p>
 
 
 This repo is the second of 4 repos that introduce our work. It provides utilities to train semantic segmentation models, using a HRNet-W48 or PSPNet backbone, sufficient to train a winning entry on the [WildDash](https://wilddash.cc/benchmark/summary_tbl?hc=semantic_rob) benchmark).
 
-Three additional repos will be introduced in April and May 2020:
 - [` mseg-api`](https://github.com/mseg-dataset/mseg-api): utilities to download the MSeg dataset, prepare the data on disk in a unified taxonomy, on-the-fly mapping to a unified taxonomy during training.
+
+Two additional repos will be introduced in June 2020:
 - `mseg-panoptic`: provides Panoptic-FPN and Mask-RCNN training, based on Detectron2
 - `mseg-mturk`: provides utilities to perform large-scale Mechanical Turk re-labeling
-
-<div align='center'>
-  <img src='https://user-images.githubusercontent.com/16724970/80264666-d663c080-8662-11ea-9805-366c246befed.jpg' height="350px">
-</div>
 
 ### Dependencies
 
@@ -113,7 +128,7 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 
 
 ## Experiment Settings
-For PSPNet, we generally follow the recommendations of [Zhao et al.](https://github.com/hszhao/semseg): We use a ResNet50 or ResNet101 backbone, with a crop size of 473x473 or 713x713, with synchronized BN. Our data augmentation consists of random scaling in the range [0.5,2.0], random rotation in the range [-10,10] degrees. We use SGD with momentum 0.9, weight decay of 1e-4. We use a polynomial learning rate with power 0.9. Base learning rate is set to 1e-2. An auxiliary cross-entropy (CE) loss is added to intermediate activations, a linear combination with weight 0.4. In our data, we use 255 as an ignore/unlabeled flag for the CE loss. Logits are upsampled by a factor is 8 ("zoom factor") to match original label map resolution for loss calculation.
+We use an HRNet-W48 backbone, we generally follow the recommendations of [Zhao et al.](https://github.com/hszhao/semseg): We use a ResNet50 or ResNet101 backbone, with a crop size of 473x473 or 713x713, with synchronized BN. Our data augmentation consists of random scaling in the range [0.5,2.0], random rotation in the range [-10,10] degrees. We use SGD with momentum 0.9, weight decay of 1e-4. We use a polynomial learning rate with power 0.9. Base learning rate is set to 1e-2. An auxiliary cross-entropy (CE) loss is added to intermediate activations, a linear combination with weight 0.4. In our data, we use 255 as an ignore/unlabeled flag for the CE loss. Logits are upsampled by a factor is 8 ("zoom factor") to match original label map resolution for loss calculation.
 
 We use Pytorch's Distributed Data Parallel (DDP) package for multiprocessing, with the NCCL backend. Zhao et al. recommend a training batch size of 16, with different number of epochs per dataset (ADE20k: 200, Cityscapes: 200, Camvid: 100, VOC2012: 50). For inference, we use a multi-scale accumulation of probabilities: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]. Base size (ADE20K: 512, Camvid: 512, Cityscapes: 2048, VOC: 512) roughly equivalent to the average longer side of an image.
 
