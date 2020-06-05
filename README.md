@@ -12,6 +12,29 @@ This repo includes the **semantic segmentation pre-trained models, training and 
 <br>
 Presented at [CVPR 2020](http://cvpr2018.thecvf.com/)
 
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83895683-094caa00-a721-11ea-8905-2183df60bc4f.gif" height="280">
+  <img src="https://user-images.githubusercontent.com/62491525/83893966-aeb24e80-a71e-11ea-84cc-80e591f91ec0.gif" height="280">
+</p>
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83895915-57fa4400-a721-11ea-8fa9-3c2ff0361080.gif" height="280">
+  <img src="https://user-images.githubusercontent.com/62491525/83895972-73654f00-a721-11ea-8438-7bd43b695355.gif" height="280"> 
+</p>
+
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83893958-abb75e00-a71e-11ea-978c-ab4080b4e718.gif" height="280">
+  <img src="https://user-images.githubusercontent.com/62491525/83895490-c094f100-a720-11ea-9f85-cf4c6b030e73.gif" height="280">
+</p>
+
+<p align="left">
+  <img src="https://user-images.githubusercontent.com/62491525/83895811-35682b00-a721-11ea-9641-38e3b2c1ad0e.gif" height="280">
+  <img src="https://user-images.githubusercontent.com/62491525/83895963-6e080480-a721-11ea-98b6-49835d9e733a.gif" height="280">
+</p>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/62491525/83896026-8710b580-a721-11ea-86d2-a0fff9c6e26e.gif" height="280">
+  <img src="" height="280">
+</p>
 
 
 This repo is the second of 4 repos that introduce our work. It provides utilities to train semantic segmentation models, using a HRNet-W48 or PSPNet backbone, sufficient to train a winning entry on the [WildDash](https://wilddash.cc/benchmark/summary_tbl?hc=semantic_rob) benchmark).
@@ -20,10 +43,6 @@ Three additional repos will be introduced in April and May 2020:
 - [` mseg-api`](https://github.com/mseg-dataset/mseg-api): utilities to download the MSeg dataset, prepare the data on disk in a unified taxonomy, on-the-fly mapping to a unified taxonomy during training.
 - `mseg-panoptic`: provides Panoptic-FPN and Mask-RCNN training, based on Detectron2
 - `mseg-mturk`: provides utilities to perform large-scale Mechanical Turk re-labeling
-
-<div align='center'>
-  <img src='https://user-images.githubusercontent.com/16724970/80264666-d663c080-8662-11ea-9805-366c246befed.jpg' height="350px">
-</div>
 
 ### Dependencies
 
