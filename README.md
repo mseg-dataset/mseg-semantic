@@ -129,7 +129,10 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 | Naive Mix Baseline (1M) | MSeg train.     | Naive                   |               |                               |                  |              |                 |              |         | [Google Drive]() | 
 | Oracle (1M)             |                 |                         | 77.0          | 46.0                          | 79.1             | –            | 57.5            | 62.2         | –       | [Google Drive]() |
 
-[Camvid-1M Model](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing)
+|    Model                | Training Set    |  Training <br> Taxonomy | VOC <br> mIoU | PASCAL <br> Context <br> mIoU | [Oracle](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing) <br> [Camvid-1M](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing) <br> [Model](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing)) | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
+
+
+
 [VOC 2012-1M Model](https://drive.google.com/file/d/1S5DuNCiRlaqTdXJ1TGups0kYEiEohZqC/view?usp=sharing)
 [PASCAL-Context-1M Model](https://drive.google.com/file/d/1-V4OOst1Ud9ohPWb-tSFNY2W44fMyZ_i/view?usp=sharing)
 [ScanNet-20-1M Model](https://drive.google.com/file/d/1njQkFTQ6F9p0nFTBLs2C4LGjAvm0Hydd/view?usp=sharing)
