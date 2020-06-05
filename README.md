@@ -28,10 +28,6 @@ Presented at [CVPR 2020](http://cvpr2018.thecvf.com/)
 
 <p align="left">
   <img src="https://user-images.githubusercontent.com/62491525/83895811-35682b00-a721-11ea-9641-38e3b2c1ad0e.gif" height="250">
-  <img src="https://user-images.githubusercontent.com/62491525/83895963-6e080480-a721-11ea-98b6-49835d9e733a.gif" height="250">
-</p>
-
-<p align="center">
   <img src="https://user-images.githubusercontent.com/62491525/83896026-8710b580-a721-11ea-86d2-a0fff9c6e26e.gif" height="250">
 </p>
 
