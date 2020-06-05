@@ -71,21 +71,30 @@ Multi-scale inference greatly improves the smoothness of predictions, therefore 
 
 If you have video input, and you would like to make predictions on each frame in the universal taxonomy, please run:
 ```
-python mseg_semantic/tool/universal_demo.py -- 
+input_file=/path/to/my/video.mp4
 ```
-If you have a set of images, and you would like to make a prediction in the universal taxonomy for each image, please run:
+If you have a set of images in a directory, and you would like to make a prediction in the universal taxonomy for each image, please run:
 ```
-python mseg_semantic/tool/universal_demo.py -- 
+input_file=/path/to/my/directory
 ```
 
-If you have as input a single image, and you would like to make a prediction in the universal taxonomy, please run:
+If you have as input a single image, and you would like to make a prediction in the universal taxonomy, please set:
 ```
-python mseg_semantic/tool/universal_demo.py -- 
+input_file=/path/to/my/image
 ```
+
+Now, run our demo script:
+```
+model_name=mseg-3m
+model_path=/path/to/downloaded/model/from/google/drive
+config=mseg_semantic/config/test/default_config_360.yaml
+python -u mseg_semantic/tool/universal_demo.py \
+  --config=${config} model_name ${model_name} model_path ${model_path} input_file ${input_file}
+```
+
 If you would like to make predictions in a specific dataset's taxonomy, e.g. Cityscapes, for the RVC Challenge, please run:
-```
-python mseg_semantic/tool/universal_demo.py -- 
-```
+``` (will be added) ```
+
 
 ## Citing MSeg
 
