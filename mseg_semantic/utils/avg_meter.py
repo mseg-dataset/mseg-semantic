@@ -3,7 +3,7 @@
 import numpy as np
 import torch.distributed as dist
 
-from mseg_semantic.utils.util import intersectionAndUnion, intersectionAndUnionGPU
+from mseg_semantic.utils.iou import intersectionAndUnion, intersectionAndUnionGPU
 
 
 class AverageMeter(object):
