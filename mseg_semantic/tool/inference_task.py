@@ -411,7 +411,7 @@ class InferenceTask:
 			pred_label_img = self.execute_on_img(rgb_img)
 
 			# avoid blurry images by upsampling RGB before overlaying text
-			if np.amin(output_img.shape[:2]) < min_resolution:
+			if np.amin(rgb_img.shape[:2]) < min_resolution:
 				rgb_img = resize_img_by_short_side(rgb_img, min_resolution, 'rgb')
 				pred_label_img = resize_img_by_short_side(pred_label_img, min_resolution, 'label')
 
