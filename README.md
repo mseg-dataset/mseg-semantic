@@ -115,10 +115,9 @@ We use apex opt_level: 'O0'
 
 For HRNet, we follow the [original authors' suggestions](https://arxiv.org/pdf/1904.04514.pdf): a learning rate of 0.01, momentum of 0.9, and weight decay of 5e-4. As above, we use a polynomial learning rate with power 0.9. Batch size is set to...
 
-## HRNet Model
+## Training Instructions
 
-[OneDrive download link](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk)
-
+Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive.
 
 
 
