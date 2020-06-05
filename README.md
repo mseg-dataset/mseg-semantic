@@ -69,11 +69,11 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 
 Multi-scale inference greatly improves the smoothness of predictions, therefore our demos scripts use multi-scale config by default. While we train at 1080p, our predictions are often visually better when we feed in test images at 360p resolution.
 
-If you have video input, and you would like to make predictions on each frame in the universal taxonomy, please run:
+If you have video input, and you would like to make predictions on each frame in the universal taxonomy, please set:
 ```
 input_file=/path/to/my/video.mp4
 ```
-If you have a set of images in a directory, and you would like to make a prediction in the universal taxonomy for each image, please run:
+If you have a set of images in a directory, and you would like to make a prediction in the universal taxonomy for each image, please set:
 ```
 input_file=/path/to/my/directory
 ```
