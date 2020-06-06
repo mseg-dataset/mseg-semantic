@@ -408,7 +408,7 @@ class InferenceTask:
 		video_fpath = '/Users/johnlamb/Downloads/sample_ffmpeg.mp4'
 		reader = VideoReader(self.input_file)
 		for frame_idx in range(reader.num_frames):
-			logger.info(f'On image {frame_idx}')
+			logger.info(f'On image {frame_idx}/{reader.num_frames}')
 			rgb_img = reader.get_frame()
 			if frame_idx > max_num_frames:
 				break
