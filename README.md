@@ -1,4 +1,4 @@
-
+[![Build Status](https://travis-ci.com/mseg-dataset/mseg-semantic.svg?branch=master)](https://travis-ci.com/mseg-dataset/mseg-semantic)
 
 This repo includes the **semantic segmentation pre-trained models, training and inference code** for the paper:
 
