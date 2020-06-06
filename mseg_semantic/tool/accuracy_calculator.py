@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 import cv2
 import imageio
 import logging
@@ -160,11 +159,7 @@ class AccuracyCalculator:
 
     def print_results(self):
         """
-            Args:
-            -   
-
-            Returns:
-            -   
+        Dump per-class IoUs and mIoU to stdout.
         """
         if self.args.taxonomy == 'universal' and (self.args.dataset in self.tc.train_datasets):
             iou_class, accuracy_class, mIoU, mAcc, allAcc = self.sam.get_metrics(
@@ -241,9 +236,7 @@ class AccuracyCalculator:
 
     def dump_acc_results_to_file(self) -> None:
         """
-            Args:
-            -   save_folder: 
-            -   sam: SegmentationAverageMeter
+        Save per-class IoUs and mIoU to a .txt file.
         """
         result_file = f'{self.save_folder}/results.txt'
         if self.args.taxonomy == 'universal':
