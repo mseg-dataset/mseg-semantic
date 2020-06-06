@@ -4,13 +4,11 @@ import glob
 from pathlib import Path
 import pdb
 
+from mseg.utils.dir_utils import check_mkdir
 from mseg.utils.txt_utils import (
 	get_last_n_path_elements_as_str,
 	write_txt_lines
 )
-
-from mseg.utils.dir_utils import check_mkdir
-
 
 def dump_relpath_txt(jpg_dir: str, txt_output_dir: str) -> str:
 	"""
