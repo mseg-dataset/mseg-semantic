@@ -7,8 +7,11 @@ install:
     - pip install -r requirements.txt
 
 script:
-    - pip install git+https://github.com/mseg-dataset/mseg-api.git
+    - git clone https://github.com/mseg-dataset/mseg-api.git
+    - cd mseg-api
     - sed -i '12s/.*/MSEG_DST_DIR="\/dummy\/path"/' mseg/utils/dataset_config.py
+    - pip install -e .
+    - cd ..
     - pip install -e .
     - pytest tests/
     
