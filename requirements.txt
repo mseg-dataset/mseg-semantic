@@ -8,4 +8,5 @@ recordclass
 scipy
 tqdm
 torch
+yacs
 yaml
