@@ -111,4 +111,3 @@ class SegmentationAverageMeter(AverageMeter):
 
         return array[count]
 
-    # def get_metrics

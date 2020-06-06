@@ -159,6 +159,42 @@ def test_intersectionAndUnion_ignore_label():
 	assert np.allclose(area_union, np.array([2, 1]))
 
 
+
+def test_intersectionAndUnionGPU_ignore_label():
+	"""
+	Handle the ignore case. Since 255 lies outside of the histogram bins, 
+	it will be ignored.
+	"""
+	pred = torch.tensor(
+		[
+			[1,0],
+			[1,0]
+		])
+	target = torch.tensor(
+		[
+			[255,0],
+			[255,1]
+		])
+	num_classes = 2
+
+	# contain the number of samples in each bin.
+	area_intersection, area_union, area_target = intersectionAndUnionGPU(
+		pred, 
+		target, 
+		K=num_classes, 
+		ignore_index=255,
+		cuda_available=False
+	)
+	assert area_intersection.shape == (2,)
+	assert area_union.shape == (2,)
+	assert area_target.shape == (2,)
+	assert torch.allclose(area_intersection, torch.tensor([1, 0]).float() )
+	assert torch.allclose(area_target, torch.tensor([1, 1]).float() )
+	assert torch.allclose(area_union, torch.tensor([2, 1]).float() )
+
+
+
+
 if __name__ == '__main__':
 	#test_intersectionAndUnion_2classes()
 	test_intersectionAndUnion_3classes()
