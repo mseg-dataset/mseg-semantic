@@ -138,11 +138,11 @@ By training each baseline *that is trained on a single training dataset* within 
 
 
 ## Experiment Settings
-We use the [HRNetV2-W48](https://arxiv.org/pdf/1904.04514.pdf) architecture. All images are resized to 1080p at training time before a crop is taken.
+We use the [HRNetV2-W48](https://arxiv.org/pdf/1904.04514.pdf) architecture. All images are resized to 1080p (shorter size=1080) at training time before a crop is taken.
 
- For inference, we use a multi-scale accumulation of probabilities: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]. We run inference with the shorter side of each test image at three resolutions (360p, 720p, 1080p), and take the max among these 3 possible resolutions. Note that in the original [semseg](https://github.com/hszhao/semseg) repo, the author specifies the longer side of an image, whereas we specify the shorter side. Batch size is set to 35.
+ We run inference with the shorter side of each test image at three resolutions (360p, 720p, 1080p), and take the max among these 3 possible resolutions. Note that in the original [semseg](https://github.com/hszhao/semseg) repo, the author specifies the longer side of an image, whereas we specify the shorter side. Batch size is set to 35.
 
-We generally follow the recommendations of [Zhao et al.](https://github.com/hszhao/semseg): Our data augmentation consists of random scaling in the range [0.5,2.0], random rotation in the range [-10,10] degrees. We use SGD with momentum 0.9, weight decay of 1e-4. We use a polynomial learning rate with power 0.9. Base learning rate is set to 1e-2. An auxiliary cross-entropy (CE) loss is added to intermediate activations, a linear combination with weight 0.4. In our data, we use 255 as an ignore/unlabeled flag for the CE loss. Logits are upsampled by a factor is 8 ("zoom factor") to match original label map resolution for loss calculation. We use Pytorch's Distributed Data Parallel (DDP) package for multiprocessing, with the NCCL backend. We use apex opt_level: 'O0' and use a crop size of 713x713, with synchronized BN.
+We generally follow the recommendations of [Zhao et al.](https://github.com/hszhao/semseg): Our data augmentation consists of random scaling in the range [0.5,2.0], random rotation in the range [-10,10] degrees. We use SGD with momentum 0.9, weight decay of 1e-4. We use a polynomial learning rate with power 0.9. Base learning rate is set to 1e-2. An auxiliary cross-entropy (CE) loss is added to intermediate activations, a linear combination with weight 0.4. In our data, we use 255 as an ignore/unlabeled flag for the CE loss. We use Pytorch's Distributed Data Parallel (DDP) package for multiprocessing, with the NCCL backend. We use apex opt_level: 'O0' and use a crop size of 713x713, with synchronized BN.
 
 ## Training Instructions
 
