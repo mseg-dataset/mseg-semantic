@@ -146,4 +146,4 @@ We generally follow the recommendations of [Zhao et al.](https://github.com/hszh
 
 ## Training Instructions
 
-Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive.
+Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive. We use 8 Quadro RTX 6000 cards w/ 24 GB of RAM each for training.
