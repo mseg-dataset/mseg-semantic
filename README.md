@@ -10,7 +10,7 @@ This repo includes the **semantic segmentation pre-trained models, training and 
 [James Hays](https://www.cc.gatech.edu/~hays/),
 [Vladlen Koltun](http://vladlen.info/)
 <br>
-Presented at [CVPR 2020](http://cvpr2018.thecvf.com/). [MSeg Video (3min) ](https://youtu.be/PzBK6K5gyyo)
+Presented at [CVPR 2020](http://cvpr2018.thecvf.com/). Link to [MSeg Video (3min) ](https://youtu.be/PzBK6K5gyyo)
 
 <p align="left">
   <img src="https://user-images.githubusercontent.com/62491525/83895683-094caa00-a721-11ea-8905-2183df60bc4f.gif" height="250">
