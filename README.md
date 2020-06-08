@@ -10,7 +10,7 @@ This repo includes the **semantic segmentation pre-trained models, training and 
 [James Hays](https://www.cc.gatech.edu/~hays/),
 [Vladlen Koltun](http://vladlen.info/)
 <br>
-Presented at [CVPR 2020](http://cvpr2018.thecvf.com/)
+Presented at [CVPR 2020](http://cvpr2018.thecvf.com/). [MSeg Video (3min) ](https://youtu.be/PzBK6K5gyyo)
 
 <p align="left">
   <img src="https://user-images.githubusercontent.com/62491525/83895683-094caa00-a721-11ea-8905-2183df60bc4f.gif" height="250">
@@ -30,8 +30,6 @@ Presented at [CVPR 2020](http://cvpr2018.thecvf.com/)
   <img src="https://user-images.githubusercontent.com/62491525/83895811-35682b00-a721-11ea-9641-38e3b2c1ad0e.gif" height="250">
   <img src="https://user-images.githubusercontent.com/62491525/83896026-8710b580-a721-11ea-86d2-a0fff9c6e26e.gif" height="250">
 </p>
-
-[![MSeg Video (3min)](http://img.youtube.com/vi/PzBK6K5gyyo/0.jpg)](https://www.youtube.com/watch?v=PzBK6K5gyyo "MSeg Video")
 
 This repo is the second of 4 repos that introduce our work. It provides utilities to train semantic segmentation models, using a HRNet-W48 or PSPNet backbone, sufficient to train a winning entry on the [WildDash](https://wilddash.cc/benchmark/summary_tbl?hc=semantic_rob) benchmark).
 
