@@ -31,6 +31,7 @@ Presented at [CVPR 2020](http://cvpr2018.thecvf.com/)
   <img src="https://user-images.githubusercontent.com/62491525/83896026-8710b580-a721-11ea-86d2-a0fff9c6e26e.gif" height="250">
 </p>
 
+[![MSeg Video (3min)](http://img.youtube.com/vi/PzBK6K5gyyo/0.jpg)](https://www.youtube.com/watch?v=PzBK6K5gyyo "MSeg Video")
 
 This repo is the second of 4 repos that introduce our work. It provides utilities to train semantic segmentation models, using a HRNet-W48 or PSPNet backbone, sufficient to train a winning entry on the [WildDash](https://wilddash.cc/benchmark/summary_tbl?hc=semantic_rob) benchmark).
 
