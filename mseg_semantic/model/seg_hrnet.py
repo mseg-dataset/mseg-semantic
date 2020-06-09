@@ -508,10 +508,10 @@ class HighResolutionNet(nn.Module):
 
         # return x
 
-    def init_weights(self, pretrained: str='',):
+    def init_weights(self, pretrained_fpath: str='',) -> None:
         """
             Args:
-            -   pretrained: str representing path to pretrained model
+            -   pretrained_fpath: str representing path to pretrained model
 
             Returns:
             -   None
@@ -523,12 +523,13 @@ class HighResolutionNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-        if os.path.isfile(pretrained):
-            pretrained_dict = torch.load(pretrained)
-            logger.info('=> loading pretrained model {}'.format(pretrained))
+        if os.path.isfile(pretrained_fpath):
+            pretrained_dict = torch.load(pretrained_fpath)
+            logger.info('=> loading pretrained model {}'.format(pretrained_fpath))
             model_dict = self.state_dict()
-            pretrained_dict = {k: v for k, v in pretrained_dict.items()
-                               if k in model_dict.keys()}
+            pretrained_dict = {
+                k: v for k, v in pretrained_dict.items() if k in model_dict.keys()
+            }
             #for k, _ in pretrained_dict.items():
             #    logger.info(
             #        '=> loading {} pretrained model {}'.format(k, pretrained))
@@ -537,11 +538,11 @@ class HighResolutionNet(nn.Module):
         else:
             # logger.info(pretrained)
             logger.info('cannot find model path, use random initialization')
-            raise Exception('no pretrained model found at {}'.format(pretrained))
+            raise Exception('no pretrained model found at {}'.format(pretrained_fpath))
 
-def get_seg_model(cfg, criterion, n_classes, **kwargs):
+def get_seg_model(cfg, criterion, n_classes, init_model_path, **kwargs):
     model = HighResolutionNet(cfg, criterion, n_classes, **kwargs)
-    model.init_weights(cfg.MODEL.PRETRAINED)
+    model.init_weights(init_model_path)
 
     return model
 
