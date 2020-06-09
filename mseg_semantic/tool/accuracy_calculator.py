@@ -20,6 +20,15 @@ from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
 from mseg_semantic.utils.confusion_matrix_renderer import ConfusionMatrixRenderer
 
 
+"""
+Given a set of inference results (inferred label maps saved as grayscale images),
+compute the accuracy vs. ground truth label maps.
+
+Expects inference results to be saved as {save_folder}/gray/*.png, exactly as our
+test scripts spit out.
+"""
+
+
 def get_logger():
     """
     """
