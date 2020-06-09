@@ -1,4 +1,4 @@
-# Code adopted from https://github.com/HRNet/HRNet-Semantic-Segmentation
+#!/usr/bin/python3
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,6 +22,7 @@ from pathlib import Path
 "High-Resolution Representations for Labeling Pixels and Regions"
 https://arxiv.org/pdf/1904.04514.pdf
 
+Code adopted from https://github.com/HRNet/HRNet-Semantic-Segmentation
 """
 
 BatchNorm2d = apex.parallel.SyncBatchNorm
@@ -544,13 +545,21 @@ def get_seg_model(cfg, criterion, n_classes, **kwargs):
 
     return model
 
-def get_configured_hrnet(n_classes):
+def get_configured_hrnet(n_classes: int, init_model_path: str):
+    """
+        Args:
+        -   n_classes: integer representing number of output classes
+        -   init_model_path: string representing path to file with weights to 
+                initialize model with
+
+        Returns:
+        -   model: HRNet model w/ architecture configured according to model yaml,
+                and with specified number of classes and weights initialized
+                (at training, init using imagenet-pretrained model)
+                (at inference, init using fully trained segmentation model)
+    """
     from yacs.config import CfgNode as CN
     _C = CN()
-    _C.PRINT_FREQ = 20
-    _C.RANK = 0
-    _C.CUDNN = CN()
-    _C.CUDNN.BENCHMARK = True
 
     # common params for NETWORK
     _C.MODEL = CN()
@@ -563,27 +572,19 @@ def get_configured_hrnet(n_classes):
 
     # testing
     _C.TEST = CN()
-
     _C.TEST.MULTI_SCALE = False
-    _C.TEST.SCALE_LIST = [1]
 
-    # debug
-    _C.DEBUG = CN()
-    _C.DEBUG.DEBUG = False
-    _C.DEBUG.SAVE_BATCH_IMAGES_GT = False
-    _C.DEBUG.SAVE_BATCH_IMAGES_PRED = False
     _C.merge_from_file(f'{_ROOT}/seg_hrnet.yaml')
-
     config = _C
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
-    model = get_seg_model(config, criterion, n_classes)
+    model = get_seg_model(config, criterion, n_classes, init_model_path)
     return model
 
 
 if __name__ == '__main__':
 
-    model = get_configured_hrnet(180)
+    model = get_configured_hrnet(180, init_model_path)
     num_p = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(num_p)
 
