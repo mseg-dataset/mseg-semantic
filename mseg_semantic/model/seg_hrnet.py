@@ -592,14 +592,14 @@ def get_configured_hrnet(
     config = _C
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
-    model = get_seg_model(config, criterion, n_classes, use_imagenet_model, imagenet_ckpt_fpath)
+    model = get_seg_model(config, criterion, n_classes, load_imagenet_model, imagenet_ckpt_fpath)
     pdb.set_trace()
     return model
 
 
 if __name__ == '__main__':
 
-    model = get_configured_hrnet(180, use_imagenet_model, imagenet_ckpt_fpath)
+    model = get_configured_hrnet(180, load_imagenet_model, imagenet_ckpt_fpath)
     num_p = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(num_p)
 
