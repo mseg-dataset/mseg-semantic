@@ -158,6 +158,17 @@ def pad_to_crop_sz(
 		)
 	return image, pad_h_half, pad_w_half
 
+
+def imread_rgb(img_fpath: str) -> np.ndarray:
+	"""
+		Returns:
+		-	RGB 3 channel nd-array with shape H * W * 3
+	"""
+	bgr_img = cv2.imread(img_fpath, cv2.IMREAD_COLOR)
+	rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
+	rgb_img = np.float32(rgb_img)
+	return rgb_img
+
 class InferenceTask:
 
 	def __init__(self,
@@ -286,18 +297,22 @@ class InferenceTask:
 
 		suffix = self.input_file[-4:]
 		is_dir = os.path.isdir(self.input_file)
+		is_img = suffix in ['.png', '.jpg']
+		is_vid = suffix in ['.mp4', '.avi', '.mov']
 
-		if is_dir:
+		if is_img:
+			self.render_single_img_pred()
+		elif is_dir:
 			# argument is a path to a directory
 			self.create_path_lists_from_dir()
 			test_loader = self.create_test_loader()
 			self.execute_on_dataloader(test_loader)
 
-		elif not is_dir and suffix in ['.mp4', '.avi', '.mov']:
+		elif is_vid:
 			# argument is a video
 			self.execute_on_video()
 
-		elif not is_dir and self.args.dataset != 'default':
+		elif not is_dir and not is_img and self.args.dataset != 'default':
 			# evaluate on a train or test dataset
 			test_loader = self.create_test_loader()
 			self.execute_on_dataloader(test_loader)		
@@ -306,6 +321,25 @@ class InferenceTask:
 			logger.info('Error: Unknown input type')
 
 		logger.info('<<<<<<<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<<<<')
+
+	def render_single_img_pred(self):
+		""" """
+		in_fname_stem = Path(self.input_file).stem
+		output_gray_fpath = f'{in_fname_stem}_gray.jpg'
+		output_demo_fpath = f'{in_fname_stem}_overlaid_classes.jpg'
+		logger.info(f'Write image prediction to {output_demo_fpath}')
+
+		rgb_img = imread_rgb(self.input_file)
+		pred_label_img = self.execute_on_img(rgb_img)
+
+		metadata = None
+		frame_visualizer = Visualizer(rgb_img, metadata)
+		overlaid_img = frame_visualizer.overlay_instances(
+			label_map=pred_label_img,
+			id_to_class_name_map=self.id_to_class_name_map
+		)
+		imageio.imwrite(output_demo_fpath, overlaid)
+		imageio.imwrite(output_gray_fpath, pred_label_img)
 
 	def create_path_lists_from_dir(self) -> None:
 		"""
@@ -405,7 +439,6 @@ class InferenceTask:
 		logger.info(f'Write video to {output_video_fpath}')
 		writer = VideoWriter(output_video_fpath)
 
-		video_fpath = '/Users/johnlamb/Downloads/sample_ffmpeg.mp4'
 		reader = VideoReader(self.input_file)
 		for frame_idx in range(reader.num_frames):
 			logger.info(f'On image {frame_idx}/{reader.num_frames}')
