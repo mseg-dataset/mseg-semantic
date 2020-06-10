@@ -262,7 +262,7 @@ class InferenceTask:
 		elif args.arch == 'hrnet':
 			from mseg_semantic.model.seg_hrnet import get_configured_hrnet
 			# note apex batchnorm is hardcoded 
-			model = get_configured_hrnet(args.num_model_classes, args.model_path)
+			model = get_configured_hrnet(args.num_model_classes, load_imagenet_model=False)
 		elif args.arch == 'hrnet_ocr':
 			from mseg_semantic.model.seg_hrnet_ocr import get_configured_hrnet_ocr
 			model = get_configured_hrnet_ocr(args.num_model_classes)

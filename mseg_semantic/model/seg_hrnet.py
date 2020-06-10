@@ -508,8 +508,8 @@ class HighResolutionNet(nn.Module):
 
         # return x
 
-    def init_weights(self, pretrained_fpath: str='',) -> None:
-        """
+    def init_weights(self, load_imagenet_model: bool=False, imagenet_ckpt_fpath: str='') -> None:
+        """ For training, we use a model pretrained on ImageNet. Irrelevant at inference.
             Args:
             -   pretrained_fpath: str representing path to pretrained model
 
@@ -523,9 +523,11 @@ class HighResolutionNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-        if os.path.isfile(pretrained_fpath):
-            pretrained_dict = torch.load(pretrained_fpath)
-            logger.info('=> loading pretrained model {}'.format(pretrained_fpath))
+        if not load_imagenet_model:
+            return
+        if os.path.isfile(imagenet_ckpt_fpath):
+            pretrained_dict = torch.load(imagenet_ckpt_fpath)
+            logger.info('=> loading pretrained model {}'.format(imagenet_ckpt_fpath))
             model_dict = self.state_dict()
             pretrained_dict = {
                 k: v for k, v in pretrained_dict.items() if k in model_dict.keys()
@@ -537,27 +539,38 @@ class HighResolutionNet(nn.Module):
             self.load_state_dict(model_dict)
         else:
             # logger.info(pretrained)
-            logger.info('cannot find model path, use random initialization')
-            raise Exception('no pretrained model found at {}'.format(pretrained_fpath))
+            logger.info('cannot find ImageNet model path, use random initialization')
+            raise Exception('no pretrained model found at {}'.format(imagenet_ckpt_fpath))
 
-def get_seg_model(cfg, criterion, n_classes, init_model_path, **kwargs):
+def get_seg_model(
+    cfg,
+    criterion,
+    n_classes: int,
+    load_imagenet_model: bool = False,
+    imagenet_ckpt_fpath: str = '',
+    **kwargs
+    ) -> nn.Module:
     model = HighResolutionNet(cfg, criterion, n_classes, **kwargs)
-    model.init_weights(init_model_path)
-
+    model.init_weights(load_imagenet_model, imagenet_ckpt_fpath)
+    assert isinstance(model, nn.Module)
     return model
 
-def get_configured_hrnet(n_classes: int, init_model_path: str):
+def get_configured_hrnet(
+    n_classes: int,
+    load_imagenet_model: bool = False,
+    imagenet_ckpt_fpath: str = '',
+    ) -> nn.Module:
     """
         Args:
         -   n_classes: integer representing number of output classes
-        -   init_model_path: string representing path to file with weights to 
+        -   load_imagenet_model: whether to initialize from ImageNet-pretrained model
+        -   imagenet_ckpt_fpath: string representing path to file with weights to 
                 initialize model with
 
         Returns:
         -   model: HRNet model w/ architecture configured according to model yaml,
                 and with specified number of classes and weights initialized
                 (at training, init using imagenet-pretrained model)
-                (at inference, init using fully trained segmentation model)
     """
     from yacs.config import CfgNode as CN
     _C = CN()
@@ -579,13 +592,14 @@ def get_configured_hrnet(n_classes: int, init_model_path: str):
     config = _C
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
-    model = get_seg_model(config, criterion, n_classes, init_model_path)
+    model = get_seg_model(config, criterion, n_classes, use_imagenet_model, imagenet_ckpt_fpath)
+    pdb.set_trace()
     return model
 
 
 if __name__ == '__main__':
 
-    model = get_configured_hrnet(180, init_model_path)
+    model = get_configured_hrnet(180, use_imagenet_model, imagenet_ckpt_fpath)
     num_p = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(num_p)
 
