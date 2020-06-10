@@ -339,7 +339,7 @@ class InferenceTask:
 			label_map=pred_label_img,
 			id_to_class_name_map=self.id_to_class_name_map
 		)
-		imageio.imwrite(output_demo_fpath, overlaid)
+		imageio.imwrite(output_demo_fpath, overlaid_img)
 		imageio.imwrite(output_gray_fpath, pred_label_img)
 
 	def create_path_lists_from_dir(self) -> None:
