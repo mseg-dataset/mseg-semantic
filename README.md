@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/mseg-dataset/mseg-semantic.svg?branch=master)](https://travis-ci.com/mseg-dataset/mseg-semantic)
+[![Build Status](https://travis-ci.com/mseg-dataset/mseg-semantic.svg?branch=master)](https://travis-ci.com/mseg-dataset/mseg-semantic) Try out our models in [Google Colab on your own images](https://colab.research.google.com/drive/1ctyBEf74uA-7R8sidi026OvNb4WlKkG1?usp=sharing)!
 
 This repo includes the **semantic segmentation pre-trained models, training and inference code** for the paper:
 
@@ -65,6 +65,8 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 
 
 ## Inference: Using our pre-trained models
+
+We show how to perform inference here [in our Google Colab](https://colab.research.google.com/drive/1ctyBEf74uA-7R8sidi026OvNb4WlKkG1?usp=sharing).
 
 Multi-scale inference greatly improves the smoothness of predictions, therefore our demos scripts use multi-scale config by default. While we train at 1080p, our predictions are often visually better when we feed in test images at 360p resolution.
 
