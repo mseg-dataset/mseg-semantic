@@ -593,7 +593,6 @@ def get_configured_hrnet(
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     model = get_seg_model(config, criterion, n_classes, load_imagenet_model, imagenet_ckpt_fpath)
-    pdb.set_trace()
     return model
 
 
