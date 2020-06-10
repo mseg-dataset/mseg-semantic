@@ -323,8 +323,11 @@ class InferenceTask:
 
 		logger.info('<<<<<<<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<<<<')
 
-	def render_single_img_pred(self):
-		""" """
+	def render_single_img_pred(self, min_resolution: int = 1080):
+		"""
+		Since overlaid class text is difficult to read below 1080p, we upsample
+		predictions.
+		"""
 		in_fname_stem = Path(self.input_file).stem
 		output_gray_fpath = f'{in_fname_stem}_gray.jpg'
 		output_demo_fpath = f'{in_fname_stem}_overlaid_classes.jpg'
@@ -332,6 +335,11 @@ class InferenceTask:
 
 		rgb_img = imread_rgb(self.input_file)
 		pred_label_img = self.execute_on_img(rgb_img)
+
+		# avoid blurry images by upsampling RGB before overlaying text
+		if np.amin(rgb_img.shape[:2]) < min_resolution:
+			rgb_img = resize_img_by_short_side(rgb_img, min_resolution, 'rgb')
+			pred_label_img = resize_img_by_short_side(pred_label_img, min_resolution, 'label')
 
 		metadata = None
 		frame_visualizer = Visualizer(rgb_img, metadata)
