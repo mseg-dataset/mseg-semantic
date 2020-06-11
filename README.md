@@ -60,8 +60,8 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 
 |    Model                | Training Set    |  Training <br> Taxonomy | VOC <br> mIoU | PASCAL <br> Context <br> mIoU | CamVid <br> mIoU | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
 | :---------------------: | :------------:  | :--------------------:  | :----------:  | :---------------------------: | :--------------: | :----------: | :-------------: | :----------: | :----:  | :--------------: |
-| MSeg (1M)               | MSeg train      | Universal               | 70.8          | 42.9                          | 83.1             | 63.1         | 63.7            | 48.4         | 59.0    | [Google Drive](https://drive.google.com/file/d/1g-D6PtXV-UhoIYFcQbiqcXWU2Q2M-zo9/view?usp=sharing) |
-| MSeg (3M)               | MSeg train      | Universal               |               |                               |                  |              |                 |              |         | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
+| MSeg (1M)               | MSeg train      | Universal               | 70.7          | 42.7                          | 83.3             | 62.0         | 67.0            | 48.3         | 59.2    | [Google Drive](https://drive.google.com/file/d/1g-D6PtXV-UhoIYFcQbiqcXWU2Q2M-zo9/view?usp=sharing) |
+| MSeg (3M)               | MSeg train      | Universal               | 72.0          | 44.0                          | 84.4             | 59.9         | 66.5            | 49.4         | 59.7    | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
 
 
 ## Inference: Using our pre-trained models
@@ -147,4 +147,4 @@ We generally follow the recommendations of [Zhao et al.](https://github.com/hszh
 
 ## Training Instructions
 
-Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive. We use 8 Quadro RTX 6000 cards w/ 24 GB of RAM each for training.
+Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive. We use 8 Quadro RTX 6000 cards, each w/ 24 GB of RAM, for training.
