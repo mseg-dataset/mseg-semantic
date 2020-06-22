@@ -42,7 +42,7 @@ Two additional repos will be introduced in June 2020:
 ### Dependencies
 
 First, install the `mseg` module from [`mseg-api`](https://github.com/mseg-dataset/mseg-api)
-Second, install the `apex` module. NVIDIA's `apex` is a library with Pytorch extensions. If your Pytorch version doesn't match the `apex` version, this is likely fine, and you can comment out the bare metal version check in their `setup.py`:
+Second, install the `apex` module. NVIDIA's `apex` is a library with Pytorch extensions. If your Pytorch version doesn't match the `apex` version, this is likely fine, and you can comment out the bare metal version check in their `setup.py`. Make sure your `CUDA_HOME` is also set by running `echo $CUDA_HOME`, it should be something like `/usr/local/cuda-10.2`.
 ```
 git clone https://github.com/NVIDIA/apex
 cd apex
@@ -55,7 +55,7 @@ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cud
 
         pip install -e /path_to_root_directory_of_the_repo/
 
-Make sure that you can run `import mseg_semantic` in python, and you are good to go!
+Make sure that you can run `python -c "import mseg_semantic; print('hello world')"` in python, and you are good to go!
 
 
 ## MSeg Pre-trained Models
