@@ -41,7 +41,13 @@ Two additional repos will be introduced in June 2020:
 
 ### Dependencies
 
-Install the `mseg` model from [`mseg-api`](https://github.com/mseg-dataset/mseg-api)
+First, install the `mseg` module from [`mseg-api`](https://github.com/mseg-dataset/mseg-api)
+Second, install the `apex` module. NVIDIA's `apex` is a library with Pytorch extensions. If your Pytorch version doesn't match the `apex` version, this is likely fine, and you can comment out the bare metal version check in their `setup.py`:
+```
+git clone https://github.com/NVIDIA/apex
+cd apex
+pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+```
 
 ### Install the MSeg-Semantic module:
 
