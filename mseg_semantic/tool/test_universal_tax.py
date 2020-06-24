@@ -71,8 +71,13 @@ def get_relabeled_dataset(dataset_name: str) -> str:
 
 def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     """
+        Args:
+        -   args:
+        -   use_gpu
+
+        Returns:
+        -   None
     """
-    pdb.set_trace()
     if 'scannet' in args.dataset:
         args.img_name_unique = False
     else:
@@ -86,9 +91,12 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     elif args.dataset in TEST_DATASETS:
         eval_taxonomy = 'test_dataset'
     else:
-        print("Unknown dataset, please check")
+        logger.info("Unknown dataset, please check")
 
-    if args.universal and 'mseg' in args.model_path and ('unrelabeled' not in args.model_path):
+    pdb.set_trace()
+    if args.eval_taxonomy == 'universal' \
+        and 'mseg' in args.model_name \
+        and ('unrelabeled' not in args.model_name):
         args.eval_relabeled = True
     else:
         args.eval_relabeled = False
@@ -97,21 +105,16 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     dataset_name = args.dataset
     args.names_path = infos[args.dataset].names_path
 
-    if args.universal:
+    model_root = str(Path(args.model_path).parent + Path(args.model_path).stem)
+    if args.eval_taxonomy == 'universal'
         if args.eval_relabeled:
-        # args.save_folder = create_leading_fpath_dirs(args.model_path, return_dir=True) + f'/{args.dataset}_universal/{args.base_size}/'
-            args.save_folder = args.model_path[:-4] + f'/{args.dataset}_universal_relabel/{args.base_size}/'
+            args.save_folder = f'{model_root}/{args.dataset}_universal_relabeled/{args.base_size}/'
         else:
-            args.save_folder = args.model_path[:-4] + f'/{args.dataset}_universal/{args.base_size}/'
-
+            args.save_folder = f'{model_root}/{args.dataset}_universal/{args.base_size}/'
     else:
-        # args.save_folder = create_leading_fpath_dirs(args.model_path, return_dir=True) + f'/{args.dataset}/{args.base_size}/'
-        args.save_folder = args.model_path[:-4] + f'/{args.dataset}/{args.base_size}/'
+        args.save_folder = f'{model_root}/{args.dataset}/{args.base_size}/'
 
     args.print_freq = 300
-
-    args = args
-    print(args)
 
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
@@ -134,7 +137,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     if not args.has_prediction:
         temp_classes = args.classes
         args.classes = args.u_classes
-        print(args.classes)
+        logger.info(args.classes)
 
         save_folder = args.save_folder
         u_classes = args.u_classes
@@ -214,6 +217,6 @@ if __name__ == '__main__':
     assert isinstance(args.model_path, str)
     assert args.dataset != 'default'
 
-    print(args)
+    logger.info(args)
     evaluate_universal_tax_model(args, use_gpu)
 
