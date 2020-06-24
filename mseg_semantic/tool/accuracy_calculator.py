@@ -10,9 +10,10 @@ import pdb
 import torch
 from typing import List, Tuple
 
+from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
 from mseg.utils.cv2_utils import cv2_imread_rgb
-from mseg.utils.dir_utils import check_mkdir
 from mseg.utils.mask_utils import save_pred_vs_label_7tuple,save_pred_vs_label_4tuple
+from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.names_utils import load_class_names, get_dataloader_id_to_classname_map
 from mseg.taxonomy.taxonomy_converter import (
     TaxonomyConverter,
@@ -22,6 +23,7 @@ from mseg.taxonomy.taxonomy_converter import (
 from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
 from mseg_semantic.utils.confusion_matrix_renderer import ConfusionMatrixRenderer
 from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
+from mseg_semantic.utils.transform import ToUniversalLabel
 
 """
 Given a set of inference results (inferred label maps saved as grayscale images),
@@ -95,6 +97,7 @@ class AccuracyCalculator:
         )
         self.tc = TaxonomyConverter()
         self.excluded_ids = []
+        self.to_universal_transform = ToUniversalLabel(self.args.dataset)
 
         assert isinstance(args.vis_freq, int)
         assert isinstance(args.img_name_unique, bool)
@@ -119,7 +122,7 @@ class AccuracyCalculator:
     def convert_label_to_pred_taxonomy(self, target_img):
         """ """
         if self.eval_taxonomy == 'universal':
-            _, target_img = ToFlatLabel(self.tc, self.args.dataset)(target_img, target_img)
+            _, target_img = self.to_universal_transform(target_img, target_img)
             return target_img.type(torch.uint8).numpy()
         else:
             return target_img
@@ -128,8 +131,8 @@ class AccuracyCalculator:
         """ Calculate accuracy.
 
             Args:
-            -   data_list: 
-            -   pred_folder: 
+            -   save_vis: whether to save visualizations on predictions
+                    vs. ground truth
 
             Returns:
             -   None
@@ -149,7 +152,6 @@ class AccuracyCalculator:
             target_img = self.convert_label_to_pred_taxonomy(target_img)
             self.sam.update_metrics_cpu(pred, target_img, self.num_eval_classes)
 
-
             if (i+1) % self.args.vis_freq == 0:
                 print_str = f'Evaluating {i + 1}/{len(self.data_list)} on image {image_name+".png"},' + \
                     f' accuracy {self.sam.accuracy:.4f}.'
@@ -161,6 +163,15 @@ class AccuracyCalculator:
                     grid_save_fpath = f'{mask_save_dir}/{image_name}.png'
                     rgb_img = cv2_imread_rgb(image_path)
                     save_pred_vs_label_7tuple(rgb_img, pred, target_img, self.id_to_class_name_map, grid_save_fpath)
+
+                    overlaid_save_fpath = f'{mask_save_dir}_overlaid/{image_name}.png'
+                    create_leading_fpath_dirs(overlaid_save_fpath)
+                    frame_visualizer = Visualizer(rgb_img, metadata=None)
+                    overlaid_img = frame_visualizer.overlay_instances(
+                        label_map=pred,
+                        id_to_class_name_map=self.id_to_class_name_map
+                    )
+                    imageio.imwrite(overlaid_save_fpath, overlaid_img)
 
 
     def print_results(self):
@@ -182,8 +193,14 @@ class AccuracyCalculator:
 
         for i in range(self.num_eval_classes):
             if not self.eval_taxonomy == 'universal':
-                logger.info('Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.'.format(f'{i:02}', iou_class[i], accuracy_class[i], self.class_names[i]))
-
+                logger.info(
+                    'Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.'.format(
+                        f'{i:02}',
+                        iou_class[i],
+                        accuracy_class[i],
+                        self.class_names[i]
+                    )
+                )
 
     # def cal_acc_for_relabeled_model(self, data_list, data_list_relabeled, pred_folder, demo=True) -> None:
     #     """ Calculate accuracy.
@@ -243,6 +260,13 @@ class AccuracyCalculator:
     def dump_acc_results_to_file(self) -> None:
         """
         Save per-class IoUs and mIoU to a .txt file.
+
+        When evaluating a model trained within the universal taxonomy, on the val
+        split of a training dataset, we must exclude certain classes -- ie those
+        classes present in the universal/unified taxonomy, but absent in the 
+        training dataset taxonomy. Otherwise our evaluation will be unfair.
+
+        TODO: make note about comparing rows vs. columns in the main paper
         """
         result_file = f'{self.save_folder}/results.txt'
         if self.eval_taxonomy == 'universal':
