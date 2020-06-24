@@ -93,7 +93,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     else:
         logger.info("Unknown dataset, please check")
 
-    pdb.set_trace()
     if eval_taxonomy == 'universal' \
         and 'mseg' in args.model_name \
         and ('unrelabeled' not in args.model_name):
@@ -127,6 +126,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     args.num_model_classes = len(get_universal_class_names())
 
+    pdb.set_trace()
     if not args.has_prediction:
         itask = InferenceTask(
             args=args,
