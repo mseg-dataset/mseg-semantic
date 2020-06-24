@@ -104,14 +104,14 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     dataset_name = args.dataset
     args.names_path = infos[args.dataset].names_path
 
-    model_root = str(Path(args.model_path).parent) + str(Path(args.model_path).stem)
+    model_results_root = f'{Path(args.model_path).parent}/{Path(args.model_path).stem}'
     if eval_taxonomy == 'universal':
         if args.eval_relabeled:
-            args.save_folder = f'{model_root}/{args.dataset}_universal_relabeled/{args.base_size}/'
+            args.save_folder = f'{model_results_root}/{args.dataset}_universal_relabeled/{args.base_size}/'
         else:
-            args.save_folder = f'{model_root}/{args.dataset}_universal/{args.base_size}/'
+            args.save_folder = f'{model_results_root}/{args.dataset}_universal/{args.base_size}/'
     else:
-        args.save_folder = f'{model_root}/{args.dataset}/{args.base_size}/'
+        args.save_folder = f'{model_results_root}/{args.dataset}/{args.base_size}/'
 
     args.print_freq = 300
 
@@ -126,7 +126,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     args.num_model_classes = len(get_universal_class_names())
 
-    pdb.set_trace()
     if not args.has_prediction:
         itask = InferenceTask(
             args=args,
@@ -140,6 +139,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         )
         itask.execute()
 
+    pdb.set_trace()
     # TODO: pass the excluded ids to the AccuracyCalculator
     tc = None
     if eval_taxonomy == 'universal' and (args.dataset in tc.train_datasets):
