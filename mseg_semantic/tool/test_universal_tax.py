@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import argparse
 import cv2
 import logging
 import numpy as np
@@ -24,7 +25,7 @@ from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
 from mseg_semantic.model.pspnet import PSPNet
 from mseg_semantic.tool.mseg_dataloaders import get_test_loader
-from mseg_semantic.transform import ToUniversalLabel
+from mseg_semantic.utils.transform import ToUniversalLabel
 from mseg_semantic.utils import dataset, transform, config
 
 """
@@ -91,7 +92,7 @@ def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
         args.eval_relabeled = False
 
     args.data_root = infos[args.dataset].dataroot
-    self.dataset_name = args.dataset
+    dataset_name = args.dataset
     args.names_path = infos[args.dataset].names_path
 
     if args.universal:
@@ -107,7 +108,7 @@ def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
 
     args.print_freq = 300
 
-    self.args = args
+    args = args
     print(args)
 
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
@@ -126,21 +127,17 @@ def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
     else:
         names = [line.rstrip('\n') for line in open(args.names_path)]
 
-    self.args.num_model_classes = len(get_universal_class_names())
+    args.num_model_classes = len(get_universal_class_names())
 
     if not args.has_prediction:
         temp_classes = args.classes
         args.classes = args.u_classes
         print(args.classes)
-        self.model = self.load_model(args) # model expects u_classes as logits size
 
-        self.save_folder = args.save_folder
-        self.u_classes = args.u_classes
-        self.classes = args.classes
+        save_folder = args.save_folder
+        u_classes = args.u_classes
+        classes = args.classes
 
-        if args.universal and (self.args.dataset in self.tc.train_datasets):
-            self.excluded_ids = self.tc.exclude_universal_ids(self.dataset_name)
-        
         itask = InferenceTask(
             args,
             base_size = args.base_size,
@@ -153,6 +150,12 @@ def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
             scales = args.scales
         )
         itask.execute()
+
+    # TODO: pass the excluded ids to the AccuracyCalculator
+    tc = None
+    if args.eval_taxonomy == 'universal' and (args.dataset in tc.train_datasets):
+        # evaluating on training datasets, within a subset of the universal taxonomy
+        excluded_ids = tc.exclude_universal_ids(dataset_name)
 
     if args.eval_relabeled:
         args.dataset_relabeled = get_relabeled_dataset(args.dataset)
@@ -173,30 +176,27 @@ def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
 
     if args.split != 'test':
         if args.eval_relabeled:
-            self.cal_acc_for_relabeled_model(test_data.data_list, test_data_relabeled.data_list, gray_folder, names, demo=True)
+            ac.cal_acc_for_relabeled_model(test_data.data_list, test_data_relabeled.data_list, gray_folder, names, demo=True)
         else:
-            self.cal_acc(test_data.data_list, gray_folder, names, demo=True)
+            ac.cal_acc(test_data.data_list, gray_folder, names, demo=True)
 
 
-    def convert_label_to_pred_taxonomy(self, target): 
-        """
-        """
-
-        if self.args.universal:
-            _, target = ToUniversalLabel(self.tc, self.args.dataset)(target, target)
-            return target.type(torch.uint8).numpy()
-        else:
-            return target
-
-    def convert_pred_to_label_tax_and_softmax(self, output):
-        """ """
-
-        if not self.args.universal:
-            output = self.tc.transform_predictions_test(output, self.args.dataset)
-        else:
-            output = self.tc.transform_predictions_universal(output, self.args.dataset)
-        return output
-
+def get_parser() -> CfgNode:
+    """
+    TODO: add to library to avoid replication.
+    """
+    parser = argparse.ArgumentParser(description='PyTorch Semantic Segmentation')
+    parser.add_argument('--config', type=str, default='config/wilddash_18/wilddash_18_flat.yaml', help='config file')
+    parser.add_argument('--file_save', type=str, default='default', help='eval result to save, when lightweight option is on')
+    # parser.add_argument('--file_load', type=str, default='', help='possible additional config')
+    # parser.add_argument('--checkpoint_load', type=str, default='', help='possible checkpoint loading directly specified in argument')
+    parser.add_argument('opts', help='see config/ade20k/ade20k_pspnet50.yaml for all options', default=None, nargs=argparse.REMAINDER) # model path is passed in 
+    args = parser.parse_args()
+    assert args.config is not None
+    cfg = config.load_cfg_from_cfg_file(args.config)
+    if args.opts is not None:
+        cfg = config.merge_cfg_from_list(cfg, args.opts)
+    return cfg
 
 
 if __name__ == '__main__':
@@ -206,7 +206,7 @@ if __name__ == '__main__':
 
     """
     use_gpu = True
-    args = self.get_parser()
+    args = get_parser()
 
     assert isinstance(args.model_name, str)
     assert isinstance(args.model_path, str)
