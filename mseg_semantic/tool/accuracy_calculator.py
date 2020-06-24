@@ -95,7 +95,6 @@ class AccuracyCalculator:
             class_names,
             include_ignore_idx_cls=True
         )
-        self.tc = TaxonomyConverter()
         self.excluded_ids = []
         self.to_universal_transform = ToUniversalLabel(self.args.dataset)
 
