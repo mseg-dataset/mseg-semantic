@@ -10,7 +10,6 @@ import torch.nn.functional as F
 from mseg.utils.dataset_config import infos
 
 from mseg_semantic.utils.config import CfgNode
-
 from mseg_semantic.utils.verification_utils import verify_architecture
 from mseg_semantic.tool.mseg_dataloaders import get_test_loader
 
