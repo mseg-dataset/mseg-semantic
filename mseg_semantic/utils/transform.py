@@ -8,7 +8,7 @@ import numbers
 import random
 import torch
 
-from mseg.taxonomy.taxonomy_converter import TaxononomyConverter
+from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 
 """
 Provides a set of Pytorch transforms that use OpenCV instead of PIL (Pytorch default)
