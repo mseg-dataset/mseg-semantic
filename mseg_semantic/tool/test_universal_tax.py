@@ -25,6 +25,7 @@ from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
 from mseg_semantic.model.pspnet import PSPNet
 from mseg_semantic.tool.inference_task import InferenceTask
+from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 from mseg_semantic.utils.transform import ToUniversalLabel
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.config import CfgNode
@@ -96,16 +97,16 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     if eval_taxonomy == 'universal' \
         and 'mseg' in args.model_name \
         and ('unrelabeled' not in args.model_name):
-        args.eval_relabeled = True
+        eval_relabeled = True
     else:
-        args.eval_relabeled = False
+        eval_relabeled = False
 
     args.data_root = infos[args.dataset].dataroot
     dataset_name = args.dataset
 
     model_results_root = f'{Path(args.model_path).parent}/{Path(args.model_path).stem}'
     if eval_taxonomy == 'universal':
-        if args.eval_relabeled:
+        if eval_relabeled:
             args.save_folder = f'{model_results_root}/{args.dataset}_universal_relabeled/{args.base_size}/'
         else:
             args.save_folder = f'{model_results_root}/{args.dataset}_universal/{args.base_size}/'
@@ -143,16 +144,18 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         # evaluating on training datasets, within a subset of the universal taxonomy
         excluded_ids = get_excluded_class_ids(dataset_name)
 
-    if args.eval_taxonomy == 'universal':
+    if eval_taxonomy == 'universal':
         class_names = get_universal_class_names()
-    elif args.eval_taxonomy == 'test_dataset':
+    elif eval_taxonomy == 'test_dataset':
         class_names = load_class_names(infos[args.dataset].names_path)
-    elif args.eval_taxonomy == 'naive':
+    elif eval_taxonomy == 'naive':
         # get from NaiveTaxonomyConverter class attributes
         raise NotImplementedError
-    
+
+    _, test_data_list = create_test_loader(args)
+    pdb.set_trace()
     # TODO: pass the excluded ids to the AccuracyCalculator
-    if args.eval_relabeled:
+    if eval_relabeled:
         raise NotImplementedError
         # args.dataset_relabeled = get_relabeled_dataset(args.dataset)
         # args.test_list_relabeled = infos[args.dataset_relabeled].vallist
@@ -169,11 +172,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
 
 
-
     ac.execute()
 
     if args.split != 'test':
-        if args.eval_relabeled:
+        if eval_relabeled:
             ac.cal_acc_for_relabeled_model(test_data.data_list, test_data_relabeled.data_list, gray_folder, names, demo=True)
         else:
             ac.cal_acc(test_data.data_list, gray_folder, names, demo=True)

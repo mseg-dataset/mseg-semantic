@@ -33,6 +33,7 @@ from mseg_semantic.utils.img_path_utils import (
 	dump_relpath_txt,
 	get_unique_stem_from_last_k_strs
 )
+from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 
 
 """
@@ -331,7 +332,7 @@ class InferenceTask:
 
 		if self.input_file is None and self.args.dataset != 'default':
 			# evaluate on a train or test dataset
-			test_loader = self.create_test_loader()
+			test_loader, self.data_list = create_test_loader(self.args)
 			self.execute_on_dataloader(test_loader)
 			logger.info('<<<<<<<<< Inference task completed <<<<<<<<<')
 			return
@@ -346,7 +347,7 @@ class InferenceTask:
 		elif is_dir:
 			# argument is a path to a directory
 			self.create_path_lists_from_dir()
-			test_loader = self.create_test_loader()
+			test_loader, self.data_list = create_test_loader(self.args)
 			self.execute_on_dataloader(test_loader)
 		elif is_vid:
 			# argument is a video
@@ -398,35 +399,6 @@ class InferenceTask:
 		txt_output_dir = str(Path(f'{_ROOT}/temp_files').resolve())
 		txt_save_fpath = dump_relpath_txt(self.input_file, txt_output_dir)
 		self.args.test_list = txt_save_fpath
-
-	def create_test_loader(self):
-		"""
-			Create a Pytorch dataloader from a dataroot and list of 
-			relative paths.
-		"""
-		test_transform = transform.Compose([transform.ToTensor()])
-		test_data = dataset.SemData(
-			split=self.args.split,
-			data_root=self.args.data_root,
-			data_list=self.args.test_list,
-			transform=test_transform
-		)
-
-		index_start = self.args.index_start
-		if self.args.index_step == 0:
-			index_end = len(test_data.data_list)
-		else:
-			index_end = min(index_start + args.index_step, len(test_data.data_list))
-		test_data.data_list = test_data.data_list[index_start:index_end]
-		self.data_list = test_data.data_list
-		test_loader = torch.utils.data.DataLoader(
-			test_data,
-			batch_size=1,
-			shuffle=False,
-			num_workers=self.args.workers,
-			pin_memory=True
-		)
-		return test_loader
 
 
 	def execute_on_img(self, image: np.ndarray) -> np.ndarray:
@@ -654,7 +626,6 @@ class InferenceTask:
 		else:
 			print('Unrecognized output taxonomy. Quitting....')
 			quit()
-		# print(time.time() - start1, image_scale.shape, h, w)
 
 		if flip:
 			# take back out the flipped crop, correct its orientation, and average result
