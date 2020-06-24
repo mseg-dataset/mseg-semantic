@@ -27,6 +27,8 @@ from mseg_semantic.model.pspnet import PSPNet
 from mseg_semantic.tool.mseg_dataloaders import get_test_loader
 from mseg_semantic.utils.transform import ToUniversalLabel
 from mseg_semantic.utils import dataset, transform, config
+from mseg_semantic.utils.config import CfgNode
+
 
 """
 Provides functionality to test a non-`oracle` model -- 
