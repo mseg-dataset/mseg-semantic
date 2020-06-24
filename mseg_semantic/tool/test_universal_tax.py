@@ -139,15 +139,17 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         )
         itask.execute()
 
-    pdb.set_trace()
+    logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
     if eval_taxonomy == 'universal' and (args.dataset in DEFAULT_TRAIN_DATASETS):
         # evaluating on training datasets, within a subset of the universal taxonomy
         excluded_ids = get_excluded_class_ids(dataset_name)
+    else:
+        excluded_ids = []
 
     if eval_taxonomy == 'universal':
         class_names = get_universal_class_names()
     elif eval_taxonomy == 'test_dataset':
-        class_names = load_class_names(infos[args.dataset].names_path)
+        class_names = load_class_names(args.dataset)
     elif eval_taxonomy == 'naive':
         # get from NaiveTaxonomyConverter class attributes
         raise NotImplementedError
