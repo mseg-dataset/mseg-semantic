@@ -209,7 +209,7 @@ class InferenceTask:
 		self.args = args
 
 		# Required arguments:
-		assert isinstance(self.args.save_folder, bool)
+		assert isinstance(self.args.save_folder, str)
 		assert isinstance(self.args.img_name_unique, bool)
 		assert isinstance(self.args.print_freq, int)
 		assert isinstance(self.args.num_model_classes, int)
