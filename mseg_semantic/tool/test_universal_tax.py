@@ -69,7 +69,7 @@ def get_relabeled_dataset(dataset_name: str) -> str:
     return dataset_name + '-relabeled'
 
 
-def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
+def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     """
     """
     pdb.set_trace()
