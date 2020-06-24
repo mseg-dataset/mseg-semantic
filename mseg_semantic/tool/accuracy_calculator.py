@@ -74,6 +74,8 @@ class AccuracyCalculator:
             Returns:
             -   None
         """
+        assert isinstance(eval_taxonomy, str)
+        self.eval_taxonomy = eval_taxonomy
         self.num_eval_classes = num_eval_classes
         self.args = args
         self.data_list = data_list
@@ -96,7 +98,7 @@ class AccuracyCalculator:
 
         assert isinstance(args.vis_freq, int)
         assert isinstance(args.img_name_unique, bool)
-        assert isinstance(args.eval_taxonomy, str)
+        
         assert isinstance(args.model_path, str)
 
     def execute(self, save_vis: bool = True) -> None:
@@ -111,7 +113,7 @@ class AccuracyCalculator:
 
     def convert_label_to_pred_taxonomy(self, target_img):
         """ """
-        if self.args.eval_taxonomy == 'universal':
+        if self.eval_taxonomy == 'universal':
             _, target_img = ToFlatLabel(self.tc, self.args.dataset)(target_img, target_img)
             return target_img.type(torch.uint8).numpy()
         else:
@@ -160,7 +162,7 @@ class AccuracyCalculator:
         """
         Dump per-class IoUs and mIoU to stdout.
         """
-        if self.args.eval_taxonomy == 'universal' and (self.args.dataset in DEFAULT_TRAIN_DATASETS):
+        if self.eval_taxonomy == 'universal' and (self.args.dataset in DEFAULT_TRAIN_DATASETS):
             iou_class, accuracy_class, mIoU, mAcc, allAcc = self.sam.get_metrics(
                 exclude=True,
                 exclude_ids=self.excluded_ids
@@ -174,7 +176,7 @@ class AccuracyCalculator:
         logger.info('Eval result: mIoU/mAcc/allAcc {:.4f}/{:.4f}/{:.4f}.'.format(mIoU, mAcc, allAcc))
 
         for i in range(self.num_eval_classes):
-            if not self.args.eval_taxonomy == 'universal':
+            if not self.eval_taxonomy == 'universal':
                 logger.info('Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.'.format(f'{i:02}', iou_class[i], accuracy_class[i], self.class_names[i]))
 
 
@@ -238,7 +240,7 @@ class AccuracyCalculator:
         Save per-class IoUs and mIoU to a .txt file.
         """
         result_file = f'{self.save_folder}/results.txt'
-        if self.args.eval_taxonomy == 'universal':
+        if self.eval_taxonomy == 'universal':
             iou_class, accuracy_class, mIoU, mAcc, allAcc = self.sam.get_metrics(exclude=True, exclude_ids=self.excluded_ids)
         else:
             iou_class, accuracy_class, mIoU, mAcc, allAcc = self.sam.get_metrics()
@@ -246,7 +248,7 @@ class AccuracyCalculator:
         result.write('Eval result: mIoU/mAcc/allAcc {:.4f}/{:.4f}/{:.4f}.\n'.format(mIoU, mAcc, allAcc))
 
         for i in range(self.num_eval_classes):
-            if self.args.eval_taxonomy == 'universal':
+            if self.eval_taxonomy == 'universal':
                 if i not in self.excluded_ids:
                     result.write('Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.\n'.format(f'{i:02}', iou_class[i], accuracy_class[i], self.class_names[i]))
             else:
