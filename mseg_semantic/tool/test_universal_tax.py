@@ -151,6 +151,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         class_names = get_universal_class_names()
     elif eval_taxonomy == 'test_dataset':
         class_names = load_class_names(args.dataset)
+        num_eval_classes = len(class_names)
     elif eval_taxonomy == 'naive':
         # get from NaiveTaxonomyConverter class attributes
         raise NotImplementedError
@@ -172,8 +173,15 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         # ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
     
     else:
-        ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
-
+        ac = AccuracyCalculator(
+            args=args,
+            data_list=test_data_list,
+            dataset_name=dataset_name,
+            class_names=class_names,
+            save_folder=save_folder,
+            num_eval_classes=num_eval_classes,
+            excluded_ids=excluded_ids
+        )
 
     ac.execute()
 

@@ -10,6 +10,12 @@ def create_test_loader(args) -> Tuple[torch.utils.data.dataloader.DataLoader, Li
 	"""
 		Create a Pytorch dataloader from a dataroot and list of 
 		relative paths.
+
+		Args:
+
+		Returns:
+		-	test_loader
+		-	data_list: list of 2-tuples (relative rgb path, relative label path)
 	"""
 	test_transform = transform.Compose([transform.ToTensor()])
 	test_data = dataset.SemData(

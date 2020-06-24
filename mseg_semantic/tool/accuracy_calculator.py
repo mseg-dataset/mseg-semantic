@@ -54,6 +54,7 @@ class AccuracyCalculator:
         class_names: List[str],
         save_folder: str,
         num_eval_classes: int,
+        excluded_ids: int,
         render_confusion_matrix: bool = False
     ) -> None:
         """
