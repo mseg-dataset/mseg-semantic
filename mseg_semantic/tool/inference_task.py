@@ -29,7 +29,10 @@ from mseg_semantic.utils.normalization_utils import (
 )
 from mseg_semantic.utils.cv2_video_utils import VideoWriter, VideoReader
 from mseg_semantic.utils import dataset, transform, config
-from mseg_semantic.utils.img_path_utils import dump_relpath_txt
+from mseg_semantic.utils.img_path_utils import (
+	dump_relpath_txt,
+	get_unique_stem_from_last_k_strs
+)
 
 
 """
@@ -81,20 +84,6 @@ def get_logger():
     return logger
 
 logger = get_logger()
-
-
-def get_unique_stem_from_last_k_strs(fpath: str, k: int = 4) -> str:
-	"""
-		Args:
-		-   fpath
-		-   k
-
-		Returns:
-		-   unique_stem: string
-	"""
-	parts = Path(fpath).parts
-	unique_stem = '_'.join(parts[-4:-1]) + '_' + Path(fpath).stem
-	return unique_stem
 
 
 class ToFlatLabel(object):

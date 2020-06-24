@@ -102,7 +102,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     args.data_root = infos[args.dataset].dataroot
     dataset_name = args.dataset
-    args.names_path = infos[args.dataset].names_path
 
     model_results_root = f'{Path(args.model_path).parent}/{Path(args.model_path).stem}'
     if eval_taxonomy == 'universal':
@@ -140,33 +139,36 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         itask.execute()
 
     pdb.set_trace()
-    # TODO: pass the excluded ids to the AccuracyCalculator
-    tc = None
-    if eval_taxonomy == 'universal' and (args.dataset in tc.train_datasets):
+    if eval_taxonomy == 'universal' and (args.dataset in DEFAULT_TRAIN_DATASETS):
         # evaluating on training datasets, within a subset of the universal taxonomy
-        excluded_ids = tc.exclude_universal_ids(dataset_name)
+        excluded_ids = get_excluded_class_ids(dataset_name)
 
     if args.eval_taxonomy == 'universal':
-        names = ''
+        class_names = get_universal_class_names()
     elif args.eval_taxonomy == 'test_dataset':
-        names = [line.rstrip('\n') for line in open(args.names_path)]
+        class_names = load_class_names(infos[args.dataset].names_path)
     elif args.eval_taxonomy == 'naive':
+        # get from NaiveTaxonomyConverter class attributes
         raise NotImplementedError
-
+    
+    # TODO: pass the excluded ids to the AccuracyCalculator
     if args.eval_relabeled:
-        args.dataset_relabeled = get_relabeled_dataset(args.dataset)
-        args.test_list_relabeled = infos[args.dataset_relabeled].vallist
-        args.data_root_relabeled = infos[args.dataset_relabeled].dataroot
-        test_data_relabeled = dataset.SemData(
-            split=args.split,
-            data_root=args.data_root_relabeled,
-            data_list=args.test_list_relabeled,
-            transform=test_transform
-        )
-        ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
+        raise NotImplementedError
+        # args.dataset_relabeled = get_relabeled_dataset(args.dataset)
+        # args.test_list_relabeled = infos[args.dataset_relabeled].vallist
+        # args.data_root_relabeled = infos[args.dataset_relabeled].dataroot
+        # test_data_relabeled = dataset.SemData(
+        #     split=args.split,
+        #     data_root=args.data_root_relabeled,
+        #     data_list=args.test_list_relabeled,
+        #     transform=test_transform
+        # )
+        # ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
     
     else:
         ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
+
+
 
     ac.execute()
 
@@ -177,6 +179,25 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             ac.cal_acc(test_data.data_list, gray_folder, names, demo=True)
 
 
+
+def get_excluded_class_ids(dataset: str) -> List[int]:
+    """
+        Args:
+        -   dataset:
+
+        Returns:
+        -   zero_class_ids
+    """
+    tc = TaxonomyConverter()
+
+    id_maps = tc.dataloaderid_to_uid_maps[dataset] # from train to universal. do this zero out or not does not affect when training and testing on same dataset.
+    nonzero_class_ids = set(id_maps.values())
+    zero_class_ids = [x for x in range(tc.classes) if x not in nonzero_class_ids]
+    return zero_class_ids
+
+
+
+
 def get_parser() -> CfgNode:
     """
     TODO: add to library to avoid replication.
@@ -184,9 +205,8 @@ def get_parser() -> CfgNode:
     parser = argparse.ArgumentParser(description='PyTorch Semantic Segmentation')
     parser.add_argument('--config', type=str, default='config/wilddash_18/wilddash_18_flat.yaml', help='config file')
     parser.add_argument('--file_save', type=str, default='default', help='eval result to save, when lightweight option is on')
-    # parser.add_argument('--file_load', type=str, default='', help='possible additional config')
-    # parser.add_argument('--checkpoint_load', type=str, default='', help='possible checkpoint loading directly specified in argument')
-    parser.add_argument('opts', help='see config/ade20k/ade20k_pspnet50.yaml for all options', default=None, nargs=argparse.REMAINDER) # model path is passed in 
+    parser.add_argument('opts', help='see mseg_semantic/config/test/default_config_360.yaml for all options, model path should be passed in', 
+        default=None, nargs=argparse.REMAINDER)
     args = parser.parse_args()
     assert args.config is not None
     cfg = config.load_cfg_from_cfg_file(args.config)
@@ -197,9 +217,10 @@ def get_parser() -> CfgNode:
 
 if __name__ == '__main__':
     """
+    Example usage:
 
-    python -u tool/test.py --config=${config}
-
+    python -u mseg_semantic/tool/test_universal_tax.py --config=${config} \
+        model_path /path/to/my/model model_name name_of_my_model 
     """
     use_gpu = True
     args = get_parser()

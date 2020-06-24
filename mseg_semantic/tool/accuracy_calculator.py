@@ -18,7 +18,7 @@ from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 
 from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
 from mseg_semantic.utils.confusion_matrix_renderer import ConfusionMatrixRenderer
-
+from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
 
 """
 Given a set of inference results (inferred label maps saved as grayscale images),
@@ -43,21 +43,6 @@ def get_logger():
     return logger
 
 logger = get_logger()
-
-def get_unique_stem_from_last_k_strs(fpath: str, k: int = 4) -> str:
-    """
-    For datasets like ScanNet where image filename stem is not unique.
-        Args:
-        -   fpath
-        -   k
-
-        Returns:
-        -   unique_stem: string
-    """
-    parts = Path(fpath).parts
-    concat_kparent_dirs = '_'.join(parts[-k:-1])
-    unique_stem = concat_kparent_dirs + '_' + Path(fpath).stem
-    return unique_stem
 
 
 class AccuracyCalculator:
