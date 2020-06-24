@@ -651,6 +651,7 @@ class InferenceTask:
 		if (h_o != h_i) or (w_o != w_i):
 			output = F.interpolate(output, (h_i, w_i), mode='bilinear', align_corners=True)
 
+		pdb.set_trace()
 		# Softmax, then convert the prediction to the label taxonomy
 		if self.eval_taxonomy == 'universal':
 			#output = self.softmax(output)
