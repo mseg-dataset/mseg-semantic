@@ -94,7 +94,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         logger.info("Unknown dataset, please check")
 
     pdb.set_trace()
-    if args.eval_taxonomy == 'universal' \
+    if eval_taxonomy == 'universal' \
         and 'mseg' in args.model_name \
         and ('unrelabeled' not in args.model_name):
         args.eval_relabeled = True
@@ -106,7 +106,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     args.names_path = infos[args.dataset].names_path
 
     model_root = str(Path(args.model_path).parent + Path(args.model_path).stem)
-    if args.eval_taxonomy == 'universal':
+    if eval_taxonomy == 'universal':
         if args.eval_relabeled:
             args.save_folder = f'{model_root}/{args.dataset}_universal_relabeled/{args.base_size}/'
         else:
@@ -158,7 +158,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     # TODO: pass the excluded ids to the AccuracyCalculator
     tc = None
-    if args.eval_taxonomy == 'universal' and (args.dataset in tc.train_datasets):
+    if eval_taxonomy == 'universal' and (args.dataset in tc.train_datasets):
         # evaluating on training datasets, within a subset of the universal taxonomy
         excluded_ids = tc.exclude_universal_ids(dataset_name)
 
