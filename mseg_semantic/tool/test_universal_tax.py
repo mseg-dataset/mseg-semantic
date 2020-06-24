@@ -25,7 +25,6 @@ from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
 from mseg_semantic.model.pspnet import PSPNet
 from mseg_semantic.tool.inference_task import InferenceTask
-from mseg_semantic.tool.mseg_dataloaders import get_test_loader
 from mseg_semantic.utils.transform import ToUniversalLabel
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.config import CfgNode
@@ -119,10 +118,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
-    relpath_list = infos[args.dataset].vallist
-    test_loader, test_data_list = get_test_loader(args, relpath_list)
 
-    args.vis_freq = len(test_data_list) // 10 + 1
+    # always evaluating on val split
+    args.test_list = infos[args.dataset].vallist
+
     if args.split == 'test':
         args.vis_freq = 1
 
@@ -134,7 +133,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             base_size = args.base_size,
             crop_h = args.test_h,
             crop_w = args.test_w,
-            data_list=test_data.data_list,
+            input_file=None,
             gray_folder=gray_folder,
             model_taxonomy=model_taxonomy,
             eval_taxonomy=eval_taxonomy,

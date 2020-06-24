@@ -334,7 +334,7 @@ class InferenceTask:
 			# argument is a video
 			self.execute_on_video()
 
-		elif not is_dir and self.args.dataset != 'default':
+		elif self.input_file is None and self.args.dataset != 'default':
 			# evaluate on a train or test dataset
 			test_loader = self.create_test_loader()
 			self.execute_on_dataloader(test_loader)		

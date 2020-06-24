@@ -11,7 +11,6 @@ from mseg.utils.dataset_config import infos
 
 from mseg_semantic.utils.config import CfgNode
 from mseg_semantic.utils.verification_utils import verify_architecture
-from mseg_semantic.tool.mseg_dataloaders import get_test_loader
 from mseg_semantic.tool.inference_task import InferenceTask
 
 """
@@ -86,8 +85,6 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
     gray_folder = os.path.join(args.save_folder, 'gray')
 
     relpath_list = infos[args.dataset].vallist
-    test_loader, test_data_list = get_test_loader(args, relpath_list)
-    # base_size = get_best_base_size()
 
     if not args.has_prediction:
         args.print_freq = 100
@@ -96,7 +93,7 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
             base_size=args.base_size,
             crop_h=args.test_h,
             crop_w=args.test_w,
-            data_list=test_data_list,
+            input_file=None,
             gray_folder=gray_folder,
             model_taxonomy='test_dataset', # i.e. is oracle
             eval_taxonomy='test_dataset',
