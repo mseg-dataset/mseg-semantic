@@ -78,7 +78,7 @@ def evaluate_universal_tax_model(use_gpu: bool = True) -> None:
     model_taxonomy = 'universal'
 
     # automatically decide which evaluation taxonomy to use
-    if args.dataset in DEFAULT_TRAIN_DATASETS
+    if args.dataset in DEFAULT_TRAIN_DATASETS:
         eval_taxonomy = 'universal'
     elif args.dataset in TEST_DATASETS:
         eval_taxonomy = 'test_dataset'

@@ -95,6 +95,20 @@ python -u mseg_semantic/tool/universal_demo.py \
 If you would like to make predictions in a specific dataset's taxonomy, e.g. Cityscapes, for the RVC Challenge, please run:
 ``` (will be added) ```
 
+## Testing a Model Trained in the Universal Taxonomy
+
+To compute mIoU scores on a particular dataset, run the following:
+```
+python mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360.yaml -dataset camvid
+```
+
+## Testing a Model Trained in the Oracle Taxonomy
+
+"Oracle" models are trained in a test dataset's taxonomy, on its train splt. To compute mIoU scores on the test dataset's val or test set, please run the following:
+```
+python mseg_semantic/tool/test_oracle_tax.py
+```
+
 
 ## Citing MSeg
 
