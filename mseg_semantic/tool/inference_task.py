@@ -204,15 +204,17 @@ class InferenceTask:
 			-	model_taxonomy: taxonomy in which trained model makes predictions
 			-	eval_taxonomy: taxonomy in which trained model is evaluated
 			-	scales
-			-	use_gpu
+			-	use_gpu: TODO, not supporting cpu at this time
 		"""
-		use_gpu = True # not supporting cpu at this time
 		self.args = args
+
+		# Required arguments:
+		assert isinstance(self.args.save_folder, bool)
 		assert isinstance(self.args.img_name_unique, bool)
 		assert isinstance(self.args.print_freq, int)
 		assert isinstance(self.args.num_model_classes, int)
 		assert isinstance(self.args.model_path, str)
-		self.pred_dim = self.args.num_model_classes
+		self.num_model_classes = self.args.num_model_classes
 
 		self.base_size = base_size
 		self.crop_h = crop_h
@@ -408,7 +410,7 @@ class InferenceTask:
 		"""
 		h, w, _ = image.shape
 
-		prediction = np.zeros((h, w, self.pred_dim), dtype=float)
+		prediction = np.zeros((h, w, self.num_model_classes), dtype=float)
 		prediction = torch.Tensor(prediction).cuda()
 
 		for scale in self.scales:
@@ -546,7 +548,7 @@ class InferenceTask:
 		grid_h = int(np.ceil(float(new_h-self.crop_h)/stride_h) + 1)
 		grid_w = int(np.ceil(float(new_w-self.crop_w)/stride_w) + 1)
 
-		prediction_crop = torch.zeros((self.pred_dim, new_h, new_w)).cuda()
+		prediction_crop = torch.zeros((self.num_model_classes, new_h, new_w)).cuda()
 		count_crop = torch.zeros((new_h, new_w)).cuda()
 
 		for index_h in range(0, grid_h):
