@@ -12,6 +12,7 @@ from mseg.utils.dataset_config import infos
 from mseg_semantic.utils.config import CfgNode
 from mseg_semantic.utils.verification_utils import verify_architecture
 from mseg_semantic.tool.mseg_dataloaders import get_test_loader
+from mseg_semantic.tool.inference_task import InferenceTask
 
 """
 Test an `oracle` model -- trained and tested on the same taxonomy/dataset.

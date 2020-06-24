@@ -24,6 +24,7 @@ from mseg.taxonomy.taxonomy_converter import (
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
 from mseg_semantic.model.pspnet import PSPNet
+from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.tool.mseg_dataloaders import get_test_loader
 from mseg_semantic.utils.transform import ToUniversalLabel
 from mseg_semantic.utils import dataset, transform, config
