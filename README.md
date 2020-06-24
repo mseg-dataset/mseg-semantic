@@ -99,7 +99,7 @@ If you would like to make predictions in a specific dataset's taxonomy, e.g. Cit
 
 To compute mIoU scores on a particular dataset, run the following:
 ```
-python mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360.yaml -dataset camvid
+python mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360.yaml dataset camvid-11
 ```
 
 ## Testing a Model Trained in the Oracle Taxonomy
