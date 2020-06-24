@@ -189,8 +189,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         )
         ac.compute_metrics()
 
-    logger.info(">>>>>>>>> Accucracy computation completed >>>>>>>>>>")
-
+    logger.info(">>>>>>>>> Accuracy computation completed >>>>>>>>>>")
 
 
 def get_excluded_class_ids(dataset: str) -> List[int]:
@@ -207,8 +206,6 @@ def get_excluded_class_ids(dataset: str) -> List[int]:
     nonzero_class_ids = set(id_maps.values())
     zero_class_ids = [x for x in range(tc.classes) if x not in nonzero_class_ids]
     return zero_class_ids
-
-
 
 
 def get_parser() -> CfgNode:
