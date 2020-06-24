@@ -48,6 +48,22 @@ screen resolution is generally described by shorter side length.
 
 "base_size" is a very important parameter and will
 affect results significantly.
+
+There are 3 possible configurations for 
+(model_taxonomy, eval_taxonomy):
+
+(1) model_taxonomy = 'universal', eval_taxonomy = 'universal'
+	Occurs when:
+	(a) running demo w/ universal output
+	(b) evaluating universal models on train datasets
+	in case (b), training 'val' set labels are converted to univ.
+
+(2) model_taxonomy = 'naive', eval_taxonomy = 'test_dataset':
+	Occurs when:
+	(a) evaluating naive unified model on test datasets
+
+(3) model_taxonomy = 'universal', eval_taxonomy = 'test_dataset':
+	(a) generic zero-shot cross-dataset evaluation case
 """
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
@@ -166,7 +182,8 @@ class InferenceTask:
 		crop_h: int,
 		crop_w: int,
 		input_file: str,
-		output_taxonomy: str,
+		model_taxonomy: str,
+		eval_taxonomy: str,
 		scales: List[float],
 		use_gpu: bool = True
 		):
@@ -184,10 +201,12 @@ class InferenceTask:
 			-	crop_w: integer representing crop width, e.g. 473
 			-	input_file: could be absolute path to .txt file, .mp4 file,
 					or to a directory full of jpg images
-			-	output_taxonomy
+			-	model_taxonomy: taxonomy in which trained model makes predictions
+			-	eval_taxonomy: taxonomy in which trained model is evaluated
 			-	scales
 			-	use_gpu
 		"""
+		use_gpu = True # not supporting cpu at this time
 		self.args = args
 		assert isinstance(self.args.img_name_unique, bool)
 		assert isinstance(self.args.print_freq, int)
@@ -210,10 +229,28 @@ class InferenceTask:
 		self.gray_folder = None # optional, intended for dataloader use
 		self.data_list = None # optional, intended for dataloader use
 
-		if self.output_taxonomy != 'universal':
+		if model_taxonomy == 'universal' and eval_taxonomy == 'universal':
+			# Occurs when:
+			# (1) running demo w/ universal output
+			# (2) evaluating universal models on train datasets
+			# in case (2), training 'val' set labels are converted to univ.
 			assert isinstance(self.args.dataset, str)
 			self.dataset_name = args.dataset
 			self.tc = TaxonomyConverter()
+
+		elif model_taxonomy == 'naive' and eval_taxonomy == 'test_dataset':
+			self.tc = StupidTaxonomyConverter()
+			if args.dataset in self.tc.convs.keys() and use_gpu:
+				self.tc.convs[args.dataset].cuda()
+			self.tc.softmax.cuda()
+
+		elif model_taxonomy == 'universal' and eval_taxonomy == 'test_dataset':
+			pass
+			# no label conversion required here, only predictions converted
+			self.tc = TaxonomyConverter()
+			if args.dataset in self.tc.convs.keys() and use_gpu:
+				self.tc.convs[args.dataset].cuda()
+			self.tc.softmax.cuda()
 
 		if self.args.arch == 'psp':
 			assert isinstance(self.args.zoom_factor, int)
@@ -444,7 +481,7 @@ class InferenceTask:
 		os.makedirs(self.args.save_folder, exist_ok=True)
 		gray_folder = os.path.join(self.args.save_folder, 'gray')
 		self.gray_folder = gray_folder
-
+		
 		data_time = AverageMeter()
 		batch_time = AverageMeter()
 		end = time.time()
@@ -569,10 +606,13 @@ class InferenceTask:
 		if (h_o != h_i) or (w_o != w_i):
 			output = F.interpolate(output, (h_i, w_i), mode='bilinear', align_corners=True)
 
-		if self.output_taxonomy == 'universal':
-			output = self.softmax(output)
-		elif self.output_taxonomy == 'test_dataset':
-			output = self.convert_pred_to_label_tax_and_softmax(output)
+		# Softmax, then convert the prediction to the label taxonomy
+		if self.eval_taxonomy == 'universal':
+			#output = self.softmax(output)
+			# equivalent, but make sure on cuda()
+			output = self.tc.transform_predictions_test(output, self.args.dataset)
+		elif self.eval_taxonomy == 'test_dataset':
+			output = self.tc.transform_predictions_universal(output, self.args.dataset)
 		else:
 			print('Unrecognized output taxonomy. Quitting....')
 			quit()
@@ -588,16 +628,6 @@ class InferenceTask:
 		# output = output.transpose(1, 2, 0)
 		# output = output.permute(1,2,0)
 
-		return output
-
-
-	def convert_pred_to_label_tax_and_softmax(self, output):
-		"""
-		"""
-		if not self.args.universal:
-			output = self.tc.transform_predictions_test(output, self.args.dataset)
-		else:
-			output = self.tc.transform_predictions_universal(output, self.args.dataset)
 		return output
 
 
