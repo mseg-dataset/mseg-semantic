@@ -220,7 +220,8 @@ class InferenceTask:
 		self.crop_h = crop_h
 		self.crop_w = crop_w
 		self.input_file = input_file
-		self.output_taxonomy = output_taxonomy
+		self.model_taxonomy = model_taxonomy
+		self.eval_taxonomy = eval_taxonomy
 		self.scales = scales
 		self.use_gpu = use_gpu
 
