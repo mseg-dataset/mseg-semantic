@@ -88,15 +88,6 @@ def get_logger():
 logger = get_logger()
 
 
-class ToFlatLabel(object):
-	def __init__(self, tc_init, dataset):
-		self.dataset = dataset
-		self.tc = tc_init
-
-	def __call__(self, image, label):
-		return image, self.tc.transform_label(label, self.dataset)
-
-
 def resize_by_scaled_short_side(
 	image: np.ndarray,
 	base_size: int,
@@ -639,18 +630,6 @@ class InferenceTask:
 		# output = output.permute(1,2,0)
 
 		return output
-
-
-    # def convert_label_to_pred_taxonomy(self, target): 
-    #     """
-    #     """
-
-    #     if self.args.universal:
-    #         _, target = ToFlatLabel(self.tc, self.args.dataset)(target, target)
-    #         return target.type(torch.uint8).numpy()
-    #     else:
-    #         return target
-
 
 
 if __name__ == '__main__':
