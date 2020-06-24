@@ -1,4 +1,4 @@
-# Code adopted from https://github.com/HRNet/HRNet-Semantic-Segmentation
+#!/usr/bin/python3
 
 from __future__ import absolute_import
 from __future__ import division
@@ -22,6 +22,7 @@ from pathlib import Path
 "High-Resolution Representations for Labeling Pixels and Regions"
 https://arxiv.org/pdf/1904.04514.pdf
 
+Code adopted from https://github.com/HRNet/HRNet-Semantic-Segmentation
 """
 
 BatchNorm2d = apex.parallel.SyncBatchNorm
@@ -507,10 +508,10 @@ class HighResolutionNet(nn.Module):
 
         # return x
 
-    def init_weights(self, pretrained: str='',):
-        """
+    def init_weights(self, load_imagenet_model: bool=False, imagenet_ckpt_fpath: str='') -> None:
+        """ For training, we use a model pretrained on ImageNet. Irrelevant at inference.
             Args:
-            -   pretrained: str representing path to pretrained model
+            -   pretrained_fpath: str representing path to pretrained model
 
             Returns:
             -   None
@@ -522,12 +523,15 @@ class HighResolutionNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-        if os.path.isfile(pretrained):
-            pretrained_dict = torch.load(pretrained)
-            logger.info('=> loading pretrained model {}'.format(pretrained))
+        if not load_imagenet_model:
+            return
+        if os.path.isfile(imagenet_ckpt_fpath):
+            pretrained_dict = torch.load(imagenet_ckpt_fpath)
+            logger.info('=> loading pretrained model {}'.format(imagenet_ckpt_fpath))
             model_dict = self.state_dict()
-            pretrained_dict = {k: v for k, v in pretrained_dict.items()
-                               if k in model_dict.keys()}
+            pretrained_dict = {
+                k: v for k, v in pretrained_dict.items() if k in model_dict.keys()
+            }
             #for k, _ in pretrained_dict.items():
             #    logger.info(
             #        '=> loading {} pretrained model {}'.format(k, pretrained))
@@ -535,121 +539,66 @@ class HighResolutionNet(nn.Module):
             self.load_state_dict(model_dict)
         else:
             # logger.info(pretrained)
-            logger.info('cannot find model path, use random initialization')
-            raise Exception('no pretrained model found at {}'.format(pretrained))
+            logger.info('cannot find ImageNet model path, use random initialization')
+            raise Exception('no pretrained model found at {}'.format(imagenet_ckpt_fpath))
 
-def get_seg_model(cfg, criterion, n_classes, **kwargs):
+def get_seg_model(
+    cfg,
+    criterion,
+    n_classes: int,
+    load_imagenet_model: bool = False,
+    imagenet_ckpt_fpath: str = '',
+    **kwargs
+    ) -> nn.Module:
     model = HighResolutionNet(cfg, criterion, n_classes, **kwargs)
-    model.init_weights(cfg.MODEL.PRETRAINED)
-
+    model.init_weights(load_imagenet_model, imagenet_ckpt_fpath)
+    assert isinstance(model, nn.Module)
     return model
 
-def get_configured_hrnet(n_classes):
+def get_configured_hrnet(
+    n_classes: int,
+    load_imagenet_model: bool = False,
+    imagenet_ckpt_fpath: str = '',
+    ) -> nn.Module:
+    """
+        Args:
+        -   n_classes: integer representing number of output classes
+        -   load_imagenet_model: whether to initialize from ImageNet-pretrained model
+        -   imagenet_ckpt_fpath: string representing path to file with weights to 
+                initialize model with
+
+        Returns:
+        -   model: HRNet model w/ architecture configured according to model yaml,
+                and with specified number of classes and weights initialized
+                (at training, init using imagenet-pretrained model)
+    """
     from yacs.config import CfgNode as CN
     _C = CN()
-    _C.OUTPUT_DIR = ''
-    _C.LOG_DIR = ''
-    _C.GPUS = (0,)
-    _C.WORKERS = 4
-    _C.PRINT_FREQ = 20
-    _C.AUTO_RESUME = False
-    _C.PIN_MEMORY = True
-    _C.RANK = 0
-    _C.CUDNN = CN()
-    _C.CUDNN.BENCHMARK = True
-    _C.CUDNN.DETERMINISTIC = False
-    _C.CUDNN.ENABLED = True
 
     # common params for NETWORK
     _C.MODEL = CN()
     _C.MODEL.NAME = 'seg_hrnet'
-    _C.MODEL.PRETRAINED = ''
     _C.MODEL.EXTRA = CN(new_allowed=True)
-
-    _C.LOSS = CN()
-    _C.LOSS.USE_OHEM = False
-    _C.LOSS.OHEMTHRES = 0.9
-    _C.LOSS.OHEMKEEP = 100000
-    _C.LOSS.CLASS_BALANCE = True
-
-    # DATASET related params
-    _C.DATASET = CN()
-    _C.DATASET.ROOT = ''
-    _C.DATASET.DATASET = 'cityscapes'
-    _C.DATASET.NUM_CLASSES = 19
-    _C.DATASET.TRAIN_SET = 'list/cityscapes/train.lst'
-    _C.DATASET.EXTRA_TRAIN_SET = ''
-    _C.DATASET.TEST_SET = 'list/cityscapes/val.lst'
 
     # training
     _C.TRAIN = CN()
-
-    _C.TRAIN.IMAGE_SIZE = [1024, 512]  # width * height
-    _C.TRAIN.BASE_SIZE = 2048
-    _C.TRAIN.DOWNSAMPLERATE = 1
-    _C.TRAIN.FLIP = True
     _C.TRAIN.MULTI_SCALE = True
-    _C.TRAIN.SCALE_FACTOR = 16
-
-    _C.TRAIN.LR_FACTOR = 0.1
-    _C.TRAIN.LR_STEP = [90, 110]
-    _C.TRAIN.LR = 0.01
-    _C.TRAIN.EXTRA_LR = 0.001
-
-    _C.TRAIN.OPTIMIZER = 'sgd'
-    _C.TRAIN.MOMENTUM = 0.9
-    _C.TRAIN.WD = 0.0001
-    _C.TRAIN.NESTEROV = False
-    _C.TRAIN.IGNORE_LABEL = -1
-
-    _C.TRAIN.BEGIN_EPOCH = 0
-    _C.TRAIN.END_EPOCH = 484
-    _C.TRAIN.EXTRA_EPOCH = 0
-
-    _C.TRAIN.RESUME = False
-
-    _C.TRAIN.BATCH_SIZE_PER_GPU = 32
-    _C.TRAIN.SHUFFLE = True
-    # only using some training samples
-    _C.TRAIN.NUM_SAMPLES = 0
 
     # testing
     _C.TEST = CN()
-
-    _C.TEST.IMAGE_SIZE = [2048, 1024]  # width * height
-    _C.TEST.BASE_SIZE = 2048
-
-    _C.TEST.BATCH_SIZE_PER_GPU = 32
-    # only testing some samples
-    _C.TEST.NUM_SAMPLES = 0
-
-    _C.TEST.MODEL_FILE = ''
-    _C.TEST.FLIP_TEST = False
     _C.TEST.MULTI_SCALE = False
-    _C.TEST.CENTER_CROP_TEST = False
-    _C.TEST.SCALE_LIST = [1]
 
-    # debug
-    _C.DEBUG = CN()
-    _C.DEBUG.DEBUG = False
-    _C.DEBUG.SAVE_BATCH_IMAGES_GT = False
-    _C.DEBUG.SAVE_BATCH_IMAGES_PRED = False 
-    _C.DEBUG.SAVE_HEATMAPS_GT = False
-    _C.DEBUG.SAVE_HEATMAPS_PRED = False
     _C.merge_from_file(f'{_ROOT}/seg_hrnet.yaml')
-
-
     config = _C
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
-    model = get_seg_model(config, criterion, n_classes)
+    model = get_seg_model(config, criterion, n_classes, load_imagenet_model, imagenet_ckpt_fpath)
     return model
 
 
 if __name__ == '__main__':
 
-
-    model = get_configured_hrnet(180)
+    model = get_configured_hrnet(180, load_imagenet_model, imagenet_ckpt_fpath)
     num_p = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(num_p)
 

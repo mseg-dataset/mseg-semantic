@@ -49,18 +49,21 @@ setup(
     include_package_data=True,
     python_requires=">= 3.6",
     install_requires=[
-        "colour",
-        "descartes",
+        "apex",
         "imageio",
         "matplotlib",
         "numpy",
         "opencv-python>=4.1.0.25",
         "pandas>=0.23.1",
+        "PyYAML",
         "pillow",
         "imageio",
+        "recordclass",
         "scipy>=1.2.1",
-        "shapely",
         "sklearn",
+        "torch",
+        "tqdm",
         "typing_extensions",
+        "yacs"
     ]
 )
