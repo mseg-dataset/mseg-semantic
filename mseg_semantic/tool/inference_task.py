@@ -333,8 +333,15 @@ class InferenceTask:
 		network and obtain predictions. Gracefully handles .txt, 
 		or video file (.mp4, etc), or directory input.
 		"""
-		logger.info('>>>>>>>>>>>>>>>> Start inference task >>>>>>>>>>>>>>>>')
+		logger.info('>>>>>>>>>>>>>> Start inference task >>>>>>>>>>>>>')
 		self.model.eval()
+
+		if self.input_file is None and self.args.dataset != 'default':
+			# evaluate on a train or test dataset
+			test_loader = self.create_test_loader()
+			self.execute_on_dataloader(test_loader)
+			logger.info('<<<<<<<<< Inference task completed <<<<<<<<<')
+			return
 
 		suffix = self.input_file[-4:]
 		is_dir = os.path.isdir(self.input_file)
@@ -348,20 +355,13 @@ class InferenceTask:
 			self.create_path_lists_from_dir()
 			test_loader = self.create_test_loader()
 			self.execute_on_dataloader(test_loader)
-
 		elif is_vid:
 			# argument is a video
 			self.execute_on_video()
-
-		elif self.input_file is None and self.args.dataset != 'default':
-			# evaluate on a train or test dataset
-			test_loader = self.create_test_loader()
-			self.execute_on_dataloader(test_loader)		
-
 		else:
 			logger.info('Error: Unknown input type')
 
-		logger.info('<<<<<<<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<<<<')
+		logger.info('<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<')
 
 	def render_single_img_pred(self, min_resolution: int = 1080):
 		"""
