@@ -113,7 +113,16 @@ def test_constructor():
 	
 	save_folder = f'{_ROOT}/accuracy_calculator_data'
 	num_eval_classes = 11
-	ac = AccuracyCalculator(args, data_list, dataset_name, class_names, save_folder, num_eval_classes)
+	ac = AccuracyCalculator(
+		args=args,
+		data_list=data_list,
+		dataset_name=dataset_name,
+		class_names=class_names,
+		save_folder=save_folder,
+		eval_taxonomy='test_dataset',
+		num_eval_classes=num_eval_classes,
+		excluded_ids=[]
+	)
 
 def test_execute():
 	""" """
@@ -144,9 +153,18 @@ def test_execute():
 	
 	save_folder = f'{_ROOT}/accuracy_calculator_data'
 	num_eval_classes = 11
-	ac = AccuracyCalculator(args, data_list, dataset_name, class_names, save_folder, num_eval_classes)
 
-	ac.execute(save_vis=False)
+	ac = AccuracyCalculator(
+		args=args,
+		data_list=data_list,
+		dataset_name=dataset_name,
+		class_names=class_names,
+		save_folder=save_folder,
+		eval_taxonomy='test_dataset',
+		num_eval_classes=num_eval_classes,
+		excluded_ids=[]
+	)
+	ac.compute_metrics(save_vis=False)
 
 	results_txt_fpath = f'{_ROOT}/accuracy_calculator_data/results.txt'
 	lines = read_txt_file(results_txt_fpath, strip_newlines=False)

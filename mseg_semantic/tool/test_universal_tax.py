@@ -140,6 +140,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         )
         itask.execute()
 
+    if args.split == 'test':
+        logger.info("Ground truth labels are not known for test set, cannot compute its accuracy.")
+        return
+
     logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
     if eval_taxonomy == 'universal' and (args.dataset in DEFAULT_TRAIN_DATASETS):
         # evaluating on training datasets, within a subset of the universal taxonomy
@@ -157,8 +161,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         raise NotImplementedError
 
     _, test_data_list = create_test_loader(args)
-    pdb.set_trace()
-    # TODO: pass the excluded ids to the AccuracyCalculator
     if eval_relabeled:
         raise NotImplementedError
         # args.dataset_relabeled = get_relabeled_dataset(args.dataset)
@@ -170,8 +172,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         #     data_list=args.test_list_relabeled,
         #     transform=test_transform
         # )
+        
         # ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
-    
+        # ac.compute_metrics_relabeled_data(test_data.data_list, test_data_relabeled.data_list)
+
     else:
         ac = AccuracyCalculator(
             args=args,
@@ -183,14 +187,9 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             num_eval_classes=num_eval_classes,
             excluded_ids=excluded_ids
         )
+        ac.compute_metrics()
 
-    ac.execute()
-
-    if args.split != 'test':
-        if eval_relabeled:
-            ac.cal_acc_for_relabeled_model(test_data.data_list, test_data_relabeled.data_list, gray_folder, names, demo=True)
-        else:
-            ac.cal_acc(test_data.data_list, gray_folder, names, demo=True)
+    logger.info(">>>>>>>>> Accucracy computation completed >>>>>>>>>>")
 
 
 
