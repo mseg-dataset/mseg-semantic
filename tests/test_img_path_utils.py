@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
 from pathlib import Path
-from mseg_semantic.utils.img_path_utils import dump_relpath_txt
+from mseg_semantic.utils.img_path_utils import (
+	dump_relpath_txt,
+	get_unique_stem_from_last_k_strs
+)
 
 _ROOT = Path(__file__).resolve().parent
 
@@ -18,3 +21,54 @@ def test_dump_relpath_txt():
 		'ADE_train_00000001.jpg'
 	]
 	assert gt_lines == lines
+
+
+def test_get_unique_stem_from_last_k_strs_k1():
+	""" """
+	fpath = 'ADE20K_2016_07_26/images/training/a/aiport_terminal/ADE_train_00000001_seg.png'
+	k = 1
+	new_fname = get_unique_stem_from_last_k_strs(fpath, k=1)
+	assert new_fname == '_ADE_train_00000001_seg'
+
+
+def test_get_unique_stem_from_last_k_strs_k2():
+	""" """
+	fpath = 'ADE20K_2016_07_26/images/training/a/aiport_terminal/ADE_train_00000001_seg.png'
+	k = 1
+	new_fname = get_unique_stem_from_last_k_strs(fpath, k=2)
+	assert new_fname == 'aiport_terminal_ADE_train_00000001_seg'
+
+
+def test_get_unique_stem_from_last_k_strs_k3():
+	""" """
+	fpath = 'ADE20K_2016_07_26/images/training/a/aiport_terminal/ADE_train_00000001_seg.png'
+	k = 1
+	new_fname = get_unique_stem_from_last_k_strs(fpath, k=3)
+	assert new_fname == 'a_aiport_terminal_ADE_train_00000001_seg'
+
+
+def test_get_unique_stem_from_last_k_strs_k4():
+	""" """
+	fpath = 'ADE20K_2016_07_26/images/training/a/aiport_terminal/ADE_train_00000001_seg.png'
+	k = 1
+	new_fname = get_unique_stem_from_last_k_strs(fpath, k=4)
+	assert new_fname == 'training_a_aiport_terminal_ADE_train_00000001_seg'
+
+
+def test_get_unique_stem_from_last_k_strs_k5():
+	""" """
+	fpath = 'ADE20K_2016_07_26/images/training/a/aiport_terminal/ADE_train_00000001_seg.png'
+	k = 1
+	new_fname = get_unique_stem_from_last_k_strs(fpath, k=5)
+	assert new_fname == 'images_training_a_aiport_terminal_ADE_train_00000001_seg'
+
+
+if __name__ == '__main__':
+	""" """
+	test_dump_relpath_txt()
+	test_get_unique_stem_from_last_k_strs_k1()
+	test_get_unique_stem_from_last_k_strs_k2()
+	test_get_unique_stem_from_last_k_strs_k3()
+	test_get_unique_stem_from_last_k_strs_k4()
+	test_get_unique_stem_from_last_k_strs_k5()
+
