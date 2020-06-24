@@ -129,12 +129,11 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     if not args.has_prediction:
         itask = InferenceTask(
-            args,
+            args=args,
             base_size = args.base_size,
             crop_h = args.test_h,
             crop_w = args.test_w,
             input_file=None,
-            gray_folder=gray_folder,
             model_taxonomy=model_taxonomy,
             eval_taxonomy=eval_taxonomy,
             scales = args.scales
