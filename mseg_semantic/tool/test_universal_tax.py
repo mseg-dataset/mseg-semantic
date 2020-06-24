@@ -121,26 +121,13 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     relpath_list = infos[args.dataset].vallist
     test_loader, test_data_list = get_test_loader(args, relpath_list)
 
-    args.vis_freq = len(test_data.data_list) // 10 + 1
+    args.vis_freq = len(test_data_list) // 10 + 1
     if args.split == 'test':
         args.vis_freq = 1
-
-    if args.universal:
-        names = ''
-    else:
-        names = [line.rstrip('\n') for line in open(args.names_path)]
 
     args.num_model_classes = len(get_universal_class_names())
 
     if not args.has_prediction:
-        temp_classes = args.classes
-        args.classes = args.u_classes
-        logger.info(args.classes)
-
-        save_folder = args.save_folder
-        u_classes = args.u_classes
-        classes = args.classes
-
         itask = InferenceTask(
             args,
             base_size = args.base_size,
@@ -159,6 +146,13 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     if eval_taxonomy == 'universal' and (args.dataset in tc.train_datasets):
         # evaluating on training datasets, within a subset of the universal taxonomy
         excluded_ids = tc.exclude_universal_ids(dataset_name)
+
+    if args.eval_taxonomy == 'universal':
+        names = ''
+    elif args.eval_taxonomy == 'test_dataset':
+        names = [line.rstrip('\n') for line in open(args.names_path)]
+    elif args.eval_taxonomy == 'naive':
+        raise NotImplementedError
 
     if args.eval_relabeled:
         args.dataset_relabeled = get_relabeled_dataset(args.dataset)
