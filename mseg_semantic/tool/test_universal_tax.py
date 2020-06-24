@@ -105,7 +105,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     dataset_name = args.dataset
     args.names_path = infos[args.dataset].names_path
 
-    model_root = str(Path(args.model_path).parent + Path(args.model_path).stem)
+    model_root = str(Path(args.model_path).parent) + str(Path(args.model_path).stem)
     if eval_taxonomy == 'universal':
         if args.eval_relabeled:
             args.save_folder = f'{model_root}/{args.dataset}_universal_relabeled/{args.base_size}/'
