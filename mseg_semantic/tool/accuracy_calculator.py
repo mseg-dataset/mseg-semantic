@@ -101,7 +101,7 @@ class AccuracyCalculator:
         
         assert isinstance(args.model_path, str)
 
-    def execute(self, save_vis: bool = True) -> None:
+    def compute_metrics(self, save_vis: bool = True) -> None:
         """
             Args:
             -   save_vis: whether to save visualize examplars
@@ -109,6 +109,11 @@ class AccuracyCalculator:
         self.evaluate_predictions(save_vis)
         self.print_results()
         self.dump_acc_results_to_file()
+
+    def compute_metrics_relabeled_data(self):
+        """
+        """
+        pass
 
 
     def convert_label_to_pred_taxonomy(self, target_img):
