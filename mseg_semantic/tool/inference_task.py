@@ -15,10 +15,9 @@ import torch.backends.cudnn as cudnn
 from typing import List, Tuple
 
 from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
-from mseg.utils.names_utils import get_universal_class_names
+from mseg.utils.names_utils import get_universal_class_names, load_class_names
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.resize_util import resize_img_by_short_side
-
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
@@ -204,7 +203,8 @@ class InferenceTask:
 		mean: 3-tuple of floats, representing pixel mean value
 		std: 3-tuple of floats, representing pixel standard deviation
 
-		'args' should contain at least two fields (shown below).
+		'args' should contain at least 5 fields (shown below).
+		See brief explanation at top of file regarding taxonomy arg configurations.
 
 			Args:
 			-	args:
@@ -249,15 +249,18 @@ class InferenceTask:
 			# (1) running demo w/ universal output
 			# (2) evaluating universal models on train datasets
 			# in case (2), training 'val' set labels are converted to univ.
+			# note there is no remapping of universal tax. predictions
 			assert isinstance(self.args.dataset, str)
 			self.dataset_name = args.dataset
 			self.tc = TaxonomyConverter()
+			self.num_eval_classes = self.num_model_classes 
 
 		elif model_taxonomy == 'naive' and eval_taxonomy == 'test_dataset':
 			self.tc = StupidTaxonomyConverter()
 			if args.dataset in self.tc.convs.keys() and use_gpu:
 				self.tc.convs[args.dataset].cuda()
 			self.tc.softmax.cuda()
+			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		elif model_taxonomy == 'universal' and eval_taxonomy == 'test_dataset':
 			pass
@@ -266,6 +269,7 @@ class InferenceTask:
 			if args.dataset in self.tc.convs.keys() and use_gpu:
 				self.tc.convs[args.dataset].cuda()
 			self.tc.softmax.cuda()
+			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		if self.args.arch == 'psp':
 			assert isinstance(self.args.zoom_factor, int)
@@ -454,7 +458,7 @@ class InferenceTask:
 		"""
 		h, w, _ = image.shape
 
-		prediction = np.zeros((h, w, self.num_model_classes), dtype=float)
+		prediction = np.zeros((h, w, self.num_eval_classes), dtype=float)
 		prediction = torch.Tensor(prediction).cuda()
 
 		for scale in self.scales:
@@ -591,7 +595,7 @@ class InferenceTask:
 		grid_h = int(np.ceil(float(new_h-self.crop_h)/stride_h) + 1)
 		grid_w = int(np.ceil(float(new_w-self.crop_w)/stride_w) + 1)
 
-		prediction_crop = torch.zeros((self.num_model_classes, new_h, new_w)).cuda()
+		prediction_crop = torch.zeros((self.num_eval_classes, new_h, new_w)).cuda()
 		count_crop = torch.zeros((new_h, new_w)).cuda()
 
 		for index_h in range(0, grid_h):
