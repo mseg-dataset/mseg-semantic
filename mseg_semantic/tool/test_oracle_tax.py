@@ -84,7 +84,8 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
     logger.info(f"Classes: {args.classes}")
     gray_folder = os.path.join(args.save_folder, 'gray')
 
-    test_loader, test_data_list = get_test_loader(args, split='test')
+    relpath_list = infos[args.dataset].vallist
+    test_loader, test_data_list = get_test_loader(args, relpath_list)
     # base_size = get_best_base_size()
 
     if not args.has_prediction:

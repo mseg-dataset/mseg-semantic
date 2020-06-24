@@ -6,7 +6,7 @@ import torch.utils.data
 from mseg_semantic.utils import dataset, transform
 
 
-def get_test_loader(args, split: str):
+def get_test_loader(args, relpath_list: str):
     """
         Args:
         -   args:
@@ -16,11 +16,6 @@ def get_test_loader(args, split: str):
         -   test_loader
         -   data_list
     """
-    if split == 'test':
-        relpath_list = args.test_list
-    elif split == 'val':
-        relpath_list = args.vallist
-
     test_transform = transform.Compose([transform.ToTensor()])
     test_data = dataset.SemData(
         split=args.split,

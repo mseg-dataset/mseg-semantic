@@ -118,10 +118,8 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
-    logger.info("=> creating model ...")
-    logger.info("Classes: {}".format(args.classes))
-
-    test_loader, test_data_list = get_test_loader(args, split='val')
+    relpath_list = infos[args.dataset].vallist
+    test_loader, test_data_list = get_test_loader(args, relpath_list)
 
     args.vis_freq = len(test_data.data_list) // 10 + 1
     if args.split == 'test':
