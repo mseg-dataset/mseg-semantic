@@ -10,9 +10,9 @@ import torch.nn.functional as F
 from mseg.utils.dataset_config import infos
 
 from mseg_semantic.utils.config import CfgNode
-from mseg_semantic.utils import dataset, transform
-from mseg_semantic.utils.verification_utils import verify_architecture
 
+from mseg_semantic.utils.verification_utils import verify_architecture
+from mseg_semantic.tool.mseg_dataloaders import get_test_loader
 
 """
 Test an `oracle` model -- trained and tested on the same taxonomy/dataset.
@@ -51,39 +51,6 @@ def get_parser() -> CfgNode:
     return cfg
 
 
-
-def get_test_loader(args):
-    """
-        Args:
-        -   
-
-        Returns:
-        -   test_loader
-        -   data_list
-    """
-    test_transform = transform.Compose([transform.ToTensor()])
-    test_data = dataset.SemData(
-        split=args.split,
-        data_root=args.data_root,
-        data_list=args.test_list,
-        transform=test_transform
-    )
-    index_start = args.index_start
-    if args.index_step == 0:
-        index_end = len(test_data.data_list)
-    else:
-        index_end = min(index_start + args.index_step, len(test_data.data_list))
-    test_data.data_list = test_data.data_list[index_start:index_end]
-    test_loader = torch.utils.data.DataLoader(
-        test_data,
-        batch_size=1,
-        shuffle=False,
-        num_workers=args.workers,
-        pin_memory=True
-    )
-    return test_loader, test_data.data_list
-
-
 def test_oracle_taxonomy_model(use_gpu: bool = True):
     """
     Test a model that was trained in the exact same taxonomy we wish
@@ -118,7 +85,7 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
     logger.info(f"Classes: {args.classes}")
     gray_folder = os.path.join(args.save_folder, 'gray')
 
-    test_loader, test_data_list = get_test_loader(args)
+    test_loader, test_data_list = get_test_loader(args, split='test')
     # base_size = get_best_base_size()
 
     if not args.has_prediction:
@@ -130,7 +97,8 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
             crop_w=args.test_w,
             data_list=test_data_list,
             gray_folder=gray_folder,
-            output_taxonomy='oracle',
+            model_taxonomy='test_dataset', # i.e. is oracle
+            eval_taxonomy='test_dataset',
             scales=args.scales
         )
         itask.execute(test_loader)
