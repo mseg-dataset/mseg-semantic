@@ -178,7 +178,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             data_list=test_data_list,
             dataset_name=dataset_name,
             class_names=class_names,
-            save_folder=save_folder,
+            save_folder=args.save_folder,
             num_eval_classes=num_eval_classes,
             excluded_ids=excluded_ids
         )
