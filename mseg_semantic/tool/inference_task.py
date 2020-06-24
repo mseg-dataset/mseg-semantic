@@ -481,7 +481,7 @@ class InferenceTask:
 		os.makedirs(self.args.save_folder, exist_ok=True)
 		gray_folder = os.path.join(self.args.save_folder, 'gray')
 		self.gray_folder = gray_folder
-		
+
 		data_time = AverageMeter()
 		batch_time = AverageMeter()
 		end = time.time()
@@ -610,9 +610,9 @@ class InferenceTask:
 		if self.eval_taxonomy == 'universal':
 			#output = self.softmax(output)
 			# equivalent, but make sure on cuda()
-			output = self.tc.transform_predictions_test(output, self.args.dataset)
-		elif self.eval_taxonomy == 'test_dataset':
 			output = self.tc.transform_predictions_universal(output, self.args.dataset)
+		elif self.eval_taxonomy == 'test_dataset':
+			output = self.tc.transform_predictions_test(output, self.args.dataset)
 		else:
 			print('Unrecognized output taxonomy. Quitting....')
 			quit()
