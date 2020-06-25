@@ -96,7 +96,7 @@ class AccuracyCalculator:
             include_ignore_idx_cls=True
         )
         self.excluded_ids = []
-        self.to_universal_transform = ToUniversalLabel(self.args.dataset)
+        self.to_universal_transform = ToUniversalLabel(self.dataset_name)
 
         assert isinstance(args.vis_freq, int)
         assert isinstance(args.img_name_unique, bool)
@@ -177,7 +177,7 @@ class AccuracyCalculator:
         """
         Dump per-class IoUs and mIoU to stdout.
         """
-        if self.eval_taxonomy == 'universal' and (self.args.dataset in DEFAULT_TRAIN_DATASETS):
+        if self.eval_taxonomy == 'universal' and (self.dataset_name in DEFAULT_TRAIN_DATASETS):
             iou_class, accuracy_class, mIoU, mAcc, allAcc = self.sam.get_metrics(
                 exclude=True,
                 exclude_ids=self.excluded_ids
