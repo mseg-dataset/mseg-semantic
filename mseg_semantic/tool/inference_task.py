@@ -88,15 +88,6 @@ def get_logger():
 logger = get_logger()
 
 
-class ToFlatLabel(object):
-	def __init__(self, tc_init, dataset):
-		self.dataset = dataset
-		self.tc = tc_init
-
-	def __call__(self, image, label):
-		return image, self.tc.transform_label(label, self.dataset)
-
-
 def resize_by_scaled_short_side(
 	image: np.ndarray,
 	base_size: int,
@@ -497,26 +488,29 @@ class InferenceTask:
 		batch_time = AverageMeter()
 		end = time.time()
 
+		check_mkdir(self.gray_folder)
+
 		for i, (input, _) in enumerate(test_loader):
 			logger.info(f'On image {i}')
-
 			data_time.update(time.time() - end)
-			# convert Pytorch tensor -> Numpy
+
+			# determine path for grayscale label map
+			image_path, _ = self.data_list[i]
+			if self.args.img_name_unique:
+				image_name = Path(image_path).stem
+			else:
+				image_name = get_unique_stem_from_last_k_strs(image_path)
+			gray_path = os.path.join(self.gray_folder, image_name + '.png')
+			if Path(gray_path).exists():
+				continue
+
+			# convert Pytorch tensor -> Numpy, then feedforward
 			input = np.squeeze(input.numpy(), axis=0)
 			image = np.transpose(input, (1, 2, 0))
 			gray_img = self.execute_on_img(image)
 
 			batch_time.update(time.time() - end)
 			end = time.time()
-			check_mkdir(self.gray_folder)
-			image_path, _ = self.data_list[i]
-
-			if self.args.img_name_unique:
-				image_name = Path(image_path).stem
-			else:
-				image_name = get_unique_stem_from_last_k_strs(image_path)
-
-			gray_path = os.path.join(self.gray_folder, image_name + '.png')
 			cv2.imwrite(gray_path, gray_img)
 
 			# todo: update to time remaining.
@@ -639,18 +633,6 @@ class InferenceTask:
 		# output = output.permute(1,2,0)
 
 		return output
-
-
-    # def convert_label_to_pred_taxonomy(self, target): 
-    #     """
-    #     """
-
-    #     if self.args.universal:
-    #         _, target = ToFlatLabel(self.tc, self.args.dataset)(target, target)
-    #         return target.type(torch.uint8).numpy()
-    #     else:
-    #         return target
-
 
 
 if __name__ == '__main__':
