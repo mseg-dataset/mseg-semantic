@@ -488,26 +488,29 @@ class InferenceTask:
 		batch_time = AverageMeter()
 		end = time.time()
 
+		check_mkdir(self.gray_folder)
+
 		for i, (input, _) in enumerate(test_loader):
 			logger.info(f'On image {i}')
-
 			data_time.update(time.time() - end)
-			# convert Pytorch tensor -> Numpy
+
+			# determine path for grayscale label map
+			image_path, _ = self.data_list[i]
+			if self.args.img_name_unique:
+				image_name = Path(image_path).stem
+			else:
+				image_name = get_unique_stem_from_last_k_strs(image_path)
+			gray_path = os.path.join(self.gray_folder, image_name + '.png')
+			if Path(gray_path).exists():
+				continue
+
+			# convert Pytorch tensor -> Numpy, then feedforward
 			input = np.squeeze(input.numpy(), axis=0)
 			image = np.transpose(input, (1, 2, 0))
 			gray_img = self.execute_on_img(image)
 
 			batch_time.update(time.time() - end)
 			end = time.time()
-			check_mkdir(self.gray_folder)
-			image_path, _ = self.data_list[i]
-
-			if self.args.img_name_unique:
-				image_name = Path(image_path).stem
-			else:
-				image_name = get_unique_stem_from_last_k_strs(image_path)
-
-			gray_path = os.path.join(self.gray_folder, image_name + '.png')
 			cv2.imwrite(gray_path, gray_img)
 
 			# todo: update to time remaining.
