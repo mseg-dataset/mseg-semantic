@@ -245,7 +245,6 @@ class InferenceTask:
 			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		elif model_taxonomy == 'universal' and eval_taxonomy == 'test_dataset':
-			pass
 			# no label conversion required here, only predictions converted
 			self.tc = TaxonomyConverter()
 			if args.dataset in self.tc.convs.keys() and use_gpu:
