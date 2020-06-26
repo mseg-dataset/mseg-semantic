@@ -116,7 +116,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     args.print_freq = 300
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
+    #os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
 
     # always evaluating on val split

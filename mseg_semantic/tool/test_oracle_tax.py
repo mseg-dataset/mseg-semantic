@@ -78,7 +78,7 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
 
     # verify_architecture(args)
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
+    #os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
     logger.info("=> creating model ...")
     logger.info(f"Classes: {args.classes}")

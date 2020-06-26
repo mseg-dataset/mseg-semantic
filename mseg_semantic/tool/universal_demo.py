@@ -58,7 +58,7 @@ def run_universal_demo(args, use_gpu: bool = True) -> None:
     args.print_freq = 10
 
     args.split = 'test'
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
+    #os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
     logger.info("=> creating model ...")
     args.num_model_classes = len(args.u_classes)
