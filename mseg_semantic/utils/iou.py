@@ -19,7 +19,7 @@ def intersectionAndUnion(
     """
     Compute IoU on Numpy arrays on CPU. We will be reasoning about each
     matrix cell individually, so we can reshape (flatten) these arrays
-    and the evaluation result won’t change. Compare 
+    into column vectors and the evaluation result won’t change. Compare 
     horizontally-corresponding cells. Wherever ground truth (target)
     pixels should be ignored, set prediction also to the ignore label.
     `intersection` represents values (class indices) in cells where

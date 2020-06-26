@@ -56,17 +56,17 @@ affect results significantly.
 There are 3 possible configurations for 
 (model_taxonomy, eval_taxonomy):
 
-(1) model_taxonomy = 'universal', eval_taxonomy = 'universal'
+(1) model_taxonomy='universal', eval_taxonomy='universal'
 	Occurs when:
 	(a) running demo w/ universal output
 	(b) evaluating universal models on train datasets
 	in case (b), training 'val' set labels are converted to univ.
 
-(2) model_taxonomy = 'naive', eval_taxonomy = 'test_dataset':
+(2) model_taxonomy='naive', eval_taxonomy='test_dataset':
 	Occurs when:
 	(a) evaluating naive unified model on test datasets
 
-(3) model_taxonomy = 'universal', eval_taxonomy = 'test_dataset':
+(3) model_taxonomy='universal', eval_taxonomy='test_dataset':
 	(a) generic zero-shot cross-dataset evaluation case
 """
 
