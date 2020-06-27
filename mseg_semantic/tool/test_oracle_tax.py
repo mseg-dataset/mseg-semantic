@@ -11,7 +11,7 @@ from mseg.utils.dataset_config import infos
 from mseg.utils.names_utils import load_class_names
 
 from mseg_semantic.utils.config import CfgNode
-from mseg_semantic.utils.verification_utils import verify_architecture
+#from mseg_semantic.utils.verification_utils import verify_architecture
 from mseg_semantic.tool.inference_task import InferenceTask
 
 """
@@ -148,7 +148,10 @@ def test_oracle_taxonomy_model(args, use_gpu: bool = True) -> None:
 
 
 if __name__ == '__main__':
-    """ """
+    """
+    Usage:
+
+    """
     use_gpu = True
     args = get_parser()
 
