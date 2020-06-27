@@ -8,6 +8,7 @@ import torch
 import torch.nn.functional as F
 
 from mseg.utils.dataset_config import infos
+from mseg.utils.names_utils import load_class_names
 
 from mseg_semantic.utils.config import CfgNode
 from mseg_semantic.utils.verification_utils import verify_architecture
@@ -50,60 +51,79 @@ def get_parser() -> CfgNode:
     return cfg
 
 
-def test_oracle_taxonomy_model(use_gpu: bool = True):
+def test_oracle_taxonomy_model(args, use_gpu: bool = True) -> None:
     """
     Test a model that was trained in the exact same taxonomy we wish
     to evaluate in.
-    """
-    args = get_parser()
-    logger.info(args)
 
+        Args:
+        -   args:
+        -   use_gpu
+
+        Returns:
+        -   None
+    """
     if 'scannet' in args.dataset:
         args.img_name_unique = False
     else:
         args.img_name_unique = True
 
-    args.taxonomy = 'oracle'
-    dataset = args.dataset
-    args.names_path = infos[self.dataset].names_path
-    args.save_folder = f'{Path(args.model_path).stem}/{args.dataset}/{args.base_size}/'
-    os.makedirs(args.save_folder, exist_ok=True)
-    args.data_root = infos[self.dataset].dataroot
-    args.test_list = infos[self.dataset].vallist
+    # These are all `oracle` models
+    model_taxonomy = 'test_dataset'
+    eval_taxonomy = 'test_dataset'
 
-    dataset_name = dataset
-    class_names = list(np.genfromtxt(args.names_path, delimiter='\n', dtype=str))
-    num_classes = len(class_names)
-    pred_dim = num_classes
+    args.data_root = infos[args.dataset].dataroot
+    dataset_name = args.dataset
+
+    model_results_root = f'{Path(args.model_path).parent}/{Path(args.model_path).stem}'
+    args.save_folder = f'{model_results_root}/{args.dataset}/{args.base_size}/'
+
+    #args.save_folder = f'{Path(args.model_path).stem}/{args.dataset}/{args.base_size}/'
+
+    args.num_model_classes = len(load_class_names(dataset_name))
+    num_eval_classes = args.num_model_classes
 
     # verify_architecture(args)
 
     #os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
-    logger.info("=> creating model ...")
-    logger.info(f"Classes: {args.classes}")
-    gray_folder = os.path.join(args.save_folder, 'gray')
 
-    relpath_list = infos[args.dataset].vallist
+    args.print_freq = 100
+    args.test_list = infos[args.dataset].vallist
 
     if not args.has_prediction:
-        args.print_freq = 100
         itask = InferenceTask(
-            args,
+            args=args,
             base_size=args.base_size,
             crop_h=args.test_h,
             crop_w=args.test_w,
             input_file=None,
-            gray_folder=gray_folder,
-            model_taxonomy='test_dataset', # i.e. is oracle
-            eval_taxonomy='test_dataset',
+            model_taxonomy=model_taxonomy,
+            eval_taxonomy=eval_taxonomy,
             scales=args.scales
         )
-        itask.execute(test_loader)
+        itask.execute()
 
-    if args.split != 'test':
-        ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
-        ac.execute()
+    logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
+    if args.split == 'test':
+        logger.info("Ground truth labels are not known for test set, cannot compute its accuracy.")
+        return
+
+    excluded_ids = [] # no classes are excluded from evaluation of the test sets
+    _, test_data_list = create_test_loader(args)
+    ac = AccuracyCalculator(
+        args=args,
+        data_list=test_data_list,
+        dataset_name=dataset_name,
+        class_names=class_names,
+        save_folder=args.save_folder,
+        eval_taxonomy=eval_taxonomy,
+        num_eval_classes=num_eval_classes,
+        excluded_ids=excluded_ids
+    )
+    ac.compute_metrics()
+
+    logger.info(">>>>>>>>> Accuracy computation completed >>>>>>>>>>")
 
     # def get_best_base_size(self): # currently only for models trained with qvga
 
@@ -130,6 +150,9 @@ def test_oracle_taxonomy_model(use_gpu: bool = True):
 if __name__ == '__main__':
     """ """
     use_gpu = True
-    test_oracle_taxonomy_model(use_gpu)
+    args = get_parser()
+
+    logger.info(args)
+    test_oracle_taxonomy_model(args, use_gpu)
 
 
