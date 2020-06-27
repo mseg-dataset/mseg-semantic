@@ -53,7 +53,7 @@ screen resolution is generally described by shorter side length.
 "base_size" is a very important parameter and will
 affect results significantly.
 
-There are 3 possible configurations for 
+There are 4 possible configurations for 
 (model_taxonomy, eval_taxonomy):
 
 (1) model_taxonomy='universal', eval_taxonomy='universal'
@@ -62,12 +62,16 @@ There are 3 possible configurations for
 	(b) evaluating universal models on train datasets
 	in case (b), training 'val' set labels are converted to univ.
 
-(2) model_taxonomy='naive', eval_taxonomy='test_dataset':
+(2) model_taxonomy='universal', eval_taxonomy='test_dataset':
+	(a) generic zero-shot cross-dataset evaluation case
+
+(3) model_taxonomy='test_dataset', eval_taxonomy='test_dataset'
+	(a) evaluating `oracle` model -- trained and tested on same
+		dataset (albeit on separate splits)
+
+(4) model_taxonomy='naive', eval_taxonomy='test_dataset':
 	Occurs when:
 	(a) evaluating naive unified model on test datasets
-
-(3) model_taxonomy='universal', eval_taxonomy='test_dataset':
-	(a) generic zero-shot cross-dataset evaluation case
 """
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
@@ -204,6 +208,7 @@ class InferenceTask:
 
 		# Required arguments:
 		assert isinstance(self.args.save_folder, str)
+		assert isinstance(self.args.dataset, str)
 		assert isinstance(self.args.img_name_unique, bool)
 		assert isinstance(self.args.print_freq, int)
 		assert isinstance(self.args.num_model_classes, int)
@@ -227,15 +232,13 @@ class InferenceTask:
 		self.data_list = None # optional, intended for dataloader use
 
 		if model_taxonomy == 'universal' and eval_taxonomy == 'universal':
-			# Occurs when:
-			# (1) running demo w/ universal output
-			# (2) evaluating universal models on train datasets
-			# in case (2), training 'val' set labels are converted to univ.
-			# note there is no remapping of universal tax. predictions
-			assert isinstance(self.args.dataset, str)
-			self.dataset_name = args.dataset
-			self.tc = TaxonomyConverter()
+			# See note above.
+			# no conversion of predictions required
 			self.num_eval_classes = self.num_model_classes 
+
+		elif model_taxonomy == 'test_dataset' and eval_taxonomy == 'test_dataset':
+			# no conversion of predictions required
+			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		elif model_taxonomy == 'naive' and eval_taxonomy == 'test_dataset':
 			self.tc = StupidTaxonomyConverter()
@@ -256,6 +259,7 @@ class InferenceTask:
 			assert isinstance(self.args.zoom_factor, int)
 			assert isinstance(self.args.network_name, int)
 
+		# `id_to_class_name_map` only used for visualizing universal taxonomy
 		self.id_to_class_name_map = {
 			i: classname for i, classname in enumerate(get_universal_class_names())
 		}
@@ -584,7 +588,8 @@ class InferenceTask:
 
 			In addition to running a crop through the network, we can flip
 			the crop horizontally, run both crops through the network, and then
-			average them appropriately.
+			average them appropriately. Afterwards, apply softmax, then convert
+			the prediction to the label taxonomy.
 
 			Args:
 			-   model:
@@ -610,16 +615,16 @@ class InferenceTask:
 		if (h_o != h_i) or (w_o != w_i):
 			output = F.interpolate(output, (h_i, w_i), mode='bilinear', align_corners=True)
 
-		# Softmax, then convert the prediction to the label taxonomy
-		if self.eval_taxonomy == 'universal':
-			#output = self.softmax(output)
-			# equivalent, but make sure on cuda()
-			output = self.tc.transform_predictions_universal(output, self.args.dataset)
-		elif self.eval_taxonomy == 'test_dataset':
+		prediction_conversion_req = self.model_taxonomy != self.eval_taxonomy
+		if prediction_conversion_req:
+			# either (model_taxonomy='naive', eval_taxonomy='test_dataset')
+			# or (model_taxonomy='universal', eval_taxonomy='test_dataset')
 			output = self.tc.transform_predictions_test(output, self.args.dataset)
 		else:
-			print('Unrecognized output taxonomy. Quitting....')
-			quit()
+			# model & eval tax match, so no conversion needed
+			assert self.model_taxonomy in ['universal','test_dataset']
+			# todo: determine when .cuda() needed here
+			output = self.softmax(output)
 
 		if flip:
 			# take back out the flipped crop, correct its orientation, and average result
