@@ -16,7 +16,7 @@ TEST:
   batch_size_val: 1  # batch size for validation during training, memory and speed tradeoff
   split: val  # split in [train, val and test]
   small: True
-  base_size: 360  # 240 slightly better than 320, based size for scaling
+  base_size: 360
   test_h: 713
   test_w: 713
   # scales: [1.0]  # evaluation scales, ms as [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
@@ -27,8 +27,7 @@ TEST:
   index_start: 0  # evaluation start index in list
   index_step: 0  # evaluation step index in list, 0 means to end
   test_gpu: [0]
-  model_path: default #MGDA_MODELS/bs_128_8gpus_2C_2A_2M_2I_MGDA_QVGA_3epochsInteriorNet/train_epoch_15.pth
-              # MGDA_MODELS/bs_90_6gpus_2C_2A_2M_MGDA_QVGA_10epochsCOCO/train_epoch_10.pth
+  model_path: default
   model_name: default
   input_file: default
   save_folder: default

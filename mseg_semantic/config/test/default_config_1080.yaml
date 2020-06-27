@@ -16,7 +16,7 @@ TEST:
   batch_size_val: 1  # batch size for validation during training, memory and speed tradeoff
   split: val  # split in [train, val and test]
   small: True
-  base_size: 720
+  base_size: 1080
   test_h: 713
   test_w: 713
   # scales: [1.0]  # evaluation scales, ms as [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
