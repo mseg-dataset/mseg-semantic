@@ -13,7 +13,6 @@ from typing import List, Optional, Tuple
 import time
 
 from mseg.utils.dataset_config import infos
-from mseg.utils.dir_utils import create_leading_fpath_dirs
 from mseg.utils.names_utils import load_class_names, get_universal_class_names
 from mseg.taxonomy.taxonomy_converter import (
     TaxonomyConverter,

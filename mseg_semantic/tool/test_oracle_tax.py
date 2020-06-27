@@ -1,18 +1,26 @@
 #!/usr/bin/python3
 
+import argparse
+import cv2
 import logging
 import numpy as np
 import os
 from pathlib import Path
 import torch
 import torch.nn.functional as F
+from typing import List
 
 from mseg.utils.dataset_config import infos
 from mseg.utils.names_utils import load_class_names
 
+from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
 #from mseg_semantic.utils.verification_utils import verify_architecture
+from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
+from mseg_semantic.tool.mseg_dataloaders import create_test_loader
+
+cv2.ocl.setUseOpenCL(False)
 
 """
 Test an `oracle` model -- trained and tested on the same taxonomy/dataset.
