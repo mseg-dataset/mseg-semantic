@@ -90,7 +90,8 @@ def test_oracle_taxonomy_model(args, use_gpu: bool = True) -> None:
 
     #args.save_folder = f'{Path(args.model_path).stem}/{args.dataset}/{args.base_size}/'
 
-    args.num_model_classes = len(load_class_names(dataset_name))
+    class_names = load_class_names(dataset_name)
+    args.num_model_classes = len(class_names)
     num_eval_classes = args.num_model_classes
 
     # verify_architecture(args)
