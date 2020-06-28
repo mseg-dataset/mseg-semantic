@@ -15,6 +15,15 @@ For evaluating models trained on relabeled data.
 
 As we loop through two dataloaders (unrelabeled and relabeled ground truth),
 we feed each pair of label maps to this function.
+
+I guess if the labeling was completely incorrect, like ade20k table instead of
+nightstand, then we have to go with the penalty route though
+so you are thinking maybe we relax such parent-child relationships since
+predicting finest-granularity is not too fair
+penalizing in the person/motorcyclist case seems unfair to the relabeled
+model, since it gets at least as good as the unrelabeled model
+lose-lose unless we specify the full hierarchy and employ it
+
 """
 
 def convert_label_to_pred_taxonomy(
@@ -38,7 +47,8 @@ def eval_relabeled_pair(
     target_img: torch.Tensor,
     target_img_relabeled: torch.Tensor,
     orig_to_u_transform,
-    relabeled_to_u_transform
+    relabeled_to_u_transform,
+    ignore_idx: int = 255
     ):
     """
         Rather than unrelabeled model on the univ. relabeled data, we instead map correctness
@@ -71,12 +81,22 @@ def eval_relabeled_pair(
     pdb.set_trace()
     relabeled_pixels = (target_img_relabeled != target_img)
     correct_pixels = (pred == target_img_relabeled)
+    incorrect_pixels = (pred != target_img_relabeled)
+    
     correct_relabeled_pixels = relabeled_pixels * correct_pixels
+    incorrect_relabeled_pixels = relabeled_pixels * incorrect_pixels
 
-    # set prediction's class index to not be what network said, 
+    # Apply Reward -> set prediction's class index to not be what network said, 
     # but what original ground truth was.
     # np.where() sets where True, yield x, otherwise yield y.
     pred_final = np.where(correct_relabeled_pixels, target_img, pred)
+
+    # Apply Penalty -> if the model predicted the un-relabeled class, we
+    # must penalize it for not choosing the `truth` from our oracle
+    # the `ignore_idx` will penalize a prediction in mIoU calculation (but not penalize GT)
+    guaranteed_wrong_pred = np.ones_like(pred)*ignore_idx
+    pred_final = np.where(incorrect_relabeled_pixels, guaranteed_wrong_pred, pred_final)
+
     accuracy_before = (pred == target_img).sum()/target_img.size
     accuracy_after = (pred_final == target_img).sum()/target_img.size
     print('Pct of img relabeled: ', np.sum(target_img_relabeled == target_img)/target_img.size)
@@ -171,6 +191,13 @@ def test_eval_relabeled_pair2():
     pdb.set_trace()
     #assert np.allclose(pred_final, target_img)
 
+    # (array([[142, 142, 142, 142],
+    #        [142, 255, 255, 142],
+    #        [142, 255, 255, 142],
+    #        [142, 255, 255, 142]], dtype=uint8), array([[142, 142, 142, 142],
+    #        [142, 125, 125, 142],
+    #        [142, 125, 125, 142],
+    #        [142, 125, 125, 142]], dtype=uint8))
 
 
 
