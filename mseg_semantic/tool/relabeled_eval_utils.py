@@ -72,13 +72,13 @@ def eval_relabeled_pair(
         -   relabeled_to_u_transform:
 
         Returns:
-        -   
+        -   pred_final: rewarded & penalized predictions, in universal taxonomy
+        -   target_img: ground truth in universal taxonomy
     """
     target_img = convert_label_to_pred_taxonomy(target_img, orig_to_u_transform)
     target_img_relabeled = convert_label_to_pred_taxonomy(target_img_relabeled, relabeled_to_u_transform)
     # construct a "correct" target image here: if pixel A is relabeled as pixel B, and prediction is B, then map prediction B back to A
 
-    pdb.set_trace()
     relabeled_pixels = (target_img_relabeled != target_img)
     correct_pixels = (pred == target_img_relabeled)
     incorrect_pixels = (pred != target_img_relabeled)
@@ -86,8 +86,9 @@ def eval_relabeled_pair(
     correct_relabeled_pixels = relabeled_pixels * correct_pixels
     incorrect_relabeled_pixels = relabeled_pixels * incorrect_pixels
 
-    # Apply Reward -> set prediction's class index to not be what network said, 
-    # but what original ground truth was.
+    # Apply Reward -> if you chose the oracle's relabeled class, then
+    # reset your predicted class index to not be what network said, 
+    # but what unrelabeled ground truth was.
     # np.where() sets where True, yield x, otherwise yield y.
     pred_final = np.where(correct_relabeled_pixels, target_img, pred)
 
@@ -187,23 +188,22 @@ def test_eval_relabeled_pair2():
         orig_to_u_transform,
         relabeled_to_u_transform
     )
-    # treated as 0% accuracy
-    pdb.set_trace()
-    #assert np.allclose(pred_final, target_img)
+    # treated as 0% accuracy for person's silhouette and interior
 
-    # (array([[142, 142, 142, 142],
-    #        [142, 255, 255, 142],
-    #        [142, 255, 255, 142],
-    #        [142, 255, 255, 142]], dtype=uint8), array([[142, 142, 142, 142],
-    #        [142, 125, 125, 142],
-    #        [142, 125, 125, 142],
-    #        [142, 125, 125, 142]], dtype=uint8))
+    target_gt = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
+    target_gt[1:,1:3] = u_names.index('person')
+    assert np.allclose(target_img, target_gt)
+
+    IGNORE_IDX = 255 # represents unlabeled
+    gt_pred_final = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
+    gt_pred_final[1:,1:3] = IGNORE_IDX
+    assert np.allclose(pred_final, gt_pred_final)
 
 
 
 if __name__ == '__main__':
     """ """
-    #test_eval_relabeled_pair1()
+    test_eval_relabeled_pair1()
     test_eval_relabeled_pair2()
 
 
