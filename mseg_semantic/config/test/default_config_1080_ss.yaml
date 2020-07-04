@@ -1,0 +1,33 @@
+DATA:
+  dataset: default
+  version: 4.0
+
+TRAIN:
+  arch: hrnet
+  network_name: 
+  layers: 50
+  zoom_factor: 8  # zoom factor for final prediction during training, be in [1, 2, 4, 8]
+  ignore_label: 255
+  workers: 16
+
+TEST:
+  vis_freq: 20
+  img_name_unique: False
+  batch_size_val: 1  # batch size for validation during training, memory and speed tradeoff
+  split: val  # split in [train, val and test]
+  small: True
+  base_size: 1080
+  test_h: 713
+  test_w: 713
+  scales: [1.0]  # evaluation scales, ms as [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
+  # scales: [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+  # scales: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]
+
+  has_prediction: False  # has prediction already or not
+  index_start: 0  # evaluation start index in list
+  index_step: 0  # evaluation step index in list, 0 means to end
+  test_gpu: [0]
+  model_path: default
+  model_name: default
+  input_file: default
+  save_folder: default
