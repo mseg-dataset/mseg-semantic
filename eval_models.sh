@@ -22,7 +22,7 @@ datasets=(
 	)
 
 base_sizes=(
-	360
+	#360
 	720
 	#1080
 	)
@@ -46,9 +46,10 @@ model_names=(
 for base_size in ${base_sizes[@]}; do
 	for dataset in ${datasets[@]}; do
 		for model_name in ${model_names[@]}; do
-			sbatch --qos=overcap -c 5 -p short -x jarvis --gres=gpu:1 \
+			#sbatch --dependency=singleton --job-name=mseg_eval_A -c 5 -p short -x jarvis,vicki,cortana,gideon,ephemeral-3 --gres=gpu:1 \
+			sbatch -c 5 --job-name=mseg_eval_overcap_A \
 			-o ${outf}/${model_name}_${base_size}_${dataset}.log \
-			eval_universal_tax_model.sh ${base_size} ${model_name} ${dataset}
+			eval_universal_tax_model_overcap.sh ${base_size} ${model_name} ${dataset}
 		done
 	done
 done
