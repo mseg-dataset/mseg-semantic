@@ -36,12 +36,12 @@ def test_run_universal_demo():
  		'save_folder': 'default',
  		'arch': 'hrnet',
 		'index_start': 0,
-		'index_step': 0
+		'index_step': 0,
+		'workers': 16
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
 	print(args)
-	pdb.set_trace()
 	run_universal_demo(args, use_gpu)
 
 	# assert a file exists
