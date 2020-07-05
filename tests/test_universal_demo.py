@@ -34,7 +34,9 @@ def test_run_universal_demo():
  		'test_w': 713,
  		'scales': [1.0],
  		'save_folder': 'default',
- 		'arch': 'hrnet'
+ 		'arch': 'hrnet',
+		'index_start': 0,
+		'index_step': 0
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
