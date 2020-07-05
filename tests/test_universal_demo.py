@@ -27,7 +27,10 @@ def test_run_universal_demo():
 		'input_file': 'test_data/temp_files/demo_images',
 		'model_name': 'mseg-3m',
 		'dataset': 'default',
-		'base_size': base_size
+		'base_size': base_size,
+		'test_h': 713,
+ 		'test_w': 713,
+ 		'scales': [1.0]
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
