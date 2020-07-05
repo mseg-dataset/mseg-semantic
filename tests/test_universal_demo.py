@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 from mseg_semantic.tool.universal_demo import run_universal_demo
 
-ROOT_ = Path(__file__).resolve().parent
+REPO_ROOT_ = Path(__file__).resolve().parent.parent
 
 
 def test_run_universal_demo():
@@ -20,31 +20,41 @@ def test_run_universal_demo():
 	python -u mseg_semantic/tool/test_universal_tax.py --config=${config_fpath}
 		dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
 	"""
-	base_size = 360
-	# Args that would be provided in command line and in config file
-	d = {
-		'config': f'{ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
-		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
-		'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
-		'input_file': f'{ROOT_}/test_data/demo_images',
-		'model_name': 'mseg-3m',
-		'dataset': 'default',
-		'base_size': base_size,
-		'test_h': 713,
- 		'test_w': 713,
- 		'scales': [1.0],
- 		'save_folder': 'default',
- 		'arch': 'hrnet',
-		'index_start': 0,
-		'index_step': 0,
-		'workers': 16
-	}
-	args = SimpleNamespace(**d)
-	use_gpu = True
-	print(args)
-	run_universal_demo(args, use_gpu)
+	for base_size in [360,720,1080]:
+		# Args that would be provided in command line and in config file
+		d = {
+			'config': f'{ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
+			#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
+			'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
+			'input_file': f'{REPO_ROOT_}/tests/test_data/demo_images',
+			'model_name': 'mseg-3m',
+			'dataset': 'default',
+			'base_size': base_size,
+			'test_h': 713,
+	 		'test_w': 713,
+	 		'scales': [1.0],
+	 		'save_folder': 'default',
+	 		'arch': 'hrnet',
+			'index_start': 0,
+			'index_step': 0,
+			'workers': 16
+		}
+		args = SimpleNamespace(**d)
+		use_gpu = True
+		print(args)
+		run_universal_demo(args, use_gpu)
 
-	# assert a file exists
+		# assert result files exist
+		results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/360/gray/'
+		fnames = [
+			'242_Maryview_Dr_Webster_0000304.png',
+			'bike_horses.png',
+			'PrivateLakefrontResidenceWoodstockGA_0000893.png'
+		]
+		for fname in fnames:
+			gray_fpath = f'{results_dir}/{fname}'
+			assert Path(gray_fpath).exists()
+			os.remove(gray_fpath)
 
 
 
