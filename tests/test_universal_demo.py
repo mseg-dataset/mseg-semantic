@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from pathlib import Path
+import pdb
 from types import SimpleNamespace
 
 from mseg_semantic.tool.universal_demo import run_universal_demo
@@ -38,6 +39,7 @@ def test_run_universal_demo():
 	args = SimpleNamespace(**d)
 	use_gpu = True
 	print(args)
+	pdb.set_trace()
 	run_universal_demo(args, use_gpu)
 
 	# assert a file exists
