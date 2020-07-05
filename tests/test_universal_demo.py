@@ -54,6 +54,7 @@ def test_run_universal_demo():
 		]
 		for fname in fnames:
 			gray_fpath = f'{results_dir}/{fname}'
+			print(gray_path)
 			assert Path(gray_fpath).exists()
 			os.remove(gray_fpath)
 
