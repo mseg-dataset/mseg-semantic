@@ -525,7 +525,7 @@ class InferenceTask:
 				batch_time=batch_time))
 
 
-	def scale_process_cuda(self, image: np.ndarray, h: int, w: int, stride_rate: float = 2/3):
+	def scale_process_cuda(self, image: np.ndarray, h: int, w: int, stride_rate: float = 2/3) -> np.ndarray:
 		""" First, pad the image. If input is (384x512), then we must pad it up to shape
 		to have shorter side "scaled base_size". 
 
@@ -542,10 +542,8 @@ class InferenceTask:
 		-   stride_rate
 
 		Returns:
-		-   prediction: predictions with shorter side equal to self.base_size
+		-   prediction: Numpy array representing predictions with shorter side equal to self.base_size
 		"""
-		start1 = time.time()                
-
 		ori_h, ori_w, _ = image.shape
 		image, pad_h_half, pad_w_half = pad_to_crop_sz(image, self.crop_h, self.crop_w, self.mean)
 		new_h, new_w, _ = image.shape
@@ -557,6 +555,7 @@ class InferenceTask:
 		prediction_crop = torch.zeros((self.num_eval_classes, new_h, new_w)).cuda()
 		count_crop = torch.zeros((new_h, new_w)).cuda()
 
+		# loop w/ sliding window, obtain start/end indices
 		for index_h in range(0, grid_h):
 			for index_w in range(0, grid_w):
 				s_h = index_h * stride_h
@@ -579,11 +578,10 @@ class InferenceTask:
 
 		# upsample or shrink predictions back down to scale=1.0
 		prediction = cv2.resize(prediction_crop, (w, h), interpolation=cv2.INTER_LINEAR)
-
 		return prediction
 
 
-	def net_process(self, image: np.ndarray, flip: bool = True):
+	def net_process(self, image: np.ndarray, flip: bool = True) -> torch.Tensor:
 		""" Feed input through the network.
 
 			In addition to running a crop through the network, we can flip
@@ -592,12 +590,12 @@ class InferenceTask:
 			the prediction to the label taxonomy.
 
 			Args:
-			-   model:
 			-   image:
 			-   flip: boolean, whether to average with flipped patch output
 
 			Returns:
-			-   output:
+			-   output: Pytorch tensor representing network predicting in evaluation
+					taxonomy (not necessarily model taxonomy)
 		"""
 		input = torch.from_numpy(image.transpose((2, 0, 1))).float()
 		normalize_img(input, self.mean, self.std)
@@ -617,8 +615,8 @@ class InferenceTask:
 
 		prediction_conversion_req = self.model_taxonomy != self.eval_taxonomy
 		if prediction_conversion_req:
-			# either (model_taxonomy='naive', eval_taxonomy='test_dataset')
-			# or (model_taxonomy='universal', eval_taxonomy='test_dataset')
+			# Either (model_taxonomy='naive', eval_taxonomy='test_dataset')
+			# Or (model_taxonomy='universal', eval_taxonomy='test_dataset')
 			output = self.tc.transform_predictions_test(output, self.args.dataset)
 		else:
 			# model & eval tax match, so no conversion needed
