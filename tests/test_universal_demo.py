@@ -30,7 +30,8 @@ def test_run_universal_demo():
 		'base_size': base_size,
 		'test_h': 713,
  		'test_w': 713,
- 		'scales': [1.0]
+ 		'scales': [1.0],
+ 		'save_folder': 'default'
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
