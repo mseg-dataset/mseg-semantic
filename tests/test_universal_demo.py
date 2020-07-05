@@ -20,6 +20,7 @@ def test_run_universal_demo():
 		dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
 	"""
 	base_size = 360
+	# Args that would be provided in command line and in config file
 	d = {
 		'config': f'{ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
@@ -31,7 +32,8 @@ def test_run_universal_demo():
 		'test_h': 713,
  		'test_w': 713,
  		'scales': [1.0],
- 		'save_folder': 'default'
+ 		'save_folder': 'default',
+ 		'arch': 'hrnet'
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
