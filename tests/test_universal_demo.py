@@ -46,7 +46,7 @@ def test_run_universal_demo():
 		run_universal_demo(args, use_gpu)
 
 		# assert result files exist
-		results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/360/gray'
+		results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/{base_size}/gray'
 		fnames = [
 			'242_Maryview_Dr_Webster_0000304.png',
 			'bike_horses.png',
