@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from pathlib import Path
 from types import SimpleNamespace
 
 from mseg_semantic.tool.universal_demo import run_universal_demo
