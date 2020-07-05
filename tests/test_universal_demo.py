@@ -25,7 +25,8 @@ def test_run_universal_demo():
 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
 		'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
 		'input_file': 'test_data/temp_files/demo_images',
-		'model_name': 'mseg-3m'
+		'model_name': 'mseg-3m',
+		'dataset': 'default'
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
