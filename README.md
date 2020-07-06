@@ -146,11 +146,11 @@ Nicknames: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
 **WildDash has no training set, so an "oracle" model cannot be trained.
 
 **Oracle Model Download Links** 
-VOC  2012  (1M) Model [Google Drive](https://drive.google.com/file/d/1S5DuNCiRlaqTdXJ1TGups0kYEiEohZqC/view?usp=sharing)
-PASCAL-Context (1M) Model [Google Drive](https://drive.google.com/file/d/1-V4OOst1Ud9ohPWb-tSFNY2W44fMyZ_i/view?usp=sharing)
-Camvid (1M) Model [Google Drive](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing)
-KITTI (1M) Model [Google Drive](https://drive.google.com/file/d/14OkwxoaPK5mrxyL8CeUqGQOFW5U33b8J/view?usp=sharing)
-ScanNet-20 (1M) Model [Google Drive](https://drive.google.com/file/d/1njQkFTQ6F9p0nFTBLs2C4LGjAvm0Hydd/view?usp=sharing)
+- VOC  2012  (1M) Model [Google Drive](https://drive.google.com/file/d/1S5DuNCiRlaqTdXJ1TGups0kYEiEohZqC/view?usp=sharing)
+- PASCAL-Context (1M) Model [Google Drive](https://drive.google.com/file/d/1-V4OOst1Ud9ohPWb-tSFNY2W44fMyZ_i/view?usp=sharing)
+- Camvid (1M) Model [Google Drive](https://drive.google.com/file/d/1023eornZ2LP5NjDqIeunCIH35Ue38W8d/view?usp=sharing)
+- KITTI (1M) Model [Google Drive](https://drive.google.com/file/d/14OkwxoaPK5mrxyL8CeUqGQOFW5U33b8J/view?usp=sharing)
+- ScanNet-20 (1M) Model [Google Drive](https://drive.google.com/file/d/1njQkFTQ6F9p0nFTBLs2C4LGjAvm0Hydd/view?usp=sharing)
 
 Note that the output number of classes for 7 of the models listed above will be identical (194 classes). These are the models that represent a single training dataset's performance -- *ADE20K (1M), BDD (1M), Cityscapes (1M ), COCO (1M), IDD (1M), Mapillary (1M), SUN RGB-D (1M)*. When we train a baseline model on a single dataset, we train it in the universal taxonomy (w/ 194 classes). If we did not do so, we would need to specify 7*6=42 mappings (which would be unbelievably tedious and also fairly redundant) since we measure each's performance according to zero-shot cross-dataset generalization -- 7 training datasets with their own taxonomy, and each would need its own mapping to each of the 6 test sets. 
 
