@@ -131,17 +131,18 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 | Cityscapes (1M )        | Cityscapes train| Universal               | 13.3 |   6.8 |  76.1 |  30.1 |  57.6 |   1.7 |   6.8     | [Google Drive](https://drive.google.com/file/d/18v6yH6mx4zksozn2ap5mCgKo-4ekayCO/view?usp=sharing) |
 | COCO (1M)               | COCO train      | Universal               |  73.4 |  43.3 |  58.7 |  38.2 |  47.6 |  33.4 |  45.8    | [Google Drive](https://drive.google.com/file/d/18H6lfHQTPUyDge_TU1uqoedUFRUyGTuJ/view?usp=sharing) |
 | IDD (1M)                | IDD train       | Universal               | 14.6 |   6.5 |  72.1 |  41.2 |  51.0 |   1.6 |   6.5     | [Google Drive](https://drive.google.com/file/d/1I6Fo5eUXrNBhWzC0BrApGAuKMGuxsrM7/view?usp=sharing) |
-| Mapillary (1M)          | Mapillary train | Universal               | 22.5 |  13.6 |  82.1 |  55.4 |  67.7 |   2.1 |   9.3     | [Google Drive](https://drive.google.com/file/d/1TPIFGZWuJXipDI9ceRMS-OdPbeVOi32u/view?usp=sharing) |
-| SUN RGB-D (1M)          | SUN RGBD train  | Universal               | 10.0 |   4.3 |   0.1 |   1.9 |   1.1 |  42.6 |   0.3     | [Google Drive](https://drive.google.com/file/d/1YRyJGe4gz4IHAKhuDUATqvaKRdR7gyAn/view?usp=sharing) |
-| MSeg (1M)              | MSeg train.     | Naive                    |  70.7 |  42.7 |  83.3 |  62.0 |  67.0 |  48.2 |  59.2   | [Google Drive]() | 
+| Mapillary (1M)          | Mapillary <br> train | Universal               | 22.5 |  13.6 |  82.1 |  55.4 |  67.7 |   2.1 |   9.3     | [Google Drive](https://drive.google.com/file/d/1TPIFGZWuJXipDI9ceRMS-OdPbeVOi32u/view?usp=sharing) |
+| SUN RGB-D (1M)          | SUN RGBD <br> train  | Universal               | 10.0 |   4.3 |   0.1 |   1.9 |   1.1 |  42.6 |   0.3     | [Google Drive](https://drive.google.com/file/d/1YRyJGe4gz4IHAKhuDUATqvaKRdR7gyAn/view?usp=sharing) |
+| MSeg (1M)              | MSeg <br> train.     | Naive                    |  70.7 |  42.7 |  83.3 |  62.0 |  67.0 |  48.2 |  59.2   | [Google Drive]() | 
 | MSeg Mix w/o relabeling (1M) | MSeg train.     | Naive              | 70.2 |  42.7 |  82.0 |  62.7 |  65.5 |  43.2 |  57.6 | [Google Drive](https://drive.google.com/file/d/1PHQNttQVn2dZW7ScUvaagc-OmB4eCRRy/view?usp=sharing) | 
 | MGDA Baseline (1M)       | MSeg train.     | Naive                   | 68.5 |  41.7 |  82.9 |  61.1 |  66.7 |  46.7 |  58.0 | [Google Drive](https://drive.google.com/file/d/1kqbEPr7LxjMZX_f2Mtieluj1OPu4eLE2/view?usp=sharing) | 
-| MSeg (3M)-480p               | MSeg train      | Universal         | 76.4 |  45.9 |  81.2 |  62.7 |  68.2 |  49.5 |  61.2  | [Google Drive](https://drive.google.com/file/d/1BeZt6QXLwVQJhOVd_NTnVTmtAO1zJYZ-/view?usp=sharing) |
-| MSeg (3M)-720p               | MSeg train      | Universal               | 74.7 |  44.0 |  83.5 |  60.4 |  67.9 |  47.7 |  59.8 | [Google Drive](https://drive.google.com/file/d/1Y9rHOn_8e_qLuOnl4NeOeueU-MXRi3Ft/view?usp=sharing) |
-| MSeg (3M)-1080p               | MSeg train      | Universal               | 72.0 |  44.0 |  84.5 |  59.9 |  66.5 |  49.5 |  59.8 | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
-| Naive Mix Baseline (1M) | MSeg train.     | Naive                   |               |                               |                  |              |                 |              |         | [Google Drive](https://drive.google.com/file/d/1t4u0C3Li6_4mxLs032EuafKgmpONo3Ws/view?usp=sharing) | 
+| MSeg (3M)-480p               | MSeg <br> train      | Universal         | 76.4 |  45.9 |  81.2 |  62.7 |  68.2 |  49.5 |  61.2  | [Google Drive](https://drive.google.com/file/d/1BeZt6QXLwVQJhOVd_NTnVTmtAO1zJYZ-/view?usp=sharing) |
+| MSeg (3M)-720p               | MSeg <br> train      | Universal               | 74.7 |  44.0 |  83.5 |  60.4 |  67.9 |  47.7 |  59.8 | [Google Drive](https://drive.google.com/file/d/1Y9rHOn_8e_qLuOnl4NeOeueU-MXRi3Ft/view?usp=sharing) |
+| MSeg (3M)-1080p               | MSeg <br> train      | Universal               | 72.0 |  44.0 |  84.5 |  59.9 |  66.5 |  49.5 |  59.8 | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
+| Naive Mix Baseline (1M) | MSeg <br> train.     | Naive                   |               |                               |                  |              |                 |              |         | [Google Drive](https://drive.google.com/file/d/1t4u0C3Li6_4mxLs032EuafKgmpONo3Ws/view?usp=sharing) | 
 | Oracle (1M)             |                 |                         | 77.0          | 46.0                          | 79.1             | –**           | 57.5            | 62.2         | –       | |
 
+**WildDash has no training set, so an "oracle" model cannot be trained.
 
 **Oracle Model Download Links** 
 VOC  2012  (1M) Model](https://drive.google.com/file/d/1S5DuNCiRlaqTdXJ1TGups0kYEiEohZqC/view?usp=sharing)
@@ -154,7 +155,6 @@ Note that the output number of classes for 7 of the models listed above will be 
 
 By training each baseline *that is trained on a single training dataset* within the universal taxonomy, we are able to specify just 7+6=13 mappings in [this table](https://github.com/mseg-dataset/mseg-api/blob/master/mseg/class_remapping_files/MSeg_master.tsv) (each training dataset's taxonomy->universal taxonomy, and then universal taxonomy to each test dataset).
 
-**WildDash has no training set, so an "oracle" model cannot be trained.
 
 
 ## Experiment Settings
