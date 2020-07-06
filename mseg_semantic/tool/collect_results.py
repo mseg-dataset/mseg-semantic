@@ -121,8 +121,8 @@ def collect_results(resolution: str, mean_type = 'harmonic'):
 		else:
 			print('Unknown mean type')
 			exit()
-		dump_results_latex(name, results)
-		#dump_results_markdown(name, results)
+		#dump_results_latex(name, results)
+		dump_results_markdown(name, results)
 
 
 def dump_results_latex(name, results):
@@ -131,18 +131,17 @@ def dump_results_latex(name, results):
 	results = ['$ ' + r + ' $' for r in results]
 	print(name.rjust(50), ' & ',    ' & '.join(results) + '\\\\')
 
+
 def dump_results_markdown(name, results):
 	""" """
-	results = ['/'.join(["{:.1f}".format(r).rjust(5) for r in x]) for x in results]
-	results = ['$ ' + r + ' $' for r in results]
-	print(name.rjust(50), ' & ',    ' & '.join(results) + '\\\\')
-
-
+	results = ['|'.join(["{:.1f}".format(r).rjust(5) for r in x]) for x in results]
+	results = ['| ' + r + '' for r in results]
+	print(name.rjust(50), '  ',    ' '.join(results) + '|')
 
 
 if __name__ == '__main__':
 	""" """
-	for resolution in ['360', '720', '1080', 'max']:
+	for resolution in ['360', '480', '720', '1080', '2160', 'max']:
 		print(f'At resolution {resolution}')
 		collect_results(resolution)
 
