@@ -67,8 +67,9 @@ Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 |    Model                | Training Set    |  Training <br> Taxonomy | VOC <br> mIoU | PASCAL <br> Context <br> mIoU | CamVid <br> mIoU | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
 | :---------------------: | :------------:  | :--------------------:  | :----------:  | :---------------------------: | :--------------: | :----------: | :-------------: | :----------: | :----:  | :--------------: |
 | MSeg (1M)               | MSeg train      | Universal               | 70.7          | 42.7                          | 83.3             | 62.0         | 67.0            | 48.2         | 59.2    | [Google Drive](https://drive.google.com/file/d/1g-D6PtXV-UhoIYFcQbiqcXWU2Q2M-zo9/view?usp=sharing) |
-| MSeg (3M)               | MSeg train      | Universal               | 72.0          | 44.0                          | 84.5             | 59.9         | 66.5            | 49.5         | 59.8    | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
-
+| MSeg (3M)-480p               | MSeg <br> train      | Universal         | 76.4 |  45.9 |  81.2 |  62.7 |  68.2 |  49.5 |  61.2  | [Google Drive](https://drive.google.com/file/d/1BeZt6QXLwVQJhOVd_NTnVTmtAO1zJYZ-/view?usp=sharing) |
+| MSeg (3M)-720p               | MSeg <br> train      | Universal               | 74.7 |  44.0 |  83.5 |  60.4 |  67.9 |  47.7 |  59.8 | [Google Drive](https://drive.google.com/file/d/1Y9rHOn_8e_qLuOnl4NeOeueU-MXRi3Ft/view?usp=sharing) |
+| MSeg (3M)-1080p               | MSeg <br> train      | Universal               | 72.0 |  44.0 |  84.5 |  59.9 |  66.5 |  49.5 |  59.8 | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
 
 ## Inference: Using our pre-trained models
 
@@ -124,7 +125,7 @@ Individually-trained models that serve as baselines:
 
 Nicknames: VOC = PASCAL VOC, WD = WildDash, SN = ScanNet
 
-|    Model                | Training Set    |  Training <br> Taxonomy | VOC <br> mIoU | PASCAL <br> Context <br> mIoU | CamVid <br> mIoU | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
+|    Model                | Training Set    |  Training <br> Tax- <br> onomy | VOC <br> mIoU | PASCAL <br> Context <br> mIoU | CamVid <br> mIoU | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
 | :---------------------: | :------------:  | :--------------------:  | :----------:  | :---------------------------: | :--------------: | :----------: | :-------------: | :----------: | :----:  | :--------------: |
 | ADE20K (1M)             | ADE20K train    | Universal               | 35.4 |  23.9 |  52.6 |  38.6 |  41.6 |  42.9 |  36.9   | [Google Drive](https://drive.google.com/file/d/1xZ72nDuRc53u_WBWO_MazdHxR5HsO68I/view?usp=sharing) |
 | BDD (1M)                | BDD train       | Universal               | 14.4 |   7.1 |  70.7 |  52.2 |  54.5 |   1.4 |   6.1     | [Google Drive](https://drive.google.com/file/d/1lTrejH7Agg1T61igCFWBpdUrrGs7EBf-/view?usp=sharing) |
