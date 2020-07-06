@@ -35,7 +35,7 @@ This repo is the second of 4 repos that introduce our work. It provides utilitie
 
 - [` mseg-api`](https://github.com/mseg-dataset/mseg-api): utilities to download the MSeg dataset, prepare the data on disk in a unified taxonomy, on-the-fly mapping to a unified taxonomy during training.
 
-Two additional repos will be introduced in June 2020:
+Two additional repos will be introduced in July 2020:
 - `mseg-panoptic`: provides Panoptic-FPN and Mask-RCNN training, based on Detectron2
 - `mseg-mturk`: provides utilities to perform large-scale Mechanical Turk re-labeling
 
