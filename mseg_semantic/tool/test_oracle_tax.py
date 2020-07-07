@@ -136,27 +136,6 @@ def test_oracle_taxonomy_model(args, use_gpu: bool = True) -> None:
 
     logger.info(">>>>>>>>> Accuracy computation completed >>>>>>>>>>")
 
-    # def get_best_base_size(self): # currently only for models trained with qvga
-
-    #     mapping_qvga = {
-    #         'voc2012': 240, # in the supplementary material, wvga self training result is using xx, since 240 (480) is bad.
-    #         # 'voc2012': 300, 
-    #         'coco': 240,
-    #         'ade20k': 240, 
-    #         'map': 600,
-    #         'bdd': 600,
-    #         'idd': 600,
-    #         'nyudepthv2-37': 360,
-    #         'wilddash': 480,
-    #         'camvid': 600,
-    #         'cityscapes': 720,
-    #         'scannet-20': 180,
-    #     }
-
-    #     for x, y in mapping_qvga.items():
-    #         if self.dataset_name.startswith(x):
-    #             return y * 2
-
 
 if __name__ == '__main__':
     """
