@@ -96,8 +96,7 @@ def parse_folder(folder, resolution: str):
 	mious = []
 	resolutions = ['360', '720', '1080']
 	for b in resolutions:
-		#result_file = os.path.join(folder, b, 'ss', 'results.txt')
-		result_file = os.path.join(folder, b, 'results.txt')
+		result_file = os.path.join(folder, b, 'ss', 'results.txt')
 		# parse_file 
 		mious.append(parse_file(result_file))
 
@@ -135,12 +134,10 @@ def geometric_mean(x):
 def collect_results(resolution: str, mean_type = 'harmonic'):
 	""" """
 	print(' '*60, (' '*5).join(datasets), ' '* 10 + 'mean')
-	#for m, name in zip(models, names):
-	for m, name in zip(local_models, local_names):
+	for m, name in zip(models, names):
 		results = []
 		for f in datasets:
-			#folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
-			folder = f'/Users/johnlamb/Downloads/MSeg-PRETRAINED-MODEL-RESULTS/{m}/train_epoch_final/{f}'
+			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
 			mious = parse_folder(folder, resolution)
 			results.append(mious)
 	
