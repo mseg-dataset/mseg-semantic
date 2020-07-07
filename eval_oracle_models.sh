@@ -32,8 +32,8 @@ o_model_names=(
 for base_size in ${base_sizes[@]}; do
 	for ((i=0;i<${#datasets[@]};++i)); do
 		printf "%s is in %s\n"  
-		model_name="${datasets[i]}"
-		dataset="${o_model_names[i]}"
+		dataset="${datasets[i]}"
+		model_name="${o_model_names[i]}"
 		sbatch -c 5 --job-name=mseg_eval_overcap_A \
 		-o ${outf}/${model_name}_${base_size}_${dataset}.log \
 		eval_oracle_tax_model_overcap.sh ${base_size} ${model_name} ${dataset}
