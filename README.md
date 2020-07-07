@@ -60,9 +60,9 @@ Make sure that you can run `python -c "import mseg_semantic; print('hello world'
 
 ## MSeg Pre-trained Models
 
-Each model is 528 MB in size. We provide download links and multi-scale testing results below:
+Each model is 528 MB in size. We provide download links and testing results (**single-scale** inference) below:
 
-Nicknames: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
+Abbreviated Dataset Names: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
 
 |    Model                | Training Set    |  Training <br> Taxonomy | VOC <br> mIoU | PC <br> mIoU | CamVid <br> mIoU | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
 | :---------------------: | :------------:  | :--------------------:  | :----------:  | :---------------------------: | :--------------: | :----------: | :-------------: | :----------: | :----:  | :--------------: |
@@ -121,9 +121,9 @@ Many thanks to Hengshuang Zhao for his [semseg](https://github.com/hszhao/semseg
 
 ## Other baseline models from our paper:
 
-Individually-trained models that serve as baselines:
+Below we report the performance of individually-trained models that serve as baselines. Inference is performed at **single-scale** below:
 
-Nicknames: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
+Abbreviated Dataset Names: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
 
 |    Model                | Training Set    |  Training <br> Tax- <br> onomy | VOC <br> mIoU | PC <br> mIoU | CamVid <br> mIoU | WD <br> mIoU | KITTI <br> mIoU | SN <br> mIoU | h. mean | Download <br> Link        |
 | :---------------------: | :------------:  | :--------------------:  | :----------:  | :---------------------------: | :--------------: | :----------: | :-------------: | :----------: | :----:  | :--------------: |
