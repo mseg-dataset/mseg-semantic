@@ -44,6 +44,37 @@ names = [
 ]
 # 'naive'
 
+
+local_models = [
+	'coco-panoptic-133',
+	'ade20k-150',
+	'mapillary-public65',
+	'idd-39',
+	'bdd',
+	'cityscapes-19',
+	'sunrgbd-37',
+	'mseg-1m',
+	'mseg-unrelabeled',
+	'mseg-mgda',
+	'mseg-3m',
+	#'mseg-naive-baseline',
+]
+
+local_names = [
+	'COCO',
+	'ADE20K',
+	'Mapillary',
+	'IDD',
+	'BDD',
+	'Cityscapes',
+	'SUN RGBD', 
+	'MSeg-1m',
+	'MSeg-1m-w/o relabeling',
+	'MSeg-MGDA-1m',
+	'MSeg-3m-1080p',
+]
+
+
 def parse_file(result_file):
 	""" """
 	if not os.path.isfile(result_file):
@@ -65,7 +96,8 @@ def parse_folder(folder, resolution: str):
 	mious = []
 	resolutions = ['360', '720', '1080']
 	for b in resolutions:
-		result_file = os.path.join(folder, b, 'ss', 'results.txt')
+		#result_file = os.path.join(folder, b, 'ss', 'results.txt')
+		result_file = os.path.join(folder, b, 'results.txt')
 		# parse_file 
 		mious.append(parse_file(result_file))
 
@@ -103,10 +135,12 @@ def geometric_mean(x):
 def collect_results(resolution: str, mean_type = 'harmonic'):
 	""" """
 	print(' '*60, (' '*5).join(datasets), ' '* 10 + 'mean')
-	for m, name in zip(models, names):
+	#for m, name in zip(models, names):
+	for m, name in zip(local_models, local_names):
 		results = []
 		for f in datasets:
-			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
+			#folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
+			folder = f'/Users/johnlamb/Downloads/MSeg-PRETRAINED-MODEL-RESULTS/{m}/train_epoch_final/{f}'
 			mious = parse_folder(folder, resolution)
 			results.append(mious)
 	
@@ -121,8 +155,8 @@ def collect_results(resolution: str, mean_type = 'harmonic'):
 		else:
 			print('Unknown mean type')
 			exit()
-		#dump_results_latex(name, results)
-		dump_results_markdown(name, results)
+		dump_results_latex(name, results)
+		#dump_results_markdown(name, results)
 
 
 def dump_results_latex(name, results):
@@ -141,7 +175,8 @@ def dump_results_markdown(name, results):
 
 if __name__ == '__main__':
 	""" """
-	for resolution in ['360', '480', '720', '1080', '2160', 'max']:
+	# 'ms' vs. 'ss'
+	for resolution in ['max']:# ['360', '480', '720', '1080', '2160', 'max']:
 		print(f'At resolution {resolution}')
 		collect_results(resolution)
 
