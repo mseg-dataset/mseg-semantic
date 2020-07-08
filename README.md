@@ -141,7 +141,7 @@ Abbreviated Dataset Names: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash,
 | MSeg (3M)-720p               | MSeg <br> train      | Universal               | 74.7 |  44.0 |  83.5 |  60.4 |  67.9 |  47.7 |  59.8 | [Google Drive](https://drive.google.com/file/d/1Y9rHOn_8e_qLuOnl4NeOeueU-MXRi3Ft/view?usp=sharing) |
 | MSeg (3M)-1080p               | MSeg <br> train      | Universal               | 72.0 |  44.0 |  84.5 |  59.9 |  66.5 |  49.5 |  59.8 | [Google Drive](https://drive.google.com/file/d/1iobea9IW2cWPF6DtM04OvKtDRVNggSb5/view?usp=sharing) |
 | Naive Mix Baseline (1M) | MSeg <br> train.     | Naive                   |               |                               |                  |              |                 |              |         | [Google Drive](https://drive.google.com/file/d/1t4u0C3Li6_4mxLs032EuafKgmpONo3Ws/view?usp=sharing) | 
-| Oracle (1M)             |                 |                         | 77.0          | 46.0                          | 79.1             | –**           | 57.5            | 62.2         | –       | |
+| Oracle (1M)             |                 |                         |  77.8 |  45.8 |  78.8 | -** | 58.4 |  62.3| - | |
 
 **WildDash has no training set, so an "oracle" model cannot be trained.
 
