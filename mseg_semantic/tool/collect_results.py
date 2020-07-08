@@ -6,12 +6,30 @@ import numpy as np
 # import scipy.stats.hmean as hmean
 from scipy.stats.mstats import gmean
 
-datasets = ['voc2012', 'pascal-context-60', 'camvid-11', 'wilddash-19',  'kitti-19', 'scannet-20']
+# zero_shot_datasets
+zs_datasets = [
+	'voc2012',
+	'pascal-context-60',
+	'camvid-11',
+	'wilddash-19',
+	'kitti-19',
+	'scannet-20'
+]
+
+# oracle-trained datasets
+o_datasets = [
+	'voc2012',
+	'pascal-context-60',
+	'camvid-11',
+	'kitti-19',
+	'scannet-20'
+]
 
 # datasets = ['coco-panoptic-133_universal','ade20k-150_universal', 'mapillary-public65_universal', 'idd-39_universal', 'bdd_universal',   'cityscapes-19_universal', 'sunrgbd-37_universal']
 # datasets = [d + '_relabel' for d in datasets]
 
-models = [
+# universal taxonomy models
+u_models = [
 	'coco-panoptic-133-1m',
 	'ade20k-150-1m',
 	'mapillary-65-1m',
@@ -27,7 +45,7 @@ models = [
 	'mseg-3m',
 ]
 
-names = [
+u_names = [
 	'COCO',
 	'ADE20K',
 	'Mapillary',
@@ -44,35 +62,23 @@ names = [
 ]
 # 'naive'
 
-
-local_models = [
-	'coco-panoptic-133',
-	'ade20k-150',
-	'mapillary-public65',
-	'idd-39',
-	'bdd',
-	'cityscapes-19',
-	'sunrgbd-37',
-	'mseg-1m',
-	'mseg-unrelabeled',
-	'mseg-mgda',
-	'mseg-3m',
-	#'mseg-naive-baseline',
+# oracle taxonomy names
+o_models = [
+	'voc2012-1m',
+	'pascal-context-60-1m',
+	'camvid-11-1m',
+	'kitti-19-1m',
+	'scannet-20-1m'
 ]
 
-local_names = [
-	'COCO',
-	'ADE20K',
-	'Mapillary',
-	'IDD',
-	'BDD',
-	'Cityscapes',
-	'SUN RGBD', 
-	'MSeg-1m',
-	'MSeg-1m-w/o relabeling',
-	'MSeg-MGDA-1m',
-	'MSeg-3m-1080p',
+o_names = [
+	'VOC Oracle',
+	'PASCAL Context Oracle',
+	'Camvid Oracle',
+	'KITTI Oracle',
+	'ScanNet Oracle'
 ]
+
 
 
 def parse_file(result_file):
@@ -131,10 +137,10 @@ def geometric_mean(x):
 	return prod ** (1/n)
 
 
-def collect_results(resolution: str, mean_type = 'harmonic'):
+def collect_results_at_res(resolution: str, mean_type = 'harmonic'):
 	""" """
-	print(' '*60, (' '*5).join(datasets), ' '* 10 + 'mean')
-	for m, name in zip(models, names):
+	print(' '*60, (' '*5).join(zs_datasets), ' '* 10 + 'mean')
+	for m, name in zip(u_models, u_names):
 		results = []
 		for f in datasets:
 			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
@@ -152,8 +158,8 @@ def collect_results(resolution: str, mean_type = 'harmonic'):
 		else:
 			print('Unknown mean type')
 			exit()
-		dump_results_latex(name, results)
-		#dump_results_markdown(name, results)
+		#dump_results_latex(name, results)
+		dump_results_markdown(name, results)
 
 
 def dump_results_latex(name, results):
@@ -170,12 +176,32 @@ def dump_results_markdown(name, results):
 	print(name.rjust(50), '  ',    ' '.join(results) + '|')
 
 
-if __name__ == '__main__':
+def collect_zero_shot_results():
 	""" """
 	# 'ms' vs. 'ss'
-	for resolution in ['max']:# ['360', '480', '720', '1080', '2160', 'max']:
+	for resolution in ['360','720','1080','max']: #  '480', '2160',
 		print(f'At resolution {resolution}')
-		collect_results(resolution)
+		collect_results_at_res(resolution)
+
+
+def collect_oracle_results(resolution: str):
+	""" """
+	results = []
+	print(' '*60, (' '*5).join(o_datasets), ' '* 10 + 'mean')
+	for m, name, d in zip(o_models, o_names, o_datasets):
+		folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
+		mious = parse_folder(folder, resolution)
+		results.append(mious)
+
+	#dump_results_latex(name, results)
+	dump_results_markdown(name, results)
+
+
+if __name__ == '__main__':
+	""" """
+	#collect_zero_shot_results()
+	collect_oracle_results()
+
 
 
 
