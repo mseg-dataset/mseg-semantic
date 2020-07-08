@@ -142,8 +142,8 @@ def collect_results_at_res(resolution: str, mean_type = 'harmonic'):
 	print(' '*60, (' '*5).join(zs_datasets), ' '* 10 + 'mean')
 	for m, name in zip(u_models, u_names):
 		results = []
-		for f in datasets:
-			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
+		for d in datasets:
+			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
 			mious = parse_folder(folder, resolution)
 			results.append(mious)
 	
@@ -184,17 +184,25 @@ def collect_zero_shot_results():
 		collect_results_at_res(resolution)
 
 
-def collect_oracle_results(resolution: str):
+def collect_oracle_results_at_res(resolution: str):
 	""" """
 	results = []
 	print(' '*60, (' '*5).join(o_datasets), ' '* 10 + 'mean')
 	for m, name, d in zip(o_models, o_names, o_datasets):
-		folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{f}'
+		folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
 		mious = parse_folder(folder, resolution)
 		results.append(mious)
 
-	#dump_results_latex(name, results)
-	dump_results_markdown(name, results)
+	dump_results_latex('Oracle', results)
+	#dump_results_markdown('Oracle', results)
+
+
+def collect_oracle_results():
+	# 'ms' vs. 'ss'
+	for resolution in ['360','720','1080','max']: #  '480', '2160',
+		print(f'At resolution {resolution}')
+		collect_oracle_results_at_res(resolution)
+
 
 
 if __name__ == '__main__':
