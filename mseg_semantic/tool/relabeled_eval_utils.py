@@ -23,7 +23,7 @@ lose-lose unless we specify the full hierarchy and employ it
 """
 
 def convert_label_to_pred_taxonomy(
-    target_img: torch.Tensor,
+    target_img: np.ndarray,
     to_universal_transform
     ) -> np.ndarray:
     """
@@ -34,20 +34,21 @@ def convert_label_to_pred_taxonomy(
         Returns:
         -   label map in universal taxonomy
     """
+    target_img = torch.from_numpy(target_img).type(torch.LongTensor)
     _, target_img = to_universal_transform(target_img, target_img)
     return target_img.type(torch.uint8).numpy()
 
 
-def eval_relabeled_pair(
+def eval_rel_model_pred_on_unrel_data(
     pred: np.ndarray,
-    target_img: torch.Tensor,
-    target_img_relabeled: torch.Tensor,
+    target_img: np.ndarray,
+    target_img_relabeled: np.ndarray,
     orig_to_u_transform,
     relabeled_to_u_transform,
     ignore_idx: int = 255
     ):
     """
-        Rather than unrelabeled model on the univ. relabeled data, we instead map correctness
+        Rather than eval unrelabeled model on the univ. relabeled data, we instead map correctness
         of relabeled model on relabeled univ. data, back to the unrelabeled univ. space. 
         Could go either way since it is a 1:1 mapping per pixel. Operate on universal taxonomy.
 
@@ -58,9 +59,9 @@ def eval_relabeled_pair(
         coco-unrel->coco-unrel-universal, then coco-unrel-universal is already in universal on disk.
 
         Args:
-        -   pred: torch.Tensor of shape (H,W) of dtype int64 representing prediction,
+        -   pred: Numpy array of shape (H,W) of dtype int64 representing prediction,
                 predictions are already in universal taxonomy.
-        -   target_img: torch.Tensor of shape (H,W) of dtype int64 representing unrelabeled ground truth,
+        -   target_img: Numpy array of shape (H,W) of dtype int64 representing unrelabeled ground truth,
                 in original `semseg` format taxonomy, e.g. `coco-panoptic-133`
         -   target_img_relabeled:  Numpy array of shape (H,W) of dtype int64 representing relabeled ground truth,
                 in relabeled taxonomy, e.g. `coco-panoptic-133-relabeled`
