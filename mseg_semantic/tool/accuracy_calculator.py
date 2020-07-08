@@ -133,7 +133,7 @@ class AccuracyCalculator:
             target_img_relabeled = target_img_relabeled.astype(np.int64)
             pdb.set_trace()
 
-            # eval_relabeled_pair(
+            # eval_rel_model_pred_on_unrel_data(
             #     pred: np.ndarray,
             #     target_img: torch.Tensor,
             #     target_img_relabeled: torch.Tensor,
