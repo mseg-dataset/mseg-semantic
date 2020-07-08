@@ -10,7 +10,9 @@ from mseg.utils.names_utils import (
 )
 
 from mseg_semantic.utils.transform import ToUniversalLabel
-from mseg_semantic.tool.relabeled_eval_utils import eval_relabeled_pair
+from mseg_semantic.tool.relabeled_eval_utils import (
+	eval_rel_model_pred_on_unrel_data
+)
 
 
 def test_eval_relabeled_pair1():
@@ -18,6 +20,7 @@ def test_eval_relabeled_pair1():
     Person vs. Motorcyclist in center
     Relabeled model correctly predicts `motorcylist`. for `motorcylist`.
     
+    Motorcyclist silhouette pattern:
             [0,0,0,0],
             [0,1,1,0],
             [0,1,1,0],
@@ -29,24 +32,23 @@ def test_eval_relabeled_pair1():
     relabeled_names = load_class_names(relabeled_dname)
     u_names = get_universal_class_names()
 
+    # prediction in universal taxonomy
     pred = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
     pred[1:,1:3] = u_names.index('motorcyclist')
 
     # original COCO image, in coco-panoptic-133
-    target_img = torch.ones(4,4) * original_names.index('sky-other-merged')
-    target_img = target_img.type(torch.LongTensor)
+    target_img = np.ones((4,4)) * original_names.index('sky-other-merged')
     target_img[1:,1:3] = original_names.index('person')
     #target_img = target_img.reshape(1,4,4)
 
     # relabeled COCO image, in coco-panoptic-133-relabeled
-    target_img_relabeled = torch.ones(4,4) * relabeled_names.index('sky')
-    target_img_relabeled = target_img_relabeled.type(torch.LongTensor)
+    target_img_relabeled = np.ones((4,4)) * relabeled_names.index('sky')
     target_img_relabeled[1:,1:3] = relabeled_names.index('motorcyclist')
     #target_img_relabeled = target_img_relabeled.reshape(1,4,4)
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
-    pred_final, target_img = eval_relabeled_pair(
+    pred_final, target_img = eval_rel_model_pred_on_unrel_data(
         pred,
         target_img,
         target_img_relabeled,
@@ -77,18 +79,16 @@ def test_eval_relabeled_pair2():
     pred[1:,1:3] = u_names.index('person')
 
     # original COCO image, in coco-panoptic-133
-    target_img = torch.ones(4,4) * original_names.index('sky-other-merged')
-    target_img = target_img.type(torch.LongTensor)
+    target_img = np.ones((4,4)) * original_names.index('sky-other-merged')
     target_img[1:,1:3] = original_names.index('person')
 
     # relabeled COCO image, in coco-panoptic-133-relabeled
-    target_img_relabeled = torch.ones(4,4) * relabeled_names.index('sky')
-    target_img_relabeled = target_img_relabeled.type(torch.LongTensor)
+    target_img_relabeled = np.ones((4,4)) * relabeled_names.index('sky')
     target_img_relabeled[1:,1:3] = relabeled_names.index('motorcyclist')
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
-    pred_final, target_img = eval_relabeled_pair(
+    pred_final, target_img = eval_rel_model_pred_on_unrel_data(
         pred,
         target_img,
         target_img_relabeled,
