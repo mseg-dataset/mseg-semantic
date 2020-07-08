@@ -31,7 +31,6 @@ o_model_names=(
 
 for base_size in ${base_sizes[@]}; do
 	for ((i=0;i<${#datasets[@]};++i)); do
-		printf "%s is in %s\n"  
 		dataset="${datasets[i]}"
 		model_name="${o_model_names[i]}"
 		sbatch -c 5 --job-name=mseg_eval_overcap_A \

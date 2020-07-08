@@ -112,11 +112,37 @@ class AccuracyCalculator:
         self.print_results()
         self.dump_acc_results_to_file()
 
-    def compute_metrics_relabeled_data(self):
+    def compute_metrics_relabeled_data(self, relabeled_data_list):
         """
+        TODO: unit test on this function.
         """
-        pass
+        pred_folder = self.gray_folder
+        for i, (
+                    (image_path, target_path),
+                    (_, target_path_relabeled)
+            ) in enumerate(zip(data_list, data_list_relabeled)):
+            pred = cv2.imread(os.path.join(pred_folder, image_name+'.png'), cv2.IMREAD_GRAYSCALE)
 
+            target_img = imageio.imread(target_path)
+            target_img = target_img.astype(np.int64)
+
+            target_img_relabeled = imageio.imread(target_path_relabeled)
+            target_img_relabeled = target_img_relabeled.astype(np.int64)
+            pdb.set_trace()
+
+            target_img = self.convert_label_to_pred_taxonomy(target_img)
+            target_img_relabeled = self.convert_label_to_pred_taxonomy(target_img_relabeled)
+
+            # convert to torch tensors?
+
+            # eval_relabeled_pair(
+            #     pred: np.ndarray,
+            #     target_img: torch.Tensor,
+            #     target_img_relabeled: torch.Tensor,
+            #     orig_to_u_transform,
+            #     relabeled_to_u_transform,
+            #     ignore_idx: int = 255
+            #     ):
 
     def convert_label_to_pred_taxonomy(self, target_img):
         """ """
