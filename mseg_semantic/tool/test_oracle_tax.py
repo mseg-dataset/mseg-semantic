@@ -85,8 +85,13 @@ def test_oracle_taxonomy_model(args, use_gpu: bool = True) -> None:
     args.data_root = infos[args.dataset].dataroot
     dataset_name = args.dataset
 
+    if len(args.scales) > 1:
+        scale_type = 'ms' # multi-scale
+    else:
+        scale_type = 'ss' # single-scale
+
     model_results_root = f'{Path(args.model_path).parent}/{Path(args.model_path).stem}'
-    args.save_folder = f'{model_results_root}/{args.dataset}/{args.base_size}/'
+    args.save_folder = f'{model_results_root}/{args.dataset}/{args.base_size}/{scale_type}/'
 
     #args.save_folder = f'{Path(args.model_path).stem}/{args.dataset}/{args.base_size}/'
 
