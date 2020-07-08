@@ -173,9 +173,17 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         #     data_list=args.test_list_relabeled,
         #     transform=test_transform
         # )
-        
-        # ac = AccuracyCalculator(args, test_data_list, dataset_name, class_names, save_folder)
-        # ac.compute_metrics_relabeled_data(test_data.data_list, test_data_relabeled.data_list)
+        ac = AccuracyCalculator(
+            args=args,
+            data_list=test_data_list,
+            dataset_name=dataset_name,
+            class_names=class_names,
+            save_folder=args.save_folder,
+            eval_taxonomy=eval_taxonomy,
+            num_eval_classes=num_eval_classes,
+            excluded_ids=excluded_ids
+        )
+        ac.compute_metrics_relabeled_data(test_data_relabeled.data_list)
 
     else:
         ac = AccuracyCalculator(
