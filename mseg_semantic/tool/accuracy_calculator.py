@@ -119,6 +119,11 @@ class AccuracyCalculator:
         """
         TODO: unit test on this function.
         """
+        unrelabeled_dname = self.dataset_name.replace('-relabeled','')
+        relabeled_dname = self.dataset_name
+        orig_to_u_transform = ToUniversalLabel(unrelabeled_dname)
+        relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
+
         pred_folder = self.gray_folder
         for i, (
                     (image_path, target_path),
@@ -133,14 +138,13 @@ class AccuracyCalculator:
             target_img_relabeled = target_img_relabeled.astype(np.int64)
             pdb.set_trace()
 
-            # eval_rel_model_pred_on_unrel_data(
-            #     pred: np.ndarray,
-            #     target_img: torch.Tensor,
-            #     target_img_relabeled: torch.Tensor,
-            #     orig_to_u_transform,
-            #     relabeled_to_u_transform,
-            #     ignore_idx: int = 255
-            #     ):
+            pred_final, true_target = eval_rel_model_pred_on_unrel_data(
+                pred,
+                target_img,
+                target_img_relabeled,
+                orig_to_u_transform,
+                relabeled_to_u_transform,
+            )
 
     def convert_label_to_pred_taxonomy(self, target_img):
         """ """
