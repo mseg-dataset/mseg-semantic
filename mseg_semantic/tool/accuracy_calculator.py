@@ -8,11 +8,14 @@ import os
 from pathlib import Path
 import pdb
 import torch
-from typing import List, Tuple
+from typing import List, Mapping, Tuple
 
 from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
 from mseg.utils.cv2_utils import cv2_imread_rgb
-from mseg.utils.mask_utils import save_pred_vs_label_7tuple,save_pred_vs_label_4tuple
+from mseg.utils.mask_utils import (
+    save_pred_vs_label_7tuple,save_pred_vs_label_4tuple,
+    write_six_img_grid_w_embedded_names
+)
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.names_utils import load_class_names, get_dataloader_id_to_classname_map
 from mseg.taxonomy.taxonomy_converter import (
@@ -115,36 +118,20 @@ class AccuracyCalculator:
         self.print_results()
         self.dump_acc_results_to_file()
 
-    def compute_metrics_relabeled_data(self, relabeled_data_list):
+    def compute_metrics_relabeled_data(
+        self,
+        relabeled_data_list: List[Tuple[str,str]],
+        save_vis: bool = True
+    ) -> None:
         """
-        TODO: unit test on this function.
+            Args:
+            -   relabeled_data_list
+            -   save_vis: whether to save visualize examplars
         """
-        unrelabeled_dname = self.dataset_name.replace('-relabeled','')
-        relabeled_dname = self.dataset_name
-        orig_to_u_transform = ToUniversalLabel(unrelabeled_dname)
-        relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
+        self.evaluate_predictions_relabeled_data(save_vis)
+        self.print_results()
+        self.dump_acc_results_to_file()
 
-        pred_folder = self.gray_folder
-        for i, (
-                    (image_path, target_path),
-                    (_, target_path_relabeled)
-            ) in enumerate(zip(data_list, data_list_relabeled)):
-            pred = cv2.imread(os.path.join(pred_folder, image_name+'.png'), cv2.IMREAD_GRAYSCALE)
-
-            target_img = imageio.imread(target_path)
-            target_img = target_img.astype(np.int64)
-
-            target_img_relabeled = imageio.imread(target_path_relabeled)
-            target_img_relabeled = target_img_relabeled.astype(np.int64)
-            pdb.set_trace()
-
-            pred_final, true_target = eval_rel_model_pred_on_unrel_data(
-                pred,
-                target_img,
-                target_img_relabeled,
-                orig_to_u_transform,
-                relabeled_to_u_transform,
-            )
 
     def convert_label_to_pred_taxonomy(self, target_img):
         """ """
@@ -177,6 +164,7 @@ class AccuracyCalculator:
             target_img = target_img.astype(np.int64)
 
             target_img = self.convert_label_to_pred_taxonomy(target_img)
+
             self.sam.update_metrics_cpu(pred, target_img, self.num_eval_classes)
 
             if (i+1) % self.args.vis_freq == 0:
@@ -184,22 +172,73 @@ class AccuracyCalculator:
                     f' accuracy {self.sam.accuracy:.4f}.'
                 logger.info(print_str)
 
-            if save_vis:
-                if (i+1) % self.args.vis_freq == 0:
-                    mask_save_dir = pred_folder.replace('gray', 'rgb_mask_predictions')
-                    grid_save_fpath = f'{mask_save_dir}/{image_name}.png'
-                    rgb_img = cv2_imread_rgb(image_path)
-                    save_pred_vs_label_7tuple(rgb_img, pred, target_img, self.id_to_class_name_map, grid_save_fpath)
+            if save_vis and ( (i+1) % self.args.vis_freq == 0 ):
+                save_prediction_visualization(
+                    pred_folder,
+                    image_path,
+                    pred,
+                    target_img,
+                    id_to_class_name_map
+                )
 
-                    overlaid_save_fpath = f'{mask_save_dir}_overlaid/{image_name}.png'
-                    create_leading_fpath_dirs(overlaid_save_fpath)
-                    frame_visualizer = Visualizer(rgb_img, metadata=None)
-                    overlaid_img = frame_visualizer.overlay_instances(
-                        label_map=pred,
-                        id_to_class_name_map=self.id_to_class_name_map
-                    )
-                    imageio.imwrite(overlaid_save_fpath, overlaid_img)
+    def evaluate_predictions_relabeled_data(
+        self,
+        relabeled_data_list: List[Tuple[str,str]],
+        save_vis: bool
+    ) -> None:
+        """
+        TODO: unit test on this function.
+        """
+        pdb.set_trace()
+        unrelabeled_dname = self.dataset_name.replace('-relabeled','')
+        relabeled_dname = self.dataset_name
+        orig_to_u_transform = ToUniversalLabel(unrelabeled_dname)
+        relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
 
+        pred_folder = self.gray_folder
+        for i, (
+                    (image_path, target_path),
+                    (_, target_path_relabeled)
+            ) in enumerate(zip(self.data_list, data_list_relabeled)):
+            
+            if self.args.img_name_unique:
+                image_name = Path(image_path).stem
+            else:
+                image_name = get_unique_stem_from_last_k_strs(image_path)
+
+            pred_rel = cv2.imread(os.path.join(pred_folder, image_name+'.png'), cv2.IMREAD_GRAYSCALE)
+
+            target_img = imageio.imread(target_path)
+            target_img = target_img.astype(np.int64)
+
+            target_img_relabeled = imageio.imread(target_path_relabeled)
+            target_img_relabeled = target_img_relabeled.astype(np.int64)
+            pdb.set_trace()
+
+            pred_unrel, target_u_tax = eval_rel_model_pred_on_unrel_data(
+                pred,
+                target_img,
+                target_img_relabeled,
+                orig_to_u_transform,
+                relabeled_to_u_transform,
+            )
+            pdb.set_trace()
+            # CHECK NUMBER OF EVAL CLASSES...
+            self.sam.update_metrics_cpu(pred_unrel, target_u_tax, self.num_eval_classes)
+
+            if (i+1) % self.args.vis_freq == 0:
+                print_str = f'Evaluating {i + 1}/{len(self.data_list)} on image {image_name+".png"},' + \
+                    f' accuracy {self.sam.accuracy:.4f}.'
+                logger.info(print_str)
+
+            if save_vis and ( (i+1) % self.args.vis_freq == 0 ):
+                save_prediction_visualization(
+                    pred_folder,
+                    image_path,
+                    pred,
+                    target_img,
+                    id_to_class_name_map
+                )
 
     def print_results(self):
         """
@@ -229,61 +268,6 @@ class AccuracyCalculator:
                     )
                 )
 
-    # def cal_acc_for_relabeled_model(self, data_list, data_list_relabeled, pred_folder, demo=True) -> None:
-    #     """ Calculate accuracy.
-
-    #         Args:
-    #         -   data_list: 
-    #         -   pred_folder: 
-    #         -   class_names: 
-
-    #         Returns:
-    #         -   None
-    #     """
-    #     for i, ((image_path, target_path), (_, target_path_relabeled)) in enumerate(zip(data_list, data_list_relabeled)):
-    #         if self.args.img_name_unique:
-    #             image_name = Path(image_path).stem
-    #         else:
-    #             image_name = get_unique_stem_from_last_k_strs(image_path)
-
-    #         pred = cv2.imread(os.path.join(pred_folder, image_name+'.png'), cv2.IMREAD_GRAYSCALE)
-
-    #         target_img = imageio.imread(target_path)
-    #         target_img = target_img.astype(np.int64)
-
-    #         target_img_relabeled = imageio.imread(target_path_relabeled)
-    #         target_img_relabeled = target_img_relabeled.astype(np.int64)
-
-    #         target_img = self.convert_label_to_pred_taxonomy(target_img)
-    #         # construct a "correct" target image here: if pixel A is relabeled as pixel B, and prediction is B, then map prediction B back to A
-
-    #         relabeled_pixels = (target_img_relabeled != target_img)
-
-    #         correct_pixels = (pred == target_img_relabeled)
-
-    #         correct_relabeled_pixels = relabeled_pixels * correct_pixels
-
-    #         pred_final = np.where(correct_relabeled_pixels, target_img, pred)
-    #         accuracy_before = (pred == target_img).sum()/target_img.size
-    #         accuracy_after = (pred_final == target_img).sum()/target_img.size
-    #         print(np.sum(target_img_relabeled == target_img)/target_img.size, accuracy_before, accuracy_after)
-
-    #         # pred[correct_pixels]
-
-    #         sam.update_metrics_cpu(pred_final, target_img, self.pred_dim)
-
-
-    #         if (i+1) % self.args.vis_freq == 0:
-    #             logger.info('Evaluating {0}/{1} on image {2}, accuracy {3:.4f}.'.format(i + 1, len(data_list), image_name+'.png', sam.accuracy))
-
-    #         if demo: 
-    #             if (i+1) % self.args.vis_freq == 0:
-    #                 mask_save_dir = pred_folder.replace('gray', 'rgb_mask_predictions')
-    #                 grid_save_fpath = f'{mask_save_dir}/{image_name}.png'
-    #                 rgb_img = cv2_imread_rgb(image_path)
-    #                 save_pred_vs_label_7tuple(rgb_img, pred, target_img, id_to_class_name_map, grid_save_fpath)
-
-
     def dump_acc_results_to_file(self) -> None:
         """
         Save per-class IoUs and mIoU to a .txt file.
@@ -310,4 +294,46 @@ class AccuracyCalculator:
             else:
                 result.write('Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.\n'.format(f'{i:02}', iou_class[i], accuracy_class[i], self.class_names[i]))
         result.close()
+
+
+def save_prediction_visualization(
+    pred_folder: str,
+    image_path: str,
+    pred: np.ndarray,
+    target_img: np.ndarray,
+    id_to_class_name_map: Mapping[int,str]
+) -> None:
+    """
+        Args:
+        -   pred_folder
+        -   image_path
+        -   pred
+        -   target_img
+        -   id_to_class_name_map
+
+        Returns:
+        -   None
+    """
+    mask_save_dir = pred_folder.replace('gray', 'rgb_mask_predictions')
+    grid_save_fpath = f'{mask_save_dir}/{image_name}.png'
+    rgb_img = cv2_imread_rgb(image_path)
+    #save_pred_vs_label_7tuple(rgb_img, pred, target_img, self.id_to_class_name_map, grid_save_fpath)
+    write_six_img_grid_w_embedded_names(
+        rgb_img,
+        pred,
+        target_img,
+        self.id_to_class_name_map,
+        grid_save_fpath
+    )
+
+    overlaid_save_fpath = f'{mask_save_dir}_overlaid/{image_name}.png'
+    create_leading_fpath_dirs(overlaid_save_fpath)
+    frame_visualizer = Visualizer(rgb_img, metadata=None)
+    overlaid_img = frame_visualizer.overlay_instances(
+        label_map=pred,
+        id_to_class_name_map=self.id_to_class_name_map
+    )
+    imageio.imwrite(overlaid_save_fpath, overlaid_img)
+
+
 
