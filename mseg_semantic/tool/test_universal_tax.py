@@ -9,6 +9,7 @@ from pathlib import Path
 import pdb
 import torch
 import torch.nn as nn
+from types import SimpleNamespace
 from typing import List, Optional, Tuple
 import time
 
@@ -145,7 +146,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         logger.info("Ground truth labels are not known for test set, cannot compute its accuracy.")
         return
 
-    logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
+    
     if eval_taxonomy == 'universal' and (args.dataset in DEFAULT_TRAIN_DATASETS):
         # evaluating on training datasets, within a subset of the universal taxonomy
         excluded_ids = get_excluded_class_ids(dataset_name)
@@ -163,16 +164,20 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     _, test_data_list = create_test_loader(args)
     if eval_relabeled:
+        logger.info(">>>>>>>>> Calculating *relabeled* accuracy from cached results >>>>>>>>>>")
         raise NotImplementedError
-        # args.dataset_relabeled = get_relabeled_dataset(args.dataset)
-        # args.test_list_relabeled = infos[args.dataset_relabeled].vallist
-        # args.data_root_relabeled = infos[args.dataset_relabeled].dataroot
-        # test_data_relabeled = dataset.SemData(
-        #     split=args.split,
-        #     data_root=args.data_root_relabeled,
-        #     data_list=args.test_list_relabeled,
-        #     transform=test_transform
-        # )
+
+        relabeled_args = {
+            'split': 
+            'data_root': infos[args.dataset_relabeled].dataroot
+            'test_list': infos[args.dataset_relabeled].vallist
+            'index_start': args.index_start,
+            'index_step': args.index_step
+        }
+        relabeled_args = SimpleNamespace(relabeled_args)
+        _, test_data_relabeled_list = create_test_loader(relabeled_args)
+        # Use relabeled dataset name?
+        pdb.set_trace()
         ac = AccuracyCalculator(
             args=args,
             data_list=test_data_list,
@@ -183,9 +188,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             num_eval_classes=num_eval_classes,
             excluded_ids=excluded_ids
         )
-        ac.compute_metrics_relabeled_data(test_data_relabeled.data_list)
+        ac.compute_metrics_relabeled_data(test_data_relabeled_list)
 
     else:
+        logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
         ac = AccuracyCalculator(
             args=args,
             data_list=test_data_list,
