@@ -40,12 +40,13 @@ def convert_label_to_pred_taxonomy(
 
 
 def eval_rel_model_pred_on_unrel_data(
-    pred: np.ndarray,
+    pred_rel: np.ndarray,
     target_img: np.ndarray,
     target_img_relabeled: np.ndarray,
     orig_to_u_transform,
     relabeled_to_u_transform,
-    ignore_idx: int = 255
+    ignore_idx: int = 255,
+    verbose: bool = True
     ):
     """
         Rather than eval unrelabeled model on the univ. relabeled data, we instead map correctness
@@ -59,8 +60,8 @@ def eval_rel_model_pred_on_unrel_data(
         coco-unrel->coco-unrel-universal, then coco-unrel-universal is already in universal on disk.
 
         Args:
-        -   pred: Numpy array of shape (H,W) of dtype int64 representing prediction,
-                predictions are already in universal taxonomy.
+        -   pred_rel: Numpy array of shape (H,W) of dtype int64 representing prediction,
+                of a relabeled model, predictions are already in universal taxonomy.
         -   target_img: Numpy array of shape (H,W) of dtype int64 representing unrelabeled ground truth,
                 in original `semseg` format taxonomy, e.g. `coco-panoptic-133`
         -   target_img_relabeled:  Numpy array of shape (H,W) of dtype int64 representing relabeled ground truth,
@@ -69,16 +70,18 @@ def eval_rel_model_pred_on_unrel_data(
         -   relabeled_to_u_transform:
 
         Returns:
-        -   pred_final: rewarded & penalized predictions, in universal taxonomy
-        -   target_img: ground truth in universal taxonomy
+        -   pred_unrel: rewarded & penalized predictions, in universal taxonomy
+                as if was made by an `unrelabeled` model
+        -   target_img: Numpy array representing unrelabeled ground truth
+                in universal taxonomy
     """
     target_img = convert_label_to_pred_taxonomy(target_img, orig_to_u_transform)
     target_img_relabeled = convert_label_to_pred_taxonomy(target_img_relabeled, relabeled_to_u_transform)
     # construct a "correct" target image here: if pixel A is relabeled as pixel B, and prediction is B, then map prediction B back to A
 
     relabeled_pixels = (target_img_relabeled != target_img)
-    correct_pixels = (pred == target_img_relabeled)
-    incorrect_pixels = (pred != target_img_relabeled)
+    correct_pixels = (pred_rel == target_img_relabeled)
+    incorrect_pixels = (pred_rel != target_img_relabeled)
     
     correct_relabeled_pixels = relabeled_pixels * correct_pixels
     incorrect_relabeled_pixels = relabeled_pixels * incorrect_pixels
@@ -87,21 +90,19 @@ def eval_rel_model_pred_on_unrel_data(
     # reset your predicted class index to not be what network said, 
     # but what unrelabeled ground truth was.
     # np.where() sets where True, yield x, otherwise yield y.
-    pred_final = np.where(correct_relabeled_pixels, target_img, pred)
+    pred_unrel = np.where(correct_relabeled_pixels, target_img, pred_rel)
 
     # Apply Penalty -> if the model predicted the un-relabeled class, we
     # must penalize it for not choosing the `truth` from our oracle
     # the `ignore_idx` will penalize a prediction in mIoU calculation (but not penalize GT)
-    guaranteed_wrong_pred = np.ones_like(pred)*ignore_idx
-    pred_final = np.where(incorrect_relabeled_pixels, guaranteed_wrong_pred, pred_final)
+    guaranteed_wrong_pred = np.ones_like(pred_rel)*ignore_idx
+    pred_unrel = np.where(incorrect_relabeled_pixels, guaranteed_wrong_pred, pred_unrel)
 
-    accuracy_before = (pred == target_img).sum()/target_img.size
-    accuracy_after = (pred_final == target_img).sum()/target_img.size
-    print('Pct of img relabeled: ', np.sum(target_img_relabeled == target_img)/target_img.size)
-
-    print('Acc before: ', accuracy_before, ' Acc after: ', accuracy_after)
-    return pred_final, target_img
-
-
-
+    if verbose:
+        num_px = target_img.size # number of pixels in the image
+        accuracy_before = (pred_rel == target_img).sum() / num_px
+        accuracy_after = (pred_unrel == target_img).sum() / num_px
+        print('Pct of img relabeled: ', np.sum(relabeled_pixels) / num_px * 100)
+        print(f'Acc before: {accuracy_before * 100}, Acc after: {accuracy_after}')
+    return pred_unrel, target_img
 
