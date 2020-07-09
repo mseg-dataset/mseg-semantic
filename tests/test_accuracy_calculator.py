@@ -10,6 +10,7 @@ from mseg.utils.dir_utils import check_mkdir
 from mseg.utils.names_utils import load_class_names
 
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
+from mseg_semantic.tool.test_universal_tax import get_excluded_class_ids
 from mseg_semantic.utils.config import CfgNode
 
 _ROOT = Path(__file__).resolve().parent
@@ -183,8 +184,28 @@ def test_execute():
 	assert 'Class_10 result: iou/accuracy 0.0000/0.0000, name: Bicyclist.' in lines[11]
 
 
+def test_relabeled_data_example():
+	""" """
+	pdb.set_trace()
+	dataset_name = 'coco-panoptic-133'
+	excluded_ids = get_excluded_class_ids(dataset_name)
+	ac = AccuracyCalculator(
+		args=args,
+		data_list=test_data_list,
+		dataset_name=dataset_name,
+		class_names=class_names,
+		save_folder=args.save_folder,
+		eval_taxonomy=eval_taxonomy,
+		num_eval_classes=num_eval_classes,
+		excluded_ids=excluded_ids
+	)
+	ac.compute_metrics_relabeled_data(test_data_relabeled.data_list)
+
+
 
 if __name__ == '__main__':
-	test_constructor()
-	test_execute()
+	# test_constructor()
+	# test_execute()
+	test_relabeled_data_example()
+
 
