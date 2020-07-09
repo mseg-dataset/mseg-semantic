@@ -33,8 +33,8 @@ def test_eval_relabeled_pair1():
     u_names = get_universal_class_names()
 
     # prediction in universal taxonomy
-    pred = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
-    pred[1:,1:3] = u_names.index('motorcyclist')
+    pred_rel = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
+    pred_rel[1:,1:3] = u_names.index('motorcyclist')
 
     # original COCO image, in coco-panoptic-133
     target_img = np.ones((4,4)) * original_names.index('sky-other-merged')
@@ -48,21 +48,21 @@ def test_eval_relabeled_pair1():
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
-    pred_final, target_img = eval_rel_model_pred_on_unrel_data(
-        pred,
+    pred_unrel, target_img = eval_rel_model_pred_on_unrel_data(
+        pred_rel,
         target_img,
         target_img_relabeled,
         orig_to_u_transform,
         relabeled_to_u_transform
     )
     # treated as 100% accuracy
-    assert np.allclose(pred_final, target_img)
+    assert np.allclose(pred_unrel, target_img)
 
 
 def test_eval_relabeled_pair2():
     """
     Person vs. Motorcyclist in center.
-    Relabeled model incorrectly predicts `person` for `motorcylist`.
+    Relabeled model incorrectly predicts `person` instead of `motorcylist`.
     
             [0,0,0,0],
             [0,1,1,0],
@@ -75,8 +75,8 @@ def test_eval_relabeled_pair2():
     relabeled_names = load_class_names(relabeled_dname)
     u_names = get_universal_class_names()
 
-    pred = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
-    pred[1:,1:3] = u_names.index('person')
+    pred_rel = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
+    pred_rel[1:,1:3] = u_names.index('person')
 
     # original COCO image, in coco-panoptic-133
     target_img = np.ones((4,4)) * original_names.index('sky-other-merged')
@@ -88,8 +88,8 @@ def test_eval_relabeled_pair2():
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
-    pred_final, target_img = eval_rel_model_pred_on_unrel_data(
-        pred,
+    pred_unrel, target_gt_univ = eval_rel_model_pred_on_unrel_data(
+        pred_rel,
         target_img,
         target_img_relabeled,
         orig_to_u_transform,
@@ -99,13 +99,12 @@ def test_eval_relabeled_pair2():
 
     target_gt = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
     target_gt[1:,1:3] = u_names.index('person')
-    assert np.allclose(target_img, target_gt)
+    assert np.allclose(target_gt_univ, target_gt)
 
     IGNORE_IDX = 255 # represents unlabeled
-    gt_pred_final = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
-    gt_pred_final[1:,1:3] = IGNORE_IDX
-    assert np.allclose(pred_final, gt_pred_final)
-
+    gt_pred_unrel = np.ones((4,4), dtype=np.uint8) * u_names.index('sky')
+    gt_pred_unrel[1:,1:3] = IGNORE_IDX
+    assert np.allclose(pred_unrel, gt_pred_unrel)
 
 
 if __name__ == '__main__':
