@@ -597,7 +597,9 @@ def get_configured_hrnet(
 
 
 if __name__ == '__main__':
-
+    """ """
+    imagenet_ckpt_fpath = ''
+    load_imagenet_model = False
     model = get_configured_hrnet(180, load_imagenet_model, imagenet_ckpt_fpath)
     num_p = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(num_p)

@@ -128,7 +128,7 @@ class AccuracyCalculator:
             -   relabeled_data_list
             -   save_vis: whether to save visualize examplars
         """
-        self.evaluate_predictions_relabeled_data(save_vis)
+        self.evaluate_predictions_relabeled_data(relabeled_data_list, save_vis)
         self.print_results()
         self.dump_acc_results_to_file()
 
@@ -176,9 +176,10 @@ class AccuracyCalculator:
                 save_prediction_visualization(
                     pred_folder,
                     image_path,
+                    image_name,
                     pred,
                     target_img,
-                    id_to_class_name_map
+                    self.id_to_class_name_map
                 )
 
     def evaluate_predictions_relabeled_data(
@@ -199,7 +200,7 @@ class AccuracyCalculator:
         for i, (
                     (image_path, target_path),
                     (_, target_path_relabeled)
-            ) in enumerate(zip(self.data_list, data_list_relabeled)):
+            ) in enumerate(zip(self.data_list, relabeled_data_list)):
             
             if self.args.img_name_unique:
                 image_name = Path(image_path).stem
@@ -216,7 +217,7 @@ class AccuracyCalculator:
             pdb.set_trace()
 
             pred_unrel, target_u_tax = eval_rel_model_pred_on_unrel_data(
-                pred,
+                pred_rel,
                 target_img,
                 target_img_relabeled,
                 orig_to_u_transform,
@@ -235,9 +236,10 @@ class AccuracyCalculator:
                 save_prediction_visualization(
                     pred_folder,
                     image_path,
-                    pred,
-                    target_img,
-                    id_to_class_name_map
+                    image_name,
+                    pred_unrel, # prediction, converted to unrelabeled version in univ. taxonomy
+                    target_u_tax, # ground truth, in universal taxonomy
+                    self.id_to_class_name_map
                 )
 
     def print_results(self):
@@ -299,6 +301,7 @@ class AccuracyCalculator:
 def save_prediction_visualization(
     pred_folder: str,
     image_path: str,
+    image_name: str,
     pred: np.ndarray,
     target_img: np.ndarray,
     id_to_class_name_map: Mapping[int,str]
@@ -314,6 +317,7 @@ def save_prediction_visualization(
         Returns:
         -   None
     """
+    image_name = Path(image_name).stem
     mask_save_dir = pred_folder.replace('gray', 'rgb_mask_predictions')
     grid_save_fpath = f'{mask_save_dir}/{image_name}.png'
     rgb_img = cv2_imread_rgb(image_path)
@@ -322,7 +326,7 @@ def save_prediction_visualization(
         rgb_img,
         pred,
         target_img,
-        self.id_to_class_name_map,
+        id_to_class_name_map,
         grid_save_fpath
     )
 
@@ -331,7 +335,7 @@ def save_prediction_visualization(
     frame_visualizer = Visualizer(rgb_img, metadata=None)
     overlaid_img = frame_visualizer.overlay_instances(
         label_map=pred,
-        id_to_class_name_map=self.id_to_class_name_map
+        id_to_class_name_map=id_to_class_name_map
     )
     imageio.imwrite(overlaid_save_fpath, overlaid_img)
 
