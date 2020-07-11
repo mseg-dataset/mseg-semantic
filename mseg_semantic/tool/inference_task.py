@@ -1,18 +1,20 @@
 #!/usr/bin/python3
 
-import cv2
-import imageio
 import logging
-import numpy as np
 import os
 from pathlib import Path
 import pdb
 import time
+from typing import List, Tuple
+
+import cv2
+import imageio
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.utils.data
 import torch.backends.cudnn as cudnn
-from typing import List, Tuple
+import torch.nn.functional as F
+import torch.utils.data
 
 from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
 from mseg.utils.names_utils import get_universal_class_names, load_class_names
@@ -241,7 +243,7 @@ class InferenceTask:
 			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		elif model_taxonomy == 'naive' and eval_taxonomy == 'test_dataset':
-			self.tc = StupidTaxonomyConverter()
+			self.tc = NaiveTaxonomyConverter()
 			if args.dataset in self.tc.convs.keys() and use_gpu:
 				self.tc.convs[args.dataset].cuda()
 			self.tc.softmax.cuda()

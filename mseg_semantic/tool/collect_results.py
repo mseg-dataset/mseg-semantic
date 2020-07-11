@@ -142,7 +142,7 @@ def collect_results_at_res(resolution: str, mean_type = 'harmonic'):
 	print(' '*60, (' '*5).join(zs_datasets), ' '* 10 + 'mean')
 	for m, name in zip(u_models, u_names):
 		results = []
-		for d in datasets:
+		for d in zs_datasets:
 			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
 			mious = parse_folder(folder, resolution)
 			results.append(mious)

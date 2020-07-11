@@ -168,9 +168,9 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         raise NotImplementedError
 
         relabeled_args = {
-            'split': 
-            'data_root': infos[args.dataset_relabeled].dataroot
-            'test_list': infos[args.dataset_relabeled].vallist
+            'split': 'val',
+            'data_root': infos[args.dataset_relabeled].dataroot,
+            'test_list': infos[args.dataset_relabeled].vallist,
             'index_start': args.index_start,
             'index_step': args.index_step
         }
