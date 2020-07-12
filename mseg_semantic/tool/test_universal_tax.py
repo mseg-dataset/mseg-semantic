@@ -160,8 +160,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     _, test_data_list = create_test_loader(args)
     if eval_relabeled:
         logger.info(">>>>>>>>> Calculating *relabeled* accuracy from cached results >>>>>>>>>>")
-        
-        pdb.set_trace()
         args.dataset_relabeled = get_relabeled_dataset(args.dataset)
         relabeled_args = {
             'split': 'val',
@@ -170,7 +168,8 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             'index_start': args.index_start,
             'index_step': args.index_step
         }
-        relabeled_args = SimpleNamespace(relabeled_args)
+        pdb.set_trace()
+        relabeled_args = SimpleNamespace(**relabeled_args)
         _, test_data_relabeled_list = create_test_loader(relabeled_args)
         # Use relabeled dataset name?
         pdb.set_trace()
