@@ -77,7 +77,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         Returns:
         -   None
     """
-    pdb.set_trace()
     if 'scannet' in args.dataset:
         args.img_name_unique = False
     else:
@@ -166,7 +165,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     _, test_data_list = create_test_loader(args)
     if eval_relabeled:
         logger.info(">>>>>>>>> Calculating *relabeled* accuracy from cached results >>>>>>>>>>")
-        raise NotImplementedError
+        pdb.set_trace()
 
         relabeled_args = {
             'split': 'val',
