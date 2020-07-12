@@ -167,6 +167,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             'test_list': infos[args.dataset_relabeled].vallist,
             'index_start': args.index_start,
             'index_step': args.index_step
+            'workers': args.workers
         }
         pdb.set_trace()
         relabeled_args = SimpleNamespace(**relabeled_args)
