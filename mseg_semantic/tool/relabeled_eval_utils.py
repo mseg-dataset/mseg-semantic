@@ -98,11 +98,13 @@ def eval_rel_model_pred_on_unrel_data(
     guaranteed_wrong_pred = np.ones_like(pred_rel)*ignore_idx
     pred_unrel = np.where(incorrect_relabeled_pixels, guaranteed_wrong_pred, pred_unrel)
 
+    num_px = target_img.size # number of pixels in the image
+    accuracy_before = (pred_rel == target_img).sum() / num_px * 100
+    accuracy_after = (pred_unrel == target_img).sum() / num_px * 100
+    acc_diff = accuracy_after - accuracy_before
+    
     if verbose:
-        num_px = target_img.size # number of pixels in the image
-        accuracy_before = (pred_rel == target_img).sum() / num_px
-        accuracy_after = (pred_unrel == target_img).sum() / num_px
         print('Pct of img relabeled: ', np.sum(relabeled_pixels) / num_px * 100)
         print(f'Acc before: {accuracy_before * 100}, Acc after: {accuracy_after}')
-    return pred_unrel, target_img
+    return pred_unrel, target_img, acc_diff
 
