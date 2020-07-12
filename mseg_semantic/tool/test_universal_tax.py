@@ -170,11 +170,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             'index_step': args.index_step,
             'workers': args.workers
         }
-        pdb.set_trace()
         relabeled_args = SimpleNamespace(**relabeled_args)
         _, test_data_relabeled_list = create_test_loader(relabeled_args)
-        # Use relabeled dataset name?
-        pdb.set_trace()
+        # AccuracyCalculator is constructed for the unrelabeled dataset
+        # we will pass relabeled dataset info as args later
         ac = AccuracyCalculator(
             args=args,
             data_list=test_data_list,
