@@ -189,10 +189,11 @@ class AccuracyCalculator:
         relabeled_data_list: List[Tuple[str,str]],
         save_vis: bool
     ) -> None:
-        """
+        """ Calculate accuracy, although use both relabeld and unrelabeled
+        data to get a number that is relatable to unrelabeled baselines
+
         TODO: unit test on this function.
         """
-        pdb.set_trace()
         unrelabeled_dname = self.dataset_name
         relabeled_dname = self.dataset_name + '-relabeled'
         orig_to_u_transform = ToUniversalLabel(unrelabeled_dname)
@@ -216,7 +217,6 @@ class AccuracyCalculator:
 
             target_img_relabeled = imageio.imread(target_path_relabeled)
             target_img_relabeled = target_img_relabeled.astype(np.int64)
-            pdb.set_trace()
 
             pred_unrel, target_u_tax = eval_rel_model_pred_on_unrel_data(
                 pred_rel,
@@ -225,7 +225,6 @@ class AccuracyCalculator:
                 orig_to_u_transform,
                 relabeled_to_u_transform,
             )
-            pdb.set_trace()
             # We pass in the number of universal classes (including the excluded ones here)
             # for the per-class histogram to know the histogram size. Later, excluded classes
             # will not factor into mIoU.
