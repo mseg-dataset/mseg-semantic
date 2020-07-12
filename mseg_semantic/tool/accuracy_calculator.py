@@ -249,6 +249,15 @@ class AccuracyCalculator:
                     target_u_tax, # ground truth, in universal taxonomy
                     self.id_to_class_name_map
                 )
+                save_prediction_visualization(
+                    pred_folder,
+                    image_path,
+                    image_name.replace('.jpg', '-unconverted-pred.jpg'),
+                    pred_rel, # prediction, converted to unrelabeled version in univ. taxonomy
+                    target_u_tax, # ground truth, in universal taxonomy
+                    self.id_to_class_name_map
+                )
+
 
     def print_results(self):
         """
@@ -327,7 +336,7 @@ def save_prediction_visualization(
     """
     image_name = Path(image_name).stem
     mask_save_dir = pred_folder.replace('gray', 'rgb_mask_predictions')
-    grid_save_fpath = f'{mask_save_dir}/{image_name}.png'
+    grid_save_fpath = f'{mask_save_dir}/{image_name}.jpg'
     rgb_img = cv2_imread_rgb(image_path)
     #save_pred_vs_label_7tuple(rgb_img, pred, target_img, self.id_to_class_name_map, grid_save_fpath)
     write_six_img_grid_w_embedded_names(
@@ -338,7 +347,7 @@ def save_prediction_visualization(
         grid_save_fpath
     )
 
-    overlaid_save_fpath = f'{mask_save_dir}_overlaid/{image_name}.png'
+    overlaid_save_fpath = f'{mask_save_dir}_overlaid/{image_name}.jpg'
     create_leading_fpath_dirs(overlaid_save_fpath)
     frame_visualizer = Visualizer(rgb_img, metadata=None)
     overlaid_img = frame_visualizer.overlay_instances(
