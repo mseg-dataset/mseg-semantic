@@ -224,7 +224,9 @@ class AccuracyCalculator:
                 relabeled_to_u_transform,
             )
             pdb.set_trace()
-            # CHECK NUMBER OF EVAL CLASSES...
+            # We pass in the number of universal classes (including the excluded ones here)
+            # for the per-class histogram to know the histogram size. Later, excluded classes
+            # will not factor into mIoU.
             self.sam.update_metrics_cpu(pred_unrel, target_u_tax, self.num_eval_classes)
 
             if (i+1) % self.args.vis_freq == 0:

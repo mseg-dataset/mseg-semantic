@@ -150,6 +150,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     if eval_taxonomy == 'universal':
         class_names = get_universal_class_names()
+        num_eval_classes = len(class_names)
     elif eval_taxonomy == 'test_dataset':
         class_names = load_class_names(args.dataset)
         num_eval_classes = len(class_names)
