@@ -217,6 +217,7 @@ def get_excluded_class_ids(dataset: str) -> List[int]:
     """
     tc = TaxonomyConverter()
 
+    pdb.set_trace()
     id_maps = tc.dataloaderid_to_uid_maps[dataset] # from train to universal. do this zero out or not does not affect when training and testing on same dataset.
     nonzero_class_ids = set(id_maps.values())
     zero_class_ids = [x for x in range(tc.classes) if x not in nonzero_class_ids]
