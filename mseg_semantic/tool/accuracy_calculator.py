@@ -96,6 +96,8 @@ class AccuracyCalculator:
         if self.render_confusion_matrix:
             self.cmr = ConfusionMatrixRenderer(self.save_folder, class_names, self.dataset_name)
         self.sam = SegmentationAverageMeter()
+
+        # can handle the `universal` taxonomy scenario just fine, since we pass in the classes manually
         self.id_to_class_name_map = get_dataloader_id_to_classname_map(
             self.dataset_name,
             class_names,
@@ -191,8 +193,8 @@ class AccuracyCalculator:
         TODO: unit test on this function.
         """
         pdb.set_trace()
-        unrelabeled_dname = self.dataset_name.replace('-relabeled','')
-        relabeled_dname = self.dataset_name
+        unrelabeled_dname = self.dataset_name
+        relabeled_dname = self.dataset_name + '-relabeled'
         orig_to_u_transform = ToUniversalLabel(unrelabeled_dname)
         relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
 
