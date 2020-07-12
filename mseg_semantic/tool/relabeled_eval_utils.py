@@ -46,7 +46,7 @@ def eval_rel_model_pred_on_unrel_data(
     orig_to_u_transform,
     relabeled_to_u_transform,
     ignore_idx: int = 255,
-    verbose: bool = True
+    verbose: bool = False
     ):
     """
         Rather than eval unrelabeled model on the univ. relabeled data, we instead map correctness
