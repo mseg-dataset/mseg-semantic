@@ -63,11 +63,6 @@ def get_logger():
 logger = get_logger()
 
 
-def get_relabeled_dataset(dataset_name: str) -> str:
-    """ """
-    return dataset_name + '-relabeled'
-
-
 def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     """
         Args:
@@ -165,8 +160,9 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     _, test_data_list = create_test_loader(args)
     if eval_relabeled:
         logger.info(">>>>>>>>> Calculating *relabeled* accuracy from cached results >>>>>>>>>>")
+        
         pdb.set_trace()
-
+        args.dataset_relabeled = get_relabeled_dataset(args.dataset)
         relabeled_args = {
             'split': 'val',
             'data_root': infos[args.dataset_relabeled].dataroot,
@@ -206,6 +202,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
     logger.info(">>>>>>>>> Accuracy computation completed >>>>>>>>>>")
 
+
+def get_relabeled_dataset(dataset_name: str) -> str:
+    """ """
+    return dataset_name + '-relabeled'
 
 def get_excluded_class_ids(dataset: str) -> List[int]:
     """Find the classes to exclude when evaluating a "relabeled" MSeg model
