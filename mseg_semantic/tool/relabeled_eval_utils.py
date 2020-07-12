@@ -102,6 +102,7 @@ def eval_rel_model_pred_on_unrel_data(
     accuracy_before = get_px_accuracy(pred_rel, target_img)
 
     # anywhere GT was relabeled as `unlabeled`, immediately transfer to `target_img`
+    # otherwise, target img will have poorly-labeled class, vs. prediction's `255`
     target_img[ np.where(target_img_relabeled == ignore_idx)] = ignore_idx
 
     accuracy_after = get_px_accuracy(pred_unrel, target_img)
