@@ -48,7 +48,7 @@ def test_eval_relabeled_pair1():
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
-    pred_unrel, target_img = eval_rel_model_pred_on_unrel_data(
+    pred_unrel, target_img, _ = eval_rel_model_pred_on_unrel_data(
         pred_rel,
         target_img,
         target_img_relabeled,
@@ -88,7 +88,7 @@ def test_eval_relabeled_pair2():
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
-    pred_unrel, target_gt_univ = eval_rel_model_pred_on_unrel_data(
+    pred_unrel, target_gt_univ, _ = eval_rel_model_pred_on_unrel_data(
         pred_rel,
         target_img,
         target_img_relabeled,

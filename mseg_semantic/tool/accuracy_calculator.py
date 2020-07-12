@@ -218,7 +218,7 @@ class AccuracyCalculator:
             target_img_relabeled = imageio.imread(target_path_relabeled)
             target_img_relabeled = target_img_relabeled.astype(np.int64)
 
-            pred_unrel, target_u_tax = eval_rel_model_pred_on_unrel_data(
+            pred_unrel, target_u_tax, acc_diff = eval_rel_model_pred_on_unrel_data(
                 pred_rel,
                 target_img,
                 target_img_relabeled,
@@ -235,7 +235,12 @@ class AccuracyCalculator:
                     f' accuracy {self.sam.accuracy:.4f}.'
                 logger.info(print_str)
 
-            if save_vis and ( (i+1) % self.args.vis_freq == 0 ):
+            large_acc_change = np.absolute(acc_diff) > 10
+            if large_acc_change:
+                logger.info(f"Accuracy changed by {acc_diff:.2f} on {image_path}")
+
+            on_visualize_iter = (i+1) % self.args.vis_freq == 0
+            if (large_acc_change and save_vis) or (save_vis and on_visualize_iter):
                 save_prediction_visualization(
                     pred_folder,
                     image_path,
