@@ -11,7 +11,8 @@ from mseg.utils.names_utils import (
 
 from mseg_semantic.utils.transform import ToUniversalLabel
 from mseg_semantic.tool.relabeled_eval_utils import (
-	eval_rel_model_pred_on_unrel_data
+	eval_rel_model_pred_on_unrel_data,
+    get_px_accuracy
 )
 
 
@@ -107,8 +108,106 @@ def test_eval_relabeled_pair2():
     assert np.allclose(pred_unrel, gt_pred_unrel)
 
 
+def test_eval_relabeled_pair_annotated_as_unlabel():
+    """
+    When labels were inaccurate, we often marked them as `unlabeled`,
+    e.g. COCO cabinets included `counter` pixels.
+    """
+    orig_dname = 'coco-panoptic-133'
+    relabeled_dname = 'coco-panoptic-133-relabeled'
+    original_names = load_class_names(orig_dname)
+    relabeled_names = load_class_names(relabeled_dname)
+    u_names = get_universal_class_names()
+
+    wall = u_names.index('wall')
+    counter = u_names.index('counter_other')
+    cabinet = u_names.index('cabinet')
+    pred_rel = np.array([
+        [wall,wall,wall,wall],
+        [counter,counter,counter,counter],
+        [cabinet,cabinet,cabinet,cabinet],
+        [cabinet,cabinet,cabinet,cabinet]
+    ]).astype(np.uint8)
+
+    # original COCO image, in coco-panoptic-133
+    wall = original_names.index('wall-wood')
+    cabinet = original_names.index('cabinet-merged')
+    target_img = np.array([
+        [wall,wall,wall,wall],
+        [cabinet,cabinet,cabinet,cabinet],
+        [cabinet,cabinet,cabinet,cabinet],
+        [cabinet,cabinet,cabinet,cabinet]
+    ]).astype(np.uint8)
+
+    # relabeled COCO image, in coco-panoptic-133-relabeled
+    # since the counter & cabinet could not be separated w/o
+    # drawing new boundary, mark both as `unlabeled`, i.e. 255
+    wall = relabeled_names.index('wall')
+    target_img_relabeled = np.array([
+        [wall,wall,wall,wall],
+        [255,255,255,255],
+        [255,255,255,255],
+        [255,255,255,255]
+    ]).astype(np.uint8)
+
+    orig_to_u_transform = ToUniversalLabel(orig_dname)
+    relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
+    pred_unrel, target_gt_univ, acc_diff = eval_rel_model_pred_on_unrel_data(
+        pred_rel,
+        target_img,
+        target_img_relabeled,
+        orig_to_u_transform,
+        relabeled_to_u_transform
+    )
+
+    # goes from 75% to 100%
+    assert acc_diff == 25
+
+    wall = u_names.index('wall')
+    gt_pred_unrel = np.array(
+        [
+            [wall,wall,wall,wall],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255]
+        ], dtype=np.uint8)
+    assert np.allclose(pred_unrel, gt_pred_unrel)
+
+    gt_target_gt_univ = np.array(
+        [
+            [wall,wall,wall,wall],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255]
+        ], dtype=np.uint8)
+    assert np.allclose(target_gt_univ, gt_target_gt_univ)
+
+def test_get_px_accuracy_perfect():
+    """ """
+    pred = np.ones((4,4), dtype=np.uint8)
+    target = np.ones((4,4), dtype=np.uint8)
+    assert 100 == get_px_accuracy(pred, target)
+
+def test_get_px_accuracy_all_wrong():
+    """ """
+    pred = np.ones((4,4), dtype=np.uint8)
+    target = np.zeros((4,4), dtype=np.uint8)
+    assert 0 == get_px_accuracy(pred, target)
+
+def test_get_px_accuracy_all_relabeled():
+    """ """
+    pred = np.ones((4,4), dtype=np.uint8)
+    target = np.ones((4,4), dtype=np.uint8) * 255
+    assert 100 == get_px_accuracy(pred, target)
+
+
 if __name__ == '__main__':
     """ """
     test_eval_relabeled_pair1()
     test_eval_relabeled_pair2()
+    test_eval_relabeled_pair_annotated_as_unlabel()
+
+    test_get_px_accuracy_perfect()
+    test_get_px_accuracy_all_wrong()
+    test_get_px_accuracy_all_relabeled()
 

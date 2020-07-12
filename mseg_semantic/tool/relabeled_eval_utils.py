@@ -66,8 +66,8 @@ def eval_rel_model_pred_on_unrel_data(
                 in original `semseg` format taxonomy, e.g. `coco-panoptic-133`
         -   target_img_relabeled:  Numpy array of shape (H,W) of dtype int64 representing relabeled ground truth,
                 in relabeled taxonomy, e.g. `coco-panoptic-133-relabeled`
-        -   orig_to_u_transform:
-        -   relabeled_to_u_transform:
+        -   orig_to_u_transform: original dataset tax. -> universal tax. transformation
+        -   relabeled_to_u_transform: relabeled dataset tax. -> universal tax. transformation
 
         Returns:
         -   pred_unrel: rewarded & penalized predictions, in universal taxonomy
@@ -99,12 +99,23 @@ def eval_rel_model_pred_on_unrel_data(
     pred_unrel = np.where(incorrect_relabeled_pixels, guaranteed_wrong_pred, pred_unrel)
 
     num_px = target_img.size # number of pixels in the image
-    accuracy_before = (pred_rel == target_img).sum() / num_px * 100
-    accuracy_after = (pred_unrel == target_img).sum() / num_px * 100
+    accuracy_before = get_px_accuracy(pred_rel, target_img)
+
+    # anywhere GT was relabeled as `unlabeled`, immediately transfer to `target_img`
+    target_img[ np.where(target_img_relabeled == ignore_idx)] = ignore_idx
+
+    accuracy_after = get_px_accuracy(pred_unrel, target_img)
     acc_diff = accuracy_after - accuracy_before
     
     if verbose:
         print('Pct of img relabeled: ', np.sum(relabeled_pixels) / num_px * 100)
-        print(f'Acc before: {accuracy_before * 100}, Acc after: {accuracy_after}')
+        print(f'Acc before: {accuracy_before}, Acc after: {accuracy_after}')
     return pred_unrel, target_img, acc_diff
+
+
+def get_px_accuracy(pred: np.ndarray, target: np.ndarray) -> float:
+    """ Quick and dirty method for analysis, not an officially correct implementation """
+    num_px = target.size
+    is_correct = np.logical_or.reduce([pred == target, target == 255])
+    return is_correct.sum() / num_px * 100
 
