@@ -77,6 +77,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         Returns:
         -   None
     """
+    pdb.set_trace()
     if 'scannet' in args.dataset:
         args.img_name_unique = False
     else:
@@ -216,7 +217,7 @@ def get_excluded_class_ids(dataset: str) -> List[int]:
     the universal taxonomy ID.
 
         Args:
-        -   dataset:
+        -   dataset: name of a MSeg training dataset, e.g. 'coco-panoptic-133'
 
         Returns:
         -   zero_class_ids
