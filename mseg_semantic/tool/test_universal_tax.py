@@ -208,7 +208,13 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
 
 
 def get_excluded_class_ids(dataset: str) -> List[int]:
-    """
+    """Find the classes to exclude when evaluating a "relabeled" MSeg model
+    on the val split of a training dataset.
+
+    We retrieve the dictionary `id_to_uid_maps` with (k,v) pairs where 
+    "k" is the original, unrelabeled training dataset ID, and "v" is 
+    the universal taxonomy ID.
+
         Args:
         -   dataset:
 
@@ -216,11 +222,9 @@ def get_excluded_class_ids(dataset: str) -> List[int]:
         -   zero_class_ids
     """
     tc = TaxonomyConverter()
-
-    pdb.set_trace()
-    id_maps = tc.dataloaderid_to_uid_maps[dataset] # from train to universal. do this zero out or not does not affect when training and testing on same dataset.
+    id_maps = tc.id_to_uid_maps[dataset] # from train to universal. do this zero out or not does not affect when training and testing on same dataset.
     nonzero_class_ids = set(id_maps.values())
-    zero_class_ids = [x for x in range(tc.classes) if x not in nonzero_class_ids]
+    zero_class_ids = [x for x in range(tc.num_uclasses) if x not in nonzero_class_ids]
     return zero_class_ids
 
 
