@@ -252,7 +252,7 @@ class AccuracyCalculator:
                 save_prediction_visualization(
                     pred_folder,
                     image_path,
-                    image_name.replace('.jpg', '-unconverted-pred.jpg'),
+                    image_name + '-unconverted-pred',
                     pred_rel, # prediction, converted to unrelabeled version in univ. taxonomy
                     target_u_tax, # ground truth, in universal taxonomy
                     self.id_to_class_name_map
