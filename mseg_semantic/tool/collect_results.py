@@ -5,6 +5,7 @@ import pdb
 import numpy as np
 # import scipy.stats.hmean as hmean
 from scipy.stats.mstats import gmean
+from typing import List
 
 # zero_shot_datasets
 zs_datasets = [
@@ -23,6 +24,16 @@ o_datasets = [
 	'camvid-11',
 	'kitti-19',
 	'scannet-20'
+]
+
+training_datasets = [
+	'ade20k-150_universal_relabeled',
+	'bdd_universal_relabeled',
+	'cityscapes-19_universal_relabeled',
+	'coco-panoptic-133_universal_relabeled',
+	'idd-39_universal_relabeled',
+	'mapillary-public65_universal_relabeled',
+	'sunrgbd-37_universal_relabeled'
 ]
 
 # datasets = ['coco-panoptic-133_universal','ade20k-150_universal', 'mapillary-public65_universal', 'idd-39_universal', 'bdd_universal',   'cityscapes-19_universal', 'sunrgbd-37_universal']
@@ -137,12 +148,12 @@ def geometric_mean(x):
 	return prod ** (1/n)
 
 
-def collect_results_at_res(resolution: str, mean_type = 'harmonic'):
+def collect_results_at_res(dataset: List[str], resolution: str, mean_type = 'harmonic'):
 	""" """
-	print(' '*60, (' '*5).join(zs_datasets), ' '* 10 + 'mean')
+	print(' '*60, (' '*5).join(datasets), ' '* 10 + 'mean')
 	for m, name in zip(u_models, u_names):
 		results = []
-		for d in zs_datasets:
+		for d in datasets:
 			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
 			mious = parse_folder(folder, resolution)
 			results.append(mious)
@@ -181,7 +192,7 @@ def collect_zero_shot_results():
 	# 'ms' vs. 'ss'
 	for resolution in ['360','720','1080','max']: #  '480', '2160',
 		print(f'At resolution {resolution}')
-		collect_results_at_res(resolution)
+		collect_results_at_res(zs_datasets, resolution)
 
 
 def collect_oracle_results_at_res(resolution: str):
@@ -204,11 +215,19 @@ def collect_oracle_results():
 		collect_oracle_results_at_res(resolution)
 
 
+def collect_training_dataset_results():
+	""" """
+	# 'ss' only
+	for resolution in ['360','720','1080','max']: #  '480', '2160',
+		print(f'At resolution {resolution}')
+		collect_results_at_res(training_datasets, resolution)
+
 
 if __name__ == '__main__':
 	""" """
 	#collect_zero_shot_results()
-	collect_oracle_results()
+	#collect_oracle_results()
+	collect_training_dataset_results()
 
 
 
