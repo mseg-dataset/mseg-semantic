@@ -148,7 +148,7 @@ def geometric_mean(x):
 	return prod ** (1/n)
 
 
-def collect_results_at_res(dataset: List[str], resolution: str, mean_type = 'harmonic'):
+def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'harmonic'):
 	""" """
 	print(' '*60, (' '*5).join(datasets), ' '* 10 + 'mean')
 	for m, name in zip(u_models, u_names):
