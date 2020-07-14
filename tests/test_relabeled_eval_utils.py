@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
+import imageio
 import numpy as np
+from pathlib import Path
 import pdb
 import torch
 
@@ -15,6 +17,8 @@ from mseg_semantic.tool.relabeled_eval_utils import (
     get_px_accuracy
 )
 
+ROOT_ = Path(__file__).resolve().parent
+TEST_DATA_ROOT_ = ROOT_ / "test_data"
 
 def test_eval_relabeled_pair1():
     """
@@ -201,13 +205,42 @@ def test_get_px_accuracy_all_relabeled():
     assert 100 == get_px_accuracy(pred, target)
 
 
+# def test_eval_relabeled_pair_coco_real_unlabel():
+#     """ """
+#     orig_dname = 'coco-panoptic-133'
+#     relabeled_dname = 'coco-panoptic-133-relabeled'
+ 
+#     pred_rel_fpath = f'{TEST_DATA_ROOT_}/relabeled_gt/000000025986-pred.png'
+#     pred_rel = imageio.imread(pred_rel_fpath)
+
+#     target_img_relabeled_fpath = f'{TEST_DATA_ROOT_}/relabeled_gt/000000025986-relabeled-gt.png'
+#     target_img_relabeled = imageio.imread(target_img_relabeled_fpath)
+
+#     target_img_fpath = f'{TEST_DATA_ROOT_}/relabeled_gt/000000025986-unrelabeled-gt.png'
+#     target_img = imageio.imread(target_img_fpath)
+
+#     orig_to_u_transform = ToUniversalLabel(orig_dname)
+#     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
+#     pred_unrel, target_gt_univ, acc_diff = eval_rel_model_pred_on_unrel_data(
+#         pred_rel,
+#         target_img,
+#         target_img_relabeled,
+#         orig_to_u_transform,
+#         relabeled_to_u_transform
+#     )
+#     # accuracy should decrease (predicted table instead of counter-other)
+#     pdb.set_trace()
+
+
 if __name__ == '__main__':
     """ """
-    test_eval_relabeled_pair1()
-    test_eval_relabeled_pair2()
-    test_eval_relabeled_pair_annotated_as_unlabel()
+    # test_eval_relabeled_pair1()
+    # test_eval_relabeled_pair2()
+    # test_eval_relabeled_pair_annotated_as_unlabel()
 
-    test_get_px_accuracy_perfect()
-    test_get_px_accuracy_all_wrong()
-    test_get_px_accuracy_all_relabeled()
+    #test_eval_relabeled_pair_coco_real_unlabel()
+
+    # test_get_px_accuracy_perfect()
+    # test_get_px_accuracy_all_wrong()
+    # test_get_px_accuracy_all_relabeled()
 
