@@ -156,7 +156,7 @@ def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'ha
 		for d in datasets:
 
 			# rename 
-			if 'mseg' in m and d in training_datasets:
+			if ('mseg' in m) and ('unrelabeled' not in m) and (d in training_datasets):
 				d += '_relabeled'
 
 			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
