@@ -186,26 +186,27 @@ def test_execute():
 
 def test_relabeled_data_example():
 	""" """
-	pdb.set_trace()
-	dataset_name = 'coco-panoptic-133'
-	excluded_ids = get_excluded_class_ids(dataset_name)
-	ac = AccuracyCalculator(
-		args=args,
-		data_list=test_data_list,
-		dataset_name=dataset_name,
-		class_names=class_names,
-		save_folder=args.save_folder,
-		eval_taxonomy=eval_taxonomy,
-		num_eval_classes=num_eval_classes,
-		excluded_ids=excluded_ids
-	)
-	ac.compute_metrics_relabeled_data(test_data_relabeled.data_list)
+	pass
+	# pdb.set_trace()
+	# dataset_name = 'coco-panoptic-133'
+	# excluded_ids = get_excluded_class_ids(dataset_name)
+	# ac = AccuracyCalculator(
+	# 	args=args,
+	# 	data_list=test_data_list,
+	# 	dataset_name=dataset_name,
+	# 	class_names=class_names,
+	# 	save_folder=args.save_folder,
+	# 	eval_taxonomy=eval_taxonomy,
+	# 	num_eval_classes=num_eval_classes,
+	# 	excluded_ids=excluded_ids
+	# )
+	# ac.compute_metrics_relabeled_data(test_data_relabeled.data_list)
 
 
 
 if __name__ == '__main__':
-	# test_constructor()
-	# test_execute()
+	test_constructor()
+	test_execute()
 	test_relabeled_data_example()
 
 
