@@ -95,7 +95,7 @@ o_names = [
 def parse_file(result_file):
 	""" """
 	if not os.path.isfile(result_file):
-		print(result_file + ' does not exist!')
+		#print(result_file + ' does not exist!')
 		return 100000
 
 	with open(result_file, 'r') as f:
