@@ -90,12 +90,13 @@ o_names = [
 	'ScanNet Oracle'
 ]
 
-
+VERBOSE = False
 
 def parse_file(result_file):
 	""" """
 	if not os.path.isfile(result_file):
-		#print(result_file + ' does not exist!')
+		if VERBOSE:
+			print(result_file + ' does not exist!')
 		return 100000
 
 	with open(result_file, 'r') as f:
