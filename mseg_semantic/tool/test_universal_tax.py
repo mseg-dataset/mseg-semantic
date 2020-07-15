@@ -260,6 +260,5 @@ if __name__ == '__main__':
     assert args.dataset != 'default'
 
     logger.info(args)
-    pdb.set_trace()
     evaluate_universal_tax_model(args, use_gpu)
 
