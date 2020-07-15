@@ -83,13 +83,14 @@ class AccuracyCalculator:
             -   None
         """
         assert isinstance(eval_taxonomy, str)
-        self.eval_taxonomy = eval_taxonomy
-        self.num_eval_classes = num_eval_classes
         self.args = args
         self.data_list = data_list
         self.dataset_name = dataset_name
         self.class_names = class_names
         self.save_folder = save_folder
+        self.eval_taxonomy = eval_taxonomy
+        self.num_eval_classes = num_eval_classes
+        self.excluded_ids = excluded_ids
         self.gray_folder = os.path.join(save_folder, 'gray')
         self.render_confusion_matrix = render_confusion_matrix
 
@@ -103,7 +104,6 @@ class AccuracyCalculator:
             class_names,
             include_ignore_idx_cls=True
         )
-        self.excluded_ids = []
         self.to_universal_transform = ToUniversalLabel(self.dataset_name)
 
         assert isinstance(args.vis_freq, int)
