@@ -116,6 +116,10 @@ python mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/te
 python mseg_semantic/tool/test_oracle_tax.py
 ```
 
+Test an MSeg model on the relabeled 'val' set of a training dataset, e.g. COCO-Panoptic:
+```
+python -u mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360_ss.yaml dataset coco-panoptic-133 model_path ../pretrained-semantic-models/mseg-3m/mseg-3m.pth model_name mseg-3m
+```
 
 ## Citing MSeg
 
