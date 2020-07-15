@@ -27,13 +27,13 @@ o_datasets = [
 ]
 
 training_datasets = [
-	'ade20k-150_universal_relabeled',
-	'bdd_universal_relabeled',
-	'cityscapes-19_universal_relabeled',
-	'coco-panoptic-133_universal_relabeled',
-	'idd-39_universal_relabeled',
-	'mapillary-public65_universal_relabeled',
-	'sunrgbd-37_universal_relabeled'
+	'ade20k-150_universal',
+	'bdd_universal',
+	'cityscapes-19_universal',
+	'coco-panoptic-133_universal',
+	'idd-39_universal',
+	'mapillary-public65_universal',
+	'sunrgbd-37_universal',
 ]
 
 # datasets = ['coco-panoptic-133_universal','ade20k-150_universal', 'mapillary-public65_universal', 'idd-39_universal', 'bdd_universal',   'cityscapes-19_universal', 'sunrgbd-37_universal']
@@ -154,6 +154,11 @@ def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'ha
 	for m, name in zip(u_models, u_names):
 		results = []
 		for d in datasets:
+
+			# rename 
+			if 'mseg' in m and d in training_datasets:
+				d += '_relabeled'
+
 			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
 			mious = parse_folder(folder, resolution)
 			results.append(mious)
