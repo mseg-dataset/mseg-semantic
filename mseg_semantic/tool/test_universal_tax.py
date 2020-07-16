@@ -141,7 +141,6 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         logger.info("Ground truth labels are not known for test set, cannot compute its accuracy.")
         return
 
-    
     if eval_taxonomy == 'universal' and (args.dataset in DEFAULT_TRAIN_DATASETS):
         # evaluating on training datasets, within a subset of the universal taxonomy
         excluded_ids = get_excluded_class_ids(dataset_name)
@@ -159,6 +158,17 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         raise NotImplementedError
 
     _, test_data_list = create_test_loader(args)
+    ac = AccuracyCalculator(
+        args=args,
+        data_list=test_data_list,
+        dataset_name=dataset_name,
+        class_names=class_names,
+        save_folder=args.save_folder,
+        eval_taxonomy=eval_taxonomy,
+        num_eval_classes=num_eval_classes,
+        excluded_ids=excluded_ids
+    )
+
     if eval_relabeled:
         logger.info(">>>>>>>>> Calculating *relabeled* accuracy from cached results >>>>>>>>>>")
         args.dataset_relabeled = get_relabeled_dataset(args.dataset)
@@ -174,30 +184,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         _, test_data_relabeled_list = create_test_loader(relabeled_args)
         # AccuracyCalculator is constructed for the unrelabeled dataset
         # we will pass relabeled dataset info as args later
-        ac = AccuracyCalculator(
-            args=args,
-            data_list=test_data_list,
-            dataset_name=dataset_name,
-            class_names=class_names,
-            save_folder=args.save_folder,
-            eval_taxonomy=eval_taxonomy,
-            num_eval_classes=num_eval_classes,
-            excluded_ids=excluded_ids
-        )
         ac.compute_metrics_relabeled_data(test_data_relabeled_list)
 
     else:
         logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
-        ac = AccuracyCalculator(
-            args=args,
-            data_list=test_data_list,
-            dataset_name=dataset_name,
-            class_names=class_names,
-            save_folder=args.save_folder,
-            eval_taxonomy=eval_taxonomy,
-            num_eval_classes=num_eval_classes,
-            excluded_ids=excluded_ids
-        )
         ac.compute_metrics()
 
     logger.info(">>>>>>>>> Accuracy computation completed >>>>>>>>>>")
