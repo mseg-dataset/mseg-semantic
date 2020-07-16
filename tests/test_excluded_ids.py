@@ -7,7 +7,7 @@ from mseg.utils.names_utils import get_universal_class_names
 from mseg_semantic.tool.test_universal_tax import get_excluded_class_ids
 
 
-def test_get_excluded_class_ids():
+def test_get_excluded_class_ids_coco():
 	"""
 	Ensure we can find the classes to exclude when evaluating
 	a "relabeled" MSeg model on the val split of a training dataset.
@@ -104,4 +104,19 @@ def test_get_excluded_class_ids():
 
 	assert gt_zero_class_ids == gt_excluded_ids
 	assert zero_class_ids == gt_zero_class_ids
+
+
+# def test_get_excluded_class_ids_bdd():
+# 	"""
+# 	Ensure we can find the classes to exclude when evaluating
+# 	a "relabeled" MSeg model on the val split of a training dataset.
+# 	"""
+# 	dataset = 'bdd'
+# 	zero_class_ids = get_excluded_class_ids(dataset)
+# 	pdb.set_trace()
+
+
+if __name__== '__main__':
+	test_get_excluded_class_ids_coco()
+	#test_get_excluded_class_ids_bdd()
 

@@ -277,8 +277,8 @@ class AccuracyCalculator:
         logger.info('Eval result: mIoU/mAcc/allAcc {:.4f}/{:.4f}/{:.4f}.'.format(mIoU, mAcc, allAcc))
 
         for i in range(self.num_eval_classes):
-            not_excluded_u_class = (self.eval_taxonomy == 'universal') and (i not in self.excluded_ids)
-            if self.eval_taxonomy != 'universal' or not_excluded_u_class:
+            excluded_u_class = (self.eval_taxonomy == 'universal') and (i in self.excluded_ids)
+            if self.eval_taxonomy != 'universal' or not excluded_u_class:
                 logger.info(
                     'Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.'.format(
                         f'{i:02}',
@@ -308,8 +308,8 @@ class AccuracyCalculator:
         result.write('Eval result: mIoU/mAcc/allAcc {:.4f}/{:.4f}/{:.4f}.\n'.format(mIoU, mAcc, allAcc))
 
         for i in range(self.num_eval_classes):
-            not_excluded_u_class = (self.eval_taxonomy == 'universal') and (i not in self.excluded_ids)
-            if (self.eval_taxonomy != 'universal') or not_excluded_u_class:
+            excluded_u_class = (self.eval_taxonomy == 'universal') and (i in self.excluded_ids)
+            if (self.eval_taxonomy != 'universal') or not excluded_u_class:
                 result.write(
                     'Class_{} result: iou/accuracy {:.4f}/{:.4f}, name: {}.\n'.format(
                         f'{i:02}', iou_class[i], accuracy_class[i], self.class_names[i]
