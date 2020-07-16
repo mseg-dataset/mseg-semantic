@@ -234,13 +234,13 @@ def test_get_px_accuracy_all_relabeled():
 
 if __name__ == '__main__':
     """ """
-    # test_eval_relabeled_pair1()
-    # test_eval_relabeled_pair2()
-    # test_eval_relabeled_pair_annotated_as_unlabel()
+    test_eval_relabeled_pair1()
+    test_eval_relabeled_pair2()
+    test_eval_relabeled_pair_annotated_as_unlabel()
 
     #test_eval_relabeled_pair_coco_real_unlabel()
 
-    # test_get_px_accuracy_perfect()
-    # test_get_px_accuracy_all_wrong()
-    # test_get_px_accuracy_all_relabeled()
+    test_get_px_accuracy_perfect()
+    test_get_px_accuracy_all_wrong()
+    test_get_px_accuracy_all_relabeled()
 

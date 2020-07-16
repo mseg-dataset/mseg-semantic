@@ -27,13 +27,13 @@ o_datasets = [
 ]
 
 training_datasets = [
+	'coco-panoptic-133_universal',
 	'ade20k-150_universal',
+	'mapillary-public65_universal',
+	'idd-39_universal',
 	'bdd_universal',
 	'cityscapes-19_universal',
-	'coco-panoptic-133_universal',
-	'idd-39_universal',
-	'mapillary-public65_universal',
-	'sunrgbd-37_universal',
+	'sunrgbd-37_universal'
 ]
 
 # datasets = ['coco-panoptic-133_universal','ade20k-150_universal', 'mapillary-public65_universal', 'idd-39_universal', 'bdd_universal',   'cityscapes-19_universal', 'sunrgbd-37_universal']

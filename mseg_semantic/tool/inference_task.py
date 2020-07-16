@@ -105,7 +105,7 @@ def resize_by_scaled_short_side(
 		-	scale: 
 
 		Returns:
-		-	image_scale: 
+		-	image_scaled: 
 	"""
 	h, w, _ = image.shape
 	short_size = round(scale * base_size)
@@ -116,8 +116,8 @@ def resize_by_scaled_short_side(
 		new_h = round(short_size/float(w)*h)
 	else:
 		new_w = round(short_size/float(h)*w)
-	image_scale = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
-	return image_scale
+	image_scaled = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+	return image_scaled
 
 def pad_to_crop_sz(
 	image: np.ndarray,
@@ -420,8 +420,8 @@ class InferenceTask:
 		prediction = torch.Tensor(prediction).cuda()
 
 		for scale in self.scales:
-			image_scale = resize_by_scaled_short_side(image, self.base_size, scale)
-			prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scale, h, w)).cuda()
+			image_scaled = resize_by_scaled_short_side(image, self.base_size, scale)
+			prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scaled, h, w)).cuda()
 
 		prediction /= len(self.scales)
 		prediction = torch.argmax(prediction, axis=2)
