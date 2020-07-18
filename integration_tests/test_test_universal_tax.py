@@ -10,7 +10,7 @@ REPO_ROOT_ = Path(__file__).resolve().parent.parent
 
 def test_evaluate_universal_tax_model():
 	"""
-	Ensure testing script works correctly.
+	Ensure universal model testing script works correctly.
 
 	base_sizes=(
 	        #360
@@ -68,4 +68,4 @@ def test_evaluate_universal_tax_model():
 if __name__ == '__main__':
 	test_evaluate_universal_tax_model()
 
-	
+
