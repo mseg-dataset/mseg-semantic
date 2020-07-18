@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from pathlib import Path
 from types import SimpleNamespace
 
 from mseg_semantic.tool.test_universal_tax import evaluate_universal_tax_model
