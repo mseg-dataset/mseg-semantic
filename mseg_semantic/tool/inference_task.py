@@ -415,13 +415,20 @@ class InferenceTask:
 			-	gray_img: prediction, representing predicted label map
 		"""
 		h, w, _ = image.shape
+		is_single_scale = len(self.scales) == 1
 
-		prediction = np.zeros((h, w, self.num_eval_classes), dtype=float)
-		prediction = torch.Tensor(prediction).cuda()
+		if is_single_scale:
+			# single scale, do addition and argmax on CPU
+			image_scaled = resize_by_scaled_short_side(image, self.base_size, self.scales[0])
+			prediction = torch.Tensor(self.scale_process_cuda(image_scaled, h, w))
 
-		for scale in self.scales:
-			image_scaled = resize_by_scaled_short_side(image, self.base_size, scale)
-			prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scaled, h, w)).cuda()
+		else:
+			# multi-scale, prefer to use fast addition on the GPU
+			prediction = np.zeros((h, w, self.num_eval_classes), dtype=float)
+			prediction = torch.Tensor(prediction).cuda()
+			for scale in self.scales:
+				image_scaled = resize_by_scaled_short_side(image, self.base_size, scale)
+				prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scaled, h, w)).cuda()
 
 		prediction /= len(self.scales)
 		prediction = torch.argmax(prediction, axis=2)
