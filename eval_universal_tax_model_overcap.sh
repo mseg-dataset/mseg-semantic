@@ -22,13 +22,13 @@ model_fpath=../pretrained-semantic-models/${model_name}/${model_name}.pth
 
 results_path=../pretrained-semantic-models/${model_name}/${model_name}/${dataset_folder}/${base_size}/ss/results.txt
 
-#if [ -f ${results_path} ]
-#then
-#    echo "Results file already exists. Quitting"
-#    exit
-#else
-#    echo "Results file not found. Executing..."
-#fi
+if [ -f ${results_path} ]
+then
+    echo "Results file already exists. Quitting"
+    exit
+else
+    echo "Results file not found. Executing..."
+fi
 
 echo "On node ${HOSTNAME}"
 echo "Running model ${model_name} on dataset ${dataset_name}, using model at ${model_fpath}"
