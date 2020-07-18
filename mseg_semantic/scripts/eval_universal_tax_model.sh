@@ -4,10 +4,10 @@ base_size=$1
 model_name=$2
 dataset_name=$3
 
-config_fpath=mseg_semantic/config/test/default_config_${base_size}.yaml
-model_fpath=../pretrained-semantic-models/${model_name}/${model_name}.pth
+config_fpath=../config/test/default_config_${base_size}.yaml
+model_fpath=../../../pretrained-semantic-models/${model_name}/${model_name}.pth
 
-results_path=../pretrained-semantic-models/${model_name}/${model_name}/${dataset_name}/${base_size}/results.txt
+results_path=../../../pretrained-semantic-models/${model_name}/${model_name}/${dataset_name}/${base_size}/results.txt
 if [ -f ${results_path} ]
 then
     echo "Results file already exists. Quitting"
