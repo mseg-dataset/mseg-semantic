@@ -37,8 +37,8 @@ def test_evaluate_universal_tax_model():
  		'arch': 'hrnet',
 		'index_start': 0,
 		'index_step': 0,
-		'workers': 16
-
+		'workers': 16,
+		'has_prediction': False
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
