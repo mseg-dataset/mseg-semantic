@@ -69,15 +69,13 @@ for base_size in ${base_sizes[@]}; do
 			d_folder=$dataset
 			# check if eval dataset is one of the training datasets
 			if [[ " ${training_datasets[@]} " =~ " ${dataset} " ]]; then
-			  d_folder=${d_folder}_universal
-			
+				d_folder=${d_folder}_universal
 
-			  # check if eval model is one of the relabeled models
-                          if [[ " ${relabeled_model_names[@]} " =~ " ${model_name} " ]]; then
-                            d_folder=${d_folder}_relabeled
-                          fi
-			fi
-			echo $d_folder			
+				# check if eval model is one of the relabeled models
+				if [[ " ${relabeled_model_names[@]} " =~ " ${model_name} " ]]; then
+					d_folder=${d_folder}_relabeled
+				fi
+			fi	
 
 			# Mapillary has larger resolution images, and requires more GPU memory
 			if [[ $dataset == *"mapillary"* ]]
@@ -86,9 +84,11 @@ for base_size in ${base_sizes[@]}; do
 			else
 				script_name="eval_universal_tax_model_overcap_1gpu.sh"
 			fi
-			
+
+			echo " "
+			echo $d_folder
 			echo $script_name
-			exit
+			echo " "
 
 			#sbatch --dependency=singleton --job-name=mseg_eval_A -c 5 -p short -x jarvis,vicki,cortana,gideon,ephemeral-3 --gres=gpu:1 \
 			sbatch -c 5 --job-name=mseg_eval_overcap_A \
