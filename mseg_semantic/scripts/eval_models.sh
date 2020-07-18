@@ -14,22 +14,22 @@ datasets=(
 	
 	#ade20k-150
 	#bdd
-	#cityscapes-19
-	coco-panoptic-133
+	cityscapes-19
+	#coco-panoptic-133
 	#idd-39
 	#mapillary-public65
 	#sunrgbd-37
 	)
 
 training_datasets=(
-        ade20k-150
-        bdd
-        cityscapes-19
+	ade20k-150
+	bdd
+	cityscapes-19
 	coco-panoptic-133
-        idd-39
-        mapillary-public65
-        sunrgbd-37
-)
+	idd-39
+	mapillary-public65
+	sunrgbd-37
+	)
 
 base_sizes=(
 	360
@@ -40,19 +40,19 @@ base_sizes=(
 	)
 
 model_names=(
-	#ade20k-150-1m
-	#bdd-1m
-	#cityscapes-19-1m
-	#coco-panoptic-133-1m
-	#idd-39-1m
-	#mseg-3m-480p
-	#mapillary-65-1m
-	#mseg-3m-720p
-	#mseg-1m
-	#mseg-mgda-1m
+	ade20k-150-1m
+	bdd-1m
+	cityscapes-19-1m
+	coco-panoptic-133-1m
+	idd-39-1m
+	mseg-3m-480p
+	mapillary-65-1m
+	mseg-3m-720p
+	mseg-1m
+	mseg-mgda-1m
 	mseg-3m
-	#sunrgbd-37-1m
-	#mseg-unrelabeled-1m	
+	sunrgbd-37-1m
+	mseg-unrelabeled-1m	
 	)
 
 relabeled_model_names=(
@@ -79,10 +79,20 @@ for base_size in ${base_sizes[@]}; do
 			fi
 			echo $d_folder			
 
+			# Mapillary has larger resolution images, and requires more GPU memory
+			if [[ $dataset == *"mapillary"* ]]
+			then
+				script_name="eval_universal_tax_model_overcap_3gpu.sh"
+			else
+				script_name="eval_universal_tax_model_overcap_1gpu.sh"
+
+			echo $script_name
+			exit
+
 			#sbatch --dependency=singleton --job-name=mseg_eval_A -c 5 -p short -x jarvis,vicki,cortana,gideon,ephemeral-3 --gres=gpu:1 \
 			sbatch -c 5 --job-name=mseg_eval_overcap_A \
 			-o ${outf}/${model_name}_${base_size}_${dataset}.log \
-			eval_universal_tax_model_overcap.sh ${base_size} ${model_name} ${dataset} ${d_folder}
+			${script_name} ${base_size} ${model_name} ${dataset} ${d_folder}
 		done
 	done
 done
