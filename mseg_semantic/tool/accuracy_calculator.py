@@ -204,12 +204,6 @@ class AccuracyCalculator:
                     (image_path, target_path),
                     (_, target_path_relabeled)
             ) in enumerate(zip(self.data_list, relabeled_data_list)):
-            
-            if i < 998:
-                continue
-            
-            print(i)
-            pdb.set_trace()
 
             if self.args.img_name_unique:
                 image_name = Path(image_path).stem
