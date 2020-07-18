@@ -52,28 +52,20 @@ def test_evaluate_universal_tax_model():
 	print('Completed')
 
 	result_file_path = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/'
-	result_file_path += 'camvid-11-1m/camvid-11/360/ss/result.txt'
+	result_file_path += 'camvid-11-1m/camvid-11/360/ss/results.txt'
+	assert Path(result_file_path).exists()
 	mIoU = parse_result_file(result_file_path)
 	print(f"mIoU: {mIoU}")
 	assert mIoU = 83.3
 
+	OKGREEN = '\033[92m'
+	ENDC = '\033[0m'
+	print(OKGREEN + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + ENDC)
+	print(OKGREEN + 'Universal model evalution passed successfully' + ENDC)
+	print(OKGREEN + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + ENDC)
+	
 
-	# 	# assert result files exist
-	# 	results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/{base_size}/gray'
-	# 	fnames = [
-	# 		'242_Maryview_Dr_Webster_0000304.png',
-	# 		'bike_horses.png',
-	# 		'PrivateLakefrontResidenceWoodstockGA_0000893.png'
-	# 	]
-	# 	for fname in fnames:
-	# 		gray_fpath = f'{results_dir}/{fname}'
-	# 		print(gray_fpath)
-	# 		assert Path(gray_fpath).exists()
-	# 		os.remove(gray_fpath)
+if __name__ == '__main__':
+	test_evaluate_universal_tax_model()
 
-
-
-
-
-
-
+	

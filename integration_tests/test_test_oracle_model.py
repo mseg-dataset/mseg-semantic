@@ -55,45 +55,19 @@ def test_evaluate_universal_tax_model():
 	print('Completed')
 
 	result_file_path = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/'
-	result_file_path += 'camvid-11-1m/camvid-11/360/ss/result.txt'
+	result_file_path += 'camvid-11-1m/camvid-11/360/ss/results.txt'
+	assert Path(result_file_path).exists()
 	mIoU = parse_result_file(result_file_path)
 	print(f"mIoU: {mIoU}")
 	assert mIoU == 78.8
 
+	OKGREEN = '\033[92m'
+	ENDC = '\033[0m'
+	print(OKGREEN + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + ENDC)
+	print(OKGREEN + 'Oracle model evalution passed successfully' + ENDC)
+	print(OKGREEN + ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"  + ENDC)
+	
 
-	# for base_size in [360,720,1080]:
-	# 	# Args that would be provided in command line and in config file
-	# 	d = {
-	# 		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
-	# 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
-	# 		'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
-	# 		'input_file': f'{REPO_ROOT_}/tests/test_data/demo_images',
-	# 		'model_name': 'mseg-3m',
-	# 		'dataset': 'default',
-	# 		'base_size': base_size,
-	# 		'test_h': 713,
-	#  		'test_w': 713,
-	#  		'scales': [1.0],
-	#  		'save_folder': 'default',
-	#  		'arch': 'hrnet',
-	# 		'index_start': 0,
-	# 		'index_step': 0,
-	# 		'workers': 16
-	# 	}
-	# 	args = SimpleNamespace(**d)
-	# 	use_gpu = True
-	# 	print(args)
-	# 	run_universal_demo(args, use_gpu)
 
-	# 	# assert result files exist
-	# 	results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/{base_size}/gray'
-	# 	fnames = [
-	# 		'242_Maryview_Dr_Webster_0000304.png',
-	# 		'bike_horses.png',
-	# 		'PrivateLakefrontResidenceWoodstockGA_0000893.png'
-	# 	]
-	# 	for fname in fnames:
-	# 		gray_fpath = f'{results_dir}/{fname}'
-	# 		print(gray_fpath)
-	# 		assert Path(gray_fpath).exists()
-	# 		os.remove(gray_fpath)
+if __name__ == '__main__':
+	test_evaluate_universal_tax_model()
