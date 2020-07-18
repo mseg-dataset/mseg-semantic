@@ -205,6 +205,10 @@ class AccuracyCalculator:
                     (_, target_path_relabeled)
             ) in enumerate(zip(self.data_list, relabeled_data_list)):
             
+            if i < 980:
+                continue
+            print(i)
+
             if self.args.img_name_unique:
                 image_name = Path(image_path).stem
             else:
