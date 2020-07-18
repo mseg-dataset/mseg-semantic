@@ -3,6 +3,7 @@
 from pathlib import Path
 from types import SimpleNamespace
 
+from mseg_semantic.scripts.collect_results import parse_result_file
 from mseg_semantic.tool.test_universal_tax import evaluate_universal_tax_model
 
 REPO_ROOT_ = Path(__file__).resolve().parent.parent
@@ -32,13 +33,15 @@ def test_evaluate_universal_tax_model():
 		'base_size': base_size,
 		'test_h': 713,
  		'test_w': 713,
- 		'scales': [1.0],
+ 		'scales': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
  		'save_folder': 'default',
  		'arch': 'hrnet',
 		'index_start': 0,
 		'index_step': 0,
 		'workers': 16,
-		'has_prediction': False
+		'has_prediction': False,
+		'split': 'val',
+		'vis_freq': 20
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
@@ -47,6 +50,13 @@ def test_evaluate_universal_tax_model():
 
 	# assert a file exists
 	print('Completed')
+
+	result_file_path = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/'
+	result_file_path += 'camvid-11-1m/camvid-11/360/ss/result.txt'
+	mIoU = parse_result_file(result_file_path)
+	print(f"mIoU: {mIoU}")
+	assert mIoU = 83.3
+
 
 	# 	# assert result files exist
 	# 	results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/{base_size}/gray'

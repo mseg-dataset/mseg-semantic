@@ -3,8 +3,8 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-from mseg_semantic.tool.test_oracle_tax import test_oracle_taxonomy_model
 from mseg_semantic.scripts.collect_results import parse_result_file
+from mseg_semantic.tool.test_oracle_tax import test_oracle_taxonomy_model
 
 REPO_ROOT_ = Path(__file__).resolve().parent.parent
 
@@ -37,7 +37,7 @@ def test_evaluate_universal_tax_model():
 		'base_size': base_size,
 		'test_h': 713,
  		'test_w': 713,
- 		'scales': [1.0],
+ 		'scales': [0.5, 0.75, 1.0, 1.25, 1.5, 1.75],
  		'save_folder': 'default',
  		'arch': 'hrnet',
 		'index_start': 0,
@@ -57,8 +57,8 @@ def test_evaluate_universal_tax_model():
 	result_file_path = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/'
 	result_file_path += 'camvid-11-1m/camvid-11/360/ss/result.txt'
 	mIoU = parse_result_file(result_file_path)
-
-	assert mIoU == 72.0
+	print(f"mIoU: {mIoU}")
+	assert mIoU == 78.8
 
 
 	# for base_size in [360,720,1080]:

@@ -91,7 +91,7 @@ o_names = [
 
 VERBOSE = False
 
-def parse_file(result_file):
+def parse_result_file(result_file: str) -> float:
 	""" """
 	if not os.path.isfile(result_file):
 		if VERBOSE:
@@ -115,7 +115,7 @@ def parse_folder(folder, resolution: str):
 	for b in resolutions:
 		result_file = os.path.join(folder, b, 'ss', 'results.txt')
 		# parse_file 
-		mious.append(parse_file(result_file))
+		mious.append(parse_result_file(result_file))
 
 	if resolution == 'max':
 		max_miou = max(mious)
@@ -125,7 +125,7 @@ def parse_folder(folder, resolution: str):
 		val_idx = resolutions.index(resolution)
 		return [mious[val_idx]]
 
-def harmonic_mean(x):
+def harmonic_mean(x: np.ndarray) -> float:
 	""" 
 	1. Take the reciprocal of all numbers in the dataset
 	2. Find the arithmetic mean of those reciprocals
@@ -136,12 +136,12 @@ def harmonic_mean(x):
 	return 1/mean
 
 
-def arithmetic_mean(x):
+def arithmetic_mean(x: np.ndarray) -> float:
 	""" """
 	return np.mean(x)
 
 
-def geometric_mean(x):
+def geometric_mean(x: np.ndarray) -> float:
 	""" """
 	n = x.shape[0]
 	prod = np.prod(x)
@@ -178,21 +178,21 @@ def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'ha
 		dump_results_markdown(name, results)
 
 
-def dump_results_latex(name, results):
+def dump_results_latex(name: str, results) -> None:
 	""" """
 	results = ['/'.join(["{:.1f}".format(r).rjust(5) for r in x]) for x in results]
 	results = ['$ ' + r + ' $' for r in results]
 	print(name.rjust(50), ' & ',    ' & '.join(results) + '\\\\')
 
 
-def dump_results_markdown(name, results):
+def dump_results_markdown(name: str, results) -> None:
 	""" """
 	results = ['|'.join(["{:.1f}".format(r).rjust(5) for r in x]) for x in results]
 	results = ['| ' + r + '' for r in results]
 	print(name.rjust(50), '  ',    ' '.join(results) + '|')
 
 
-def collect_zero_shot_results():
+def collect_zero_shot_results() -> None:
 	""" """
 	# 'ms' vs. 'ss'
 	for resolution in ['360','720','1080','max']: #  '480', '2160',
@@ -200,7 +200,7 @@ def collect_zero_shot_results():
 		collect_results_at_res(zs_datasets, resolution)
 
 
-def collect_oracle_results_at_res(resolution: str):
+def collect_oracle_results_at_res(resolution: str) -> None:
 	""" """
 	results = []
 	print(' '*60, (' '*5).join(o_datasets), ' '* 10 + 'mean')
@@ -213,7 +213,7 @@ def collect_oracle_results_at_res(resolution: str):
 	#dump_results_markdown('Oracle', results)
 
 
-def collect_oracle_results():
+def collect_oracle_results() -> None:
 	# 'ms' vs. 'ss'
 	for resolution in ['360','720','1080','max']: #  '480', '2160',
 		print(f'At resolution {resolution}')
