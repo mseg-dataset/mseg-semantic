@@ -1,11 +1,13 @@
+#!/usr/bin/python3
 
-
+import argparse
 import os
 import pdb
+from typing import List
+
 import numpy as np
 # import scipy.stats.hmean as hmean
 from scipy.stats.mstats import gmean
-from typing import List
 
 # zero_shot_datasets
 zs_datasets = [
@@ -228,12 +230,28 @@ def collect_training_dataset_results():
 		collect_results_at_res(training_datasets, resolution)
 
 
-if __name__ == '__main__':
-	""" """
-	#collect_zero_shot_results()
-	#collect_oracle_results()
-	collect_training_dataset_results()
+if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--regime",
+        required=True
+        type=int,
+        help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` "
+    )
+	args = parser.parse_args()
+	logger.info(args)
 
+	if args.regime == 'zero_shot':
+		collect_zero_shot_results()
 
+	elif args.regime == 'oracle':
+		collect_oracle_results()
+
+	elif args.regime == 'training_datasets':
+		collect_training_dataset_results()
+
+	else:
+		print("Unknown testing regime")
 
 
