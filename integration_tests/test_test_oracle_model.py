@@ -2,14 +2,19 @@
 
 from types import SimpleNamespace
 
-from mseg_semantic.tool.test_universal_tax import evaluate_universal_tax_model
+from mseg_semantic.tool.test_oracle_tax import test_oracle_taxonomy_model
 
 REPO_ROOT_ = Path(__file__).resolve().parent.parent
 
 def test_evaluate_universal_tax_model():
 	"""
 	Ensure testing script works correctly.
+	"""
+	args = None
+	use_gpu = True
+	
 
+	"""
 	base_sizes=(
 	        #360
 	        720
@@ -19,15 +24,14 @@ def test_evaluate_universal_tax_model():
 		dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
 	"""
 	base_size = 360
-	# Args that would be provided in command line and in config file
 	d = {
-		'dataset': 'camvid-11'
+		'dataset': 'camvid-11',
 		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
-		'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
+		'model_path': '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/camvid-11-1m.pth',
 		'model_name': 'mseg-3m',
-		
-		'input_file': 'default'
+
+		'input_file': 'default',
 		'base_size': base_size,
 		'test_h': 713,
  		'test_w': 713,
@@ -37,15 +41,37 @@ def test_evaluate_universal_tax_model():
 		'index_start': 0,
 		'index_step': 0,
 		'workers': 16
-
 	}
 	args = SimpleNamespace(**d)
 	use_gpu = True
-	print(args)
-	evaluate_universal_tax_model(args, use_gpu)
+	test_oracle_taxonomy_model(args, use_gpu)
 
 	# assert a file exists
 	print('Completed')
+
+	# for base_size in [360,720,1080]:
+	# 	# Args that would be provided in command line and in config file
+	# 	d = {
+	# 		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
+	# 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
+	# 		'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
+	# 		'input_file': f'{REPO_ROOT_}/tests/test_data/demo_images',
+	# 		'model_name': 'mseg-3m',
+	# 		'dataset': 'default',
+	# 		'base_size': base_size,
+	# 		'test_h': 713,
+	#  		'test_w': 713,
+	#  		'scales': [1.0],
+	#  		'save_folder': 'default',
+	#  		'arch': 'hrnet',
+	# 		'index_start': 0,
+	# 		'index_step': 0,
+	# 		'workers': 16
+	# 	}
+	# 	args = SimpleNamespace(**d)
+	# 	use_gpu = True
+	# 	print(args)
+	# 	run_universal_demo(args, use_gpu)
 
 	# 	# assert result files exist
 	# 	results_dir = f'{REPO_ROOT_}/temp_files/mseg-3m_default_universal_ss/{base_size}/gray'
@@ -59,10 +85,3 @@ def test_evaluate_universal_tax_model():
 	# 		print(gray_fpath)
 	# 		assert Path(gray_fpath).exists()
 	# 		os.remove(gray_fpath)
-
-
-
-
-
-
-
