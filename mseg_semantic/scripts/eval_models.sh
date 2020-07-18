@@ -85,7 +85,8 @@ for base_size in ${base_sizes[@]}; do
 				script_name="eval_universal_tax_model_overcap_3gpu.sh"
 			else
 				script_name="eval_universal_tax_model_overcap_1gpu.sh"
-
+			fi
+			
 			echo $script_name
 			exit
 
