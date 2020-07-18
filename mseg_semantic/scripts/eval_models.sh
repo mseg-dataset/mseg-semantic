@@ -5,20 +5,20 @@ mkdir -p ${outf}
 
 
 datasets=(
-	#wilddash-19
-	#camvid-11
-	#scannet-20
-	#kitti-19
-	#pascal-context-60
-	#voc2012
+	wilddash-19
+	camvid-11
+	scannet-20
+	kitti-19
+	pascal-context-60
+	voc2012
 	
-	#ade20k-150
-	#bdd
-	cityscapes-19
-	#coco-panoptic-133
-	#idd-39
-	#mapillary-public65
-	#sunrgbd-37
+	ade20k-150
+	bdd
+	# cityscapes-19
+	coco-panoptic-133
+	idd-39
+	mapillary-public65
+	sunrgbd-37
 	)
 
 training_datasets=(
