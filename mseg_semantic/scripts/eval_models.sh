@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export outf=2020_06_24_test
+export outf=2020_07_18_test
 mkdir -p ${outf}
 
 
@@ -86,14 +86,15 @@ for base_size in ${base_sizes[@]}; do
 			fi
 
 			echo " "
-			echo $d_folder
+			echo "Evaluate on: ${d_folder}"
 			echo $script_name
-			echo " "
 
 			#sbatch --dependency=singleton --job-name=mseg_eval_A -c 5 -p short -x jarvis,vicki,cortana,gideon,ephemeral-3 --gres=gpu:1 \
 			sbatch -c 5 --job-name=mseg_eval_overcap_A \
 			-o ${outf}/${model_name}_${base_size}_${dataset}.log \
 			${script_name} ${base_size} ${model_name} ${dataset} ${d_folder}
+
+			echo " "
 		done
 	done
 done

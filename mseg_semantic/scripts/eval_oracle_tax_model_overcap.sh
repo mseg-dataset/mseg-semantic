@@ -31,4 +31,4 @@ fi
 echo "On node ${HOSTNAME}"
 echo "Running model ${model_name} on dataset ${dataset_name}, using model at ${model_fpath}"
 
-srun python -u mseg_semantic/tool/test_oracle_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
+srun python -u ../tool/test_oracle_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}

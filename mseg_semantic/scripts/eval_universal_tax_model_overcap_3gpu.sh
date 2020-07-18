@@ -35,4 +35,4 @@ echo "Running model ${model_name} on dataset ${dataset_name}, using model at ${m
 echo "CUDA VISIBLE DEVICES ${CUDA_VISIBLE_DEVICES}"
 nvidia-smi
 
-srun python -u mseg_semantic/tool/test_universal_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name} 
+srun python -u ../tool/test_universal_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name} 

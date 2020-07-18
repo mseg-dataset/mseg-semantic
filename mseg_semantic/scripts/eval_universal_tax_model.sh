@@ -19,4 +19,4 @@ fi
 echo "On node ${HOSTNAME}"
 echo "Running model ${model_name} on dataset ${dataset_name}, using model at ${model_fpath}"
 
-python -u mseg_semantic/tool/test_universal_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
+python -u ../tool/test_universal_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}

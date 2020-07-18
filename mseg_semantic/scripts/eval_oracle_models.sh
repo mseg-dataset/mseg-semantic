@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export outf=2020_07_06_test
+export outf=2020_07_18_test
 mkdir -p ${outf}
 
 
