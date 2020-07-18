@@ -108,7 +108,7 @@ def parse_file(result_file):
 
 def parse_folder(folder, resolution: str):
 	"""
-	# folder containing subfolders as 360/480/1080
+	# folder containing subfolders as 360/720/1080
 	"""
 	mious = []
 	resolutions = ['360', '720', '1080']
