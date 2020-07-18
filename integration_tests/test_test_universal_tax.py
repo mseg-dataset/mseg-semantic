@@ -24,7 +24,7 @@ def test_evaluate_universal_tax_model():
 		'dataset': 'camvid-11'
 		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
-		'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
+		'model_path': '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/mseg-3m.pth',
 		'model_name': 'mseg-3m',
 		
 		'input_file': 'default'
