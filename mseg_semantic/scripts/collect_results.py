@@ -235,8 +235,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--regime",
-        required=True
-        type=int,
+        required=True,
+        type=str,
         help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` "
     )
 	args = parser.parse_args()
