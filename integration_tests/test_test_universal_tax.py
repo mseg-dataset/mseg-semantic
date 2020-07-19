@@ -52,7 +52,7 @@ def test_evaluate_universal_tax_model():
 	print('Completed')
 
 	result_file_path = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/'
-	result_file_path += f'camvid-11-1m/camvid-11/{base_size}/ss/results.txt'
+	result_file_path += f'mseg-3m/camvid-11/{base_size}/ss/results.txt'
 	assert Path(result_file_path).exists()
 	mIoU = parse_result_file(result_file_path)
 	print(f"mIoU: {mIoU}")
