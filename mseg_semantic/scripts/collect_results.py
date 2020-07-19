@@ -231,14 +231,14 @@ def collect_training_dataset_results():
 
 
 if __name__ == "__main__":
-    # Parse command line arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--regime",
-        required=True,
-        type=str,
-        help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` "
-    )
+	# Parse command line arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument(
+		"--regime",
+		required=True,
+		type=str,
+		help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` "
+	)
 	args = parser.parse_args()
 	logger.info(args)
 
