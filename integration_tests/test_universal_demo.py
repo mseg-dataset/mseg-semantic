@@ -9,6 +9,10 @@ from mseg_semantic.tool.universal_demo import run_universal_demo
 
 REPO_ROOT_ = Path(__file__).resolve().parent.parent
 
+# Replace this variables with your own path to run integration tests.
+INTEGRATION_TEST_OUTPUT_DIR = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data'
+# Copy the mseg-3m-1080p model there
+MSEG_3M_1080p_MODEL_PATH = f'{INTEGRATION_TEST_OUTPUT_DIR}/mseg-3m.pth'
 
 def test_run_universal_demo():
 	"""
@@ -26,7 +30,7 @@ def test_run_universal_demo():
 		d = {
 			'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}_ms.yaml', 
 			#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
-			'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
+			'model_path': MSEG_3M_1080p_MODEL_PATH,
 			'input_file': f'{REPO_ROOT_}/tests/test_data/demo_images',
 			'model_name': 'mseg-3m',
 			'dataset': 'default',

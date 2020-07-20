@@ -8,6 +8,11 @@ from mseg_semantic.tool.test_universal_tax import evaluate_universal_tax_model
 
 REPO_ROOT_ = Path(__file__).resolve().parent.parent
 
+# Replace this variables with your own path to run integration tests.
+INTEGRATION_TEST_OUTPUT_DIR = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data'
+# Copy the mseg-3m-1080p model there
+MSEG_3M_1080p_MODEL_PATH = f'{INTEGRATION_TEST_OUTPUT_DIR}/mseg-3m.pth'
+
 def test_evaluate_universal_tax_model():
 	"""
 	Ensure universal model testing script works correctly.
@@ -25,8 +30,7 @@ def test_evaluate_universal_tax_model():
 	d = {
 		'dataset': 'camvid-11',
 		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}_ss.yaml', 
-		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
-		'model_path': '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/mseg-3m.pth',
+		'model_path': MSEG_3M_1080p_MODEL_PATH,
 		'model_name': 'mseg-3m',
 		
 		'input_file': 'default',
@@ -51,8 +55,8 @@ def test_evaluate_universal_tax_model():
 	# assert a file exists
 	print('Completed')
 
-	result_file_path = '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/'
-	result_file_path += f'mseg-3m/camvid-11/{base_size}/ss/results.txt'
+	result_file_path = INTEGRATION_TEST_OUTPUT_DIR
+	result_file_path += f'/mseg-3m/camvid-11/{base_size}/ss/results.txt'
 	assert Path(result_file_path).exists()
 	mIoU = parse_result_file(result_file_path)
 	print(f"mIoU: {mIoU}")
