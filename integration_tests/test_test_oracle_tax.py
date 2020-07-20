@@ -23,7 +23,7 @@ def test_evaluate_oracle_tax_model():
 	base_size = 1080
 	d = {
 		'dataset': 'camvid-11',
-		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
+		'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}_ss.yaml', 
 		#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
 		'model_path': '/srv/scratch/jlambert30/MSeg/mseg-semantic/integration_test_data/camvid-11-1m.pth',
 		'model_name': 'mseg-3m',
