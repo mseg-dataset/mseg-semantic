@@ -147,7 +147,14 @@ Many thanks to Hengshuang Zhao for his [semseg](https://github.com/hszhao/semseg
 
 ## Other baseline models from our paper:
 
-Below we report the performance of individually-trained models that serve as baselines. Inference is performed at **single-scale** below:
+Below we report the performance of individually-trained models that serve as baselines. Inference is performed at **single-scale** below.
+
+You can obtain the following table by running 
+```python
+python collect_results.py --regime zero_shot --scale ss --output_format markdown
+python collect_results.py --regime oracle --scale ss --output_format markdown
+```
+after `./eval_models.sh`:
 
 Abbreviated Dataset Names: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
 
