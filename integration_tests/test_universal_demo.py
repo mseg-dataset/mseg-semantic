@@ -24,7 +24,7 @@ def test_run_universal_demo():
 	for base_size in [360,720,1080]:
 		# Args that would be provided in command line and in config file
 		d = {
-			'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}.yaml', 
+			'config': f'{REPO_ROOT_}/mseg_semantic/config/test/default_config_${base_size}_ms.yaml', 
 			#'model_path': f'{_ROOT}/pretrained-semantic-models/${model_name}/${model_name}.pth',
 			'model_path': '/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/mseg-3m/mseg-3m.pth',
 			'input_file': f'{REPO_ROOT_}/tests/test_data/demo_images',
