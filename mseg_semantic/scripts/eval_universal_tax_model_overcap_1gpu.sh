@@ -16,7 +16,7 @@ model_name=$2
 dataset_name=$3
 dataset_folder=$4
 
-# MULTI-SCALE config_fpath=mseg_semantic/config/test/default_config_${base_size}.yaml
+# MULTI-SCALE config_fpath=mseg_semantic/config/test/default_config_${base_size}_ms.yaml
 config_fpath=../config/test/default_config_${base_size}_ss.yaml
 model_fpath=../../../pretrained-semantic-models/${model_name}/${model_name}.pth
 

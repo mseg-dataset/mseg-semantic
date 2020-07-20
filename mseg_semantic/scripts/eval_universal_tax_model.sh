@@ -4,7 +4,7 @@ base_size=$1
 model_name=$2
 dataset_name=$3
 
-config_fpath=../config/test/default_config_${base_size}.yaml
+config_fpath=../config/test/default_config_${base_size}_ss.yaml
 model_fpath=../../../pretrained-semantic-models/${model_name}/${model_name}.pth
 
 results_path=../../../pretrained-semantic-models/${model_name}/${model_name}/${dataset_name}/${base_size}/results.txt
