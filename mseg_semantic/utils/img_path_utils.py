@@ -34,3 +34,22 @@ def dump_relpath_txt(jpg_dir: str, txt_output_dir: str) -> str:
 	write_txt_lines(txt_save_fpath, txt_lines)
 	return txt_save_fpath
 
+def get_unique_stem_from_last_k_strs(fpath: str, k: int = 4) -> str:
+	"""
+		For datasets like ScanNet where image filename stem is not unique.
+		Will not return the suffix, e.g. 
+		'aiport_terminal/ADE_train_00000001_seg.png'
+		would be returned as 'aiport_terminal_ADE_train_00000001_seg'
+
+		Args:
+		-   fpath: absolute file path
+		-   k: integer representing number of subdirs in filepath to use
+				in new filename, starting at leaf in filesystem tree
+
+		Returns:
+		-   unique_stem: string
+	"""
+	parts = Path(fpath).parts
+	concat_kparent_dirs = '_'.join(parts[-k:-1])
+	unique_stem = concat_kparent_dirs + '_' + Path(fpath).stem
+	return unique_stem

@@ -42,34 +42,38 @@ logger = get_logger()
 
 cv2.ocl.setUseOpenCL(False)
 
-class UniversalDemoRunner():
-    """ """
-    def __init__(self, args, use_gpu = True):
-        self.use_gpu = use_gpu
-        if 'scannet' in args.dataset:
-            args.img_name_unique = False
-        else:
-            args.img_name_unique = True
 
-        args.u_classes = get_universal_class_names()
-        args.print_freq = 10
+def run_universal_demo(args, use_gpu: bool = True) -> None:
+    """
+        Args:
+        -   args:
+        -   use_gpu
+    """
+    if 'scannet' in args.dataset:
+        args.img_name_unique = False
+    else:
+        args.img_name_unique = True
 
-        args.split = 'test'
-        os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
-        logger.info(args)
-        logger.info("=> creating model ...")
-        args.num_model_classes = len(args.u_classes)
+    args.u_classes = get_universal_class_names()
+    args.print_freq = 10
 
-        itask = InferenceTask(
-            args,
-            base_size = args.base_size,
-            crop_h = args.test_h,
-            crop_w = args.test_w,
-            input_file=args.input_file,
-            output_taxonomy='universal',
-            scales = args.scales
-        )
-        itask.execute()
+    args.split = 'test'
+    #os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
+    logger.info(args)
+    logger.info("=> creating model ...")
+    args.num_model_classes = len(args.u_classes)
+
+    itask = InferenceTask(
+        args,
+        base_size = args.base_size,
+        crop_h = args.test_h,
+        crop_w = args.test_w,
+        input_file=args.input_file,
+        model_taxonomy='universal',
+        eval_taxonomy='universal',
+        scales = args.scales
+    )
+    itask.execute()
 
 
 def get_parser() -> CfgNode:
@@ -102,5 +106,5 @@ if __name__ == '__main__':
         args.dataset = Path(args.input_file).stem
 
     print(args)
-    test_runner = UniversalDemoRunner(args, use_gpu)
+    run_universal_demo(args, use_gpu)
 

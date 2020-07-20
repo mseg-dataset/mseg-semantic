@@ -95,14 +95,40 @@ Now, run our demo script:
 ```
 model_name=mseg-3m
 model_path=/path/to/downloaded/model/from/google/drive
-config=mseg_semantic/config/test/default_config_360.yaml
+config=mseg_semantic/config/test/default_config_360_ms.yaml
 python -u mseg_semantic/tool/universal_demo.py \
   --config=${config} model_name ${model_name} model_path ${model_path} input_file ${input_file}
 ```
 
-If you would like to make predictions in a specific dataset's taxonomy, e.g. Cityscapes, for the RVC Challenge, please run:
-``` (will be added) ```
 
+
+## Testing a Model Trained in the Universal Taxonomy
+
+To compute mIoU scores on all train and test datasets, run the following (single-scale inference):
+
+```python
+cd mseg_semantic/scripts
+./eval_models.sh
+```
+This will launch several hundred SLURM jobs, each of the following form:
+```
+python mseg_semantic/tool/test_universal_tax.py --config=$config_path dataset $dataset_name model_path $model_path model_name $model_name
+```
+Please expect this to take many hours, depending upon your SLURM cluster capacity.
+
+## Testing a Model Trained in the Oracle Taxonomy
+
+"Oracle" models are trained in a test dataset's taxonomy, on its train split. To compute mIoU scores on the test dataset's val or test set, please run the following:
+
+This will launch 5 SLURM jobs, each of the following form
+```
+python mseg_semantic/tool/test_oracle_tax.py
+```
+
+Test an MSeg model on the relabeled 'val' set of a training dataset, e.g. COCO-Panoptic:
+```
+python -u mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360_ss.yaml dataset coco-panoptic-133 model_path ../pretrained-semantic-models/mseg-3m/mseg-3m.pth model_name mseg-3m
+```
 
 ## Citing MSeg
 
@@ -121,7 +147,14 @@ Many thanks to Hengshuang Zhao for his [semseg](https://github.com/hszhao/semseg
 
 ## Other baseline models from our paper:
 
-Below we report the performance of individually-trained models that serve as baselines. Inference is performed at **single-scale** below:
+Below we report the performance of individually-trained models that serve as baselines. Inference is performed at **single-scale** below.
+
+You can obtain the following table by running 
+```python
+python collect_results.py --regime zero_shot --scale ss --output_format markdown
+python collect_results.py --regime oracle --scale ss --output_format markdown
+```
+after `./eval_models.sh`:
 
 Abbreviated Dataset Names: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
 
@@ -156,7 +189,28 @@ Note that the output number of classes for 7 of the models listed above will be 
 
 By training each baseline *that is trained on a single training dataset* within the universal taxonomy, we are able to specify just 7+6=13 mappings in [this table](https://github.com/mseg-dataset/mseg-api/blob/master/mseg/class_remapping_files/MSeg_master.tsv) (each training dataset's taxonomy->universal taxonomy, and then universal taxonomy to each test dataset).
 
+## Results on the Training Datasets
 
+You can obtain the following table by running 
+```python
+python collect_results.py --regime training_datasets --scale ss --output_format markdown
+```
+after `./eval_models.sh`:
+|                            | COCO  | ADE20k| Mapill|  IDD  |  BDD  |Citysca|SUN-RGBD|h. mean|
+| :------------------------: | :--:  | :--:  | :--:  | :--:  | :--:  | :--:  | :--:  | :--:  |
+|                    COCO    |  52.7 |  19.1 |  28.4 |  31.1 |  44.9 |  46.9 |  29.6 |  32.4|
+|                  ADE20K    |  14.6 |  45.6 |  24.2 |  26.8 |  40.7 |  44.3 |  36.0 |  28.7|
+|               Mapillary    |   7.0 |   6.2 |  53.0 |  50.6 |  59.3 |  71.9 |   0.3 |   1.7|
+|                     IDD    |   3.2 |   3.0 |  24.6 |  64.9 |  42.4 |  48.0 |   0.4 |   2.3|
+|                     BDD    |   3.8 |   4.2 |  23.2 |  32.3 |  63.4 |  58.1 |   0.3 |   1.6|
+|              Cityscapes    |   3.4 |   3.1 |  22.1 |  30.1 |  44.1 |  77.5 |   0.2 |   1.2|
+|                SUN RGBD    |   3.4 |   7.0 |   1.1 |   1.0 |   2.2 |   2.6 |  43.0 |   2.1|
+|                 MSeg-1m    |  50.7 |  45.7 |  53.1 |  65.3 |  68.5 |  80.4 |  50.3 |  57.1|
+|  MSeg-1m-w/o relabeling    |  50.4 |  45.4 |  53.1 |  65.1 |  66.5 |  79.5 |  49.9 |  56.6|
+|            MSeg-MGDA-1m    |  48.1 |  43.7 |  51.6 |  64.1 |  67.2 |  78.2 |  49.9 |  55.4|
+|            MSeg-3m-480p    |  56.1 |  49.6 |  53.5 |  64.5 |  67.8 |  79.9 |  49.2 |  58.5|
+|            MSeg-3m-720p    |  53.3 |  48.2 |  53.5 |  64.8 |  68.6 |  79.8 |  49.3 |  57.8|
+|           MSeg-3m-1080p    |  53.6 |  49.2 |  54.9 |  66.3 |  69.1 |  81.5 |  50.1 |  58.8|
 
 ## Experiment Settings
 We use the [HRNetV2-W48](https://arxiv.org/pdf/1904.04514.pdf) architecture. All images are resized to 1080p (shorter size=1080) at training time before a crop is taken.
@@ -168,6 +222,21 @@ We generally follow the recommendations of [Zhao et al.](https://github.com/hszh
 ## Training Instructions
 
 Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive. We use 8 Quadro RTX 6000 cards, each w/ 24 GB of RAM, for training.
+
+
+## Running unit tests and integration tests
+
+To run the unit tests, execute
+```python
+pytest tests
+````
+All should pass. To run the integration tests, follow the instructions in the following 3 files, then run:
+```python
+python test_test_oracle_tax.py
+python test_test_universal_tax.py
+python test_universal_demo.py
+```
+All should also pass.
 
 ## Frequently Asked Questions (FAQ) (identical to FAQ on [`mseg-api` page](https://github.com/mseg-dataset/mseg-api))
 **Q**: How is testing performed on the test datasets? In the paper you talk about "zero-shot transfer" -- how this is performed? Are the test dataset labels also mapped or included in the unified taxonomy? If you remapped the test dataset labels to the unified taxonomy, are the reported results the performances on the unified label space, or on each test dataset's original label space? How did you you obtain results on the WildDash dataset - which is evaluated by the server - when the MSeg taxonomy may be different from the WildDash dataset.
@@ -185,3 +254,5 @@ Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6p
 **Q**: How are datasets images read in for training/inference? Should I use the `dataset_apis` from `mseg-api`?
 
 **A**: The `dataset_apis` from `mseg-api` are not for training or inference. They are purely for generating the MSeg dataset labels on disk. We read in the datasets using [`mseg_semantic/utils/dataset.py`](https://github.com/mseg-dataset/mseg-semantic/blob/master/mseg_semantic/utils/dataset.py) and then remap them to the universal space on the fly.
+
+

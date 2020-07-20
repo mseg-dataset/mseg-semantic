@@ -1,24 +1,25 @@
 #!/usr/bin/python3
 
-import cv2
-import imageio
 import logging
-import numpy as np
 import os
 from pathlib import Path
 import pdb
 import time
-import torch
-import torch.nn as nn
-import torch.utils.data
-import torch.backends.cudnn as cudnn
 from typing import List, Tuple
 
+import cv2
+import imageio
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.backends.cudnn as cudnn
+import torch.nn.functional as F
+import torch.utils.data
+
 from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
-from mseg.utils.names_utils import get_universal_class_names
+from mseg.utils.names_utils import get_universal_class_names, load_class_names
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.resize_util import resize_img_by_short_side
-
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
@@ -30,7 +31,11 @@ from mseg_semantic.utils.normalization_utils import (
 )
 from mseg_semantic.utils.cv2_video_utils import VideoWriter, VideoReader
 from mseg_semantic.utils import dataset, transform, config
-from mseg_semantic.utils.img_path_utils import dump_relpath_txt
+from mseg_semantic.utils.img_path_utils import (
+	dump_relpath_txt,
+	get_unique_stem_from_last_k_strs
+)
+from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 
 
 """
@@ -49,6 +54,26 @@ screen resolution is generally described by shorter side length.
 
 "base_size" is a very important parameter and will
 affect results significantly.
+
+There are 4 possible configurations for 
+(model_taxonomy, eval_taxonomy):
+
+(1) model_taxonomy='universal', eval_taxonomy='universal'
+	Occurs when:
+	(a) running demo w/ universal output
+	(b) evaluating universal models on train datasets
+	in case (b), training 'val' set labels are converted to univ.
+
+(2) model_taxonomy='universal', eval_taxonomy='test_dataset':
+	(a) generic zero-shot cross-dataset evaluation case
+
+(3) model_taxonomy='test_dataset', eval_taxonomy='test_dataset'
+	(a) evaluating `oracle` model -- trained and tested on same
+		dataset (albeit on separate splits)
+
+(4) model_taxonomy='naive', eval_taxonomy='test_dataset':
+	Occurs when:
+	(a) evaluating naive unified model on test datasets
 """
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
@@ -59,36 +84,14 @@ def get_logger():
     logger_name = "main-logger"
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler()
-    fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-    handler.setFormatter(logging.Formatter(fmt))
-    logger.addHandler(handler)
+    if not logger.handlers:
+	    handler = logging.StreamHandler()
+	    fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
+	    handler.setFormatter(logging.Formatter(fmt))
+	    logger.addHandler(handler)
     return logger
 
 logger = get_logger()
-
-
-def get_unique_stem_from_last_k_strs(fpath: str, k: int = 4) -> str:
-	"""
-		Args:
-		-   fpath
-		-   k
-
-		Returns:
-		-   unique_stem: string
-	"""
-	parts = Path(fpath).parts
-	unique_stem = '_'.join(parts[-4:-1]) + '_' + Path(fpath).stem
-	return unique_stem
-
-
-class ToFlatLabel(object):
-	def __init__(self, tc_init, dataset):
-		self.dataset = dataset
-		self.tc = tc_init
-
-	def __call__(self, image, label):
-		return image, self.tc.transform_label(label, self.dataset)
 
 
 def resize_by_scaled_short_side(
@@ -102,7 +105,7 @@ def resize_by_scaled_short_side(
 		-	scale: 
 
 		Returns:
-		-	image_scale: 
+		-	image_scaled: 
 	"""
 	h, w, _ = image.shape
 	short_size = round(scale * base_size)
@@ -113,8 +116,8 @@ def resize_by_scaled_short_side(
 		new_h = round(short_size/float(w)*h)
 	else:
 		new_w = round(short_size/float(h)*w)
-	image_scale = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
-	return image_scale
+	image_scaled = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+	return image_scaled
 
 def pad_to_crop_sz(
 	image: np.ndarray,
@@ -178,7 +181,8 @@ class InferenceTask:
 		crop_h: int,
 		crop_w: int,
 		input_file: str,
-		output_taxonomy: str,
+		model_taxonomy: str,
+		eval_taxonomy: str,
 		scales: List[float],
 		use_gpu: bool = True
 		):
@@ -187,7 +191,8 @@ class InferenceTask:
 		mean: 3-tuple of floats, representing pixel mean value
 		std: 3-tuple of floats, representing pixel standard deviation
 
-		'args' should contain at least two fields (shown below).
+		'args' should contain at least 5 fields (shown below).
+		See brief explanation at top of file regarding taxonomy arg configurations.
 
 			Args:
 			-	args:
@@ -196,22 +201,28 @@ class InferenceTask:
 			-	crop_w: integer representing crop width, e.g. 473
 			-	input_file: could be absolute path to .txt file, .mp4 file,
 					or to a directory full of jpg images
-			-	output_taxonomy
+			-	model_taxonomy: taxonomy in which trained model makes predictions
+			-	eval_taxonomy: taxonomy in which trained model is evaluated
 			-	scales
-			-	use_gpu
+			-	use_gpu: TODO, not supporting cpu at this time
 		"""
 		self.args = args
+
+		# Required arguments:
+		assert isinstance(self.args.save_folder, str)
+		assert isinstance(self.args.dataset, str)
 		assert isinstance(self.args.img_name_unique, bool)
 		assert isinstance(self.args.print_freq, int)
 		assert isinstance(self.args.num_model_classes, int)
 		assert isinstance(self.args.model_path, str)
-		self.pred_dim = self.args.num_model_classes
+		self.num_model_classes = self.args.num_model_classes
 
 		self.base_size = base_size
 		self.crop_h = crop_h
 		self.crop_w = crop_w
 		self.input_file = input_file
-		self.output_taxonomy = output_taxonomy
+		self.model_taxonomy = model_taxonomy
+		self.eval_taxonomy = eval_taxonomy
 		self.scales = scales
 		self.use_gpu = use_gpu
 
@@ -222,15 +233,35 @@ class InferenceTask:
 		self.gray_folder = None # optional, intended for dataloader use
 		self.data_list = None # optional, intended for dataloader use
 
-		if self.output_taxonomy != 'universal':
-			assert isinstance(self.args.dataset, str)
-			self.dataset_name = args.dataset
+		if model_taxonomy == 'universal' and eval_taxonomy == 'universal':
+			# See note above.
+			# no conversion of predictions required
+			self.num_eval_classes = self.num_model_classes 
+
+		elif model_taxonomy == 'test_dataset' and eval_taxonomy == 'test_dataset':
+			# no conversion of predictions required
+			self.num_eval_classes = len(load_class_names(args.dataset))
+
+		elif model_taxonomy == 'naive' and eval_taxonomy == 'test_dataset':
+			self.tc = NaiveTaxonomyConverter()
+			if args.dataset in self.tc.convs.keys() and use_gpu:
+				self.tc.convs[args.dataset].cuda()
+			self.tc.softmax.cuda()
+			self.num_eval_classes = len(load_class_names(args.dataset))
+
+		elif model_taxonomy == 'universal' and eval_taxonomy == 'test_dataset':
+			# no label conversion required here, only predictions converted
 			self.tc = TaxonomyConverter()
+			if args.dataset in self.tc.convs.keys() and use_gpu:
+				self.tc.convs[args.dataset].cuda()
+			self.tc.softmax.cuda()
+			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		if self.args.arch == 'psp':
 			assert isinstance(self.args.zoom_factor, int)
 			assert isinstance(self.args.network_name, int)
 
+		# `id_to_class_name_map` only used for visualizing universal taxonomy
 		self.id_to_class_name_map = {
 			i: classname for i, classname in enumerate(get_universal_class_names())
 		}
@@ -293,8 +324,15 @@ class InferenceTask:
 		network and obtain predictions. Gracefully handles .txt, 
 		or video file (.mp4, etc), or directory input.
 		"""
-		logger.info('>>>>>>>>>>>>>>>> Start inference task >>>>>>>>>>>>>>>>')
+		logger.info('>>>>>>>>>>>>>> Start inference task >>>>>>>>>>>>>')
 		self.model.eval()
+
+		if self.input_file is None and self.args.dataset != 'default':
+			# evaluate on a train or test dataset
+			test_loader, self.data_list = create_test_loader(self.args)
+			self.execute_on_dataloader(test_loader)
+			logger.info('<<<<<<<<< Inference task completed <<<<<<<<<')
+			return
 
 		suffix = self.input_file[-4:]
 		is_dir = os.path.isdir(self.input_file)
@@ -306,22 +344,15 @@ class InferenceTask:
 		elif is_dir:
 			# argument is a path to a directory
 			self.create_path_lists_from_dir()
-			test_loader = self.create_test_loader()
+			test_loader, self.data_list = create_test_loader(self.args)
 			self.execute_on_dataloader(test_loader)
-
 		elif is_vid:
 			# argument is a video
 			self.execute_on_video()
-
-		elif not is_dir and not is_img and self.args.dataset != 'default':
-			# evaluate on a train or test dataset
-			test_loader = self.create_test_loader()
-			self.execute_on_dataloader(test_loader)		
-
 		else:
 			logger.info('Error: Unknown input type')
 
-		logger.info('<<<<<<<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<<<<')
+		logger.info('<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<')
 
 	def render_single_img_pred(self, min_resolution: int = 1080):
 		"""
@@ -366,35 +397,6 @@ class InferenceTask:
 		txt_save_fpath = dump_relpath_txt(self.input_file, txt_output_dir)
 		self.args.test_list = txt_save_fpath
 
-	def create_test_loader(self):
-		"""
-			Create a Pytorch dataloader from a dataroot and list of 
-			relative paths.
-		"""
-		test_transform = transform.Compose([transform.ToTensor()])
-		test_data = dataset.SemData(
-			split=self.args.split,
-			data_root=self.args.data_root,
-			data_list=self.args.test_list,
-			transform=test_transform
-		)
-
-		index_start = self.args.index_start
-		if self.args.index_step == 0:
-			index_end = len(test_data.data_list)
-		else:
-			index_end = min(index_start + args.index_step, len(test_data.data_list))
-		test_data.data_list = test_data.data_list[index_start:index_end]
-		self.data_list = test_data.data_list
-		test_loader = torch.utils.data.DataLoader(
-			test_data,
-			batch_size=1,
-			shuffle=False,
-			num_workers=self.args.workers,
-			pin_memory=True
-		)
-		return test_loader
-
 
 	def execute_on_img(self, image: np.ndarray) -> np.ndarray:
 		"""
@@ -413,13 +415,20 @@ class InferenceTask:
 			-	gray_img: prediction, representing predicted label map
 		"""
 		h, w, _ = image.shape
+		is_single_scale = len(self.scales) == 1
 
-		prediction = np.zeros((h, w, self.pred_dim), dtype=float)
-		prediction = torch.Tensor(prediction).cuda()
+		if is_single_scale:
+			# single scale, do addition and argmax on CPU
+			image_scaled = resize_by_scaled_short_side(image, self.base_size, self.scales[0])
+			prediction = torch.Tensor(self.scale_process_cuda(image_scaled, h, w))
 
-		for scale in self.scales:
-			image_scale = resize_by_scaled_short_side(image, self.base_size, scale)
-			prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scale, h, w)).cuda()
+		else:
+			# multi-scale, prefer to use fast addition on the GPU
+			prediction = np.zeros((h, w, self.num_eval_classes), dtype=float)
+			prediction = torch.Tensor(prediction).cuda()
+			for scale in self.scales:
+				image_scaled = resize_by_scaled_short_side(image, self.base_size, scale)
+				prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scaled, h, w)).cuda()
 
 		prediction /= len(self.scales)
 		prediction = torch.argmax(prediction, axis=2)
@@ -491,26 +500,29 @@ class InferenceTask:
 		batch_time = AverageMeter()
 		end = time.time()
 
+		check_mkdir(self.gray_folder)
+
 		for i, (input, _) in enumerate(test_loader):
 			logger.info(f'On image {i}')
-
 			data_time.update(time.time() - end)
-			# convert Pytorch tensor -> Numpy
+
+			# determine path for grayscale label map
+			image_path, _ = self.data_list[i]
+			if self.args.img_name_unique:
+				image_name = Path(image_path).stem
+			else:
+				image_name = get_unique_stem_from_last_k_strs(image_path)
+			gray_path = os.path.join(self.gray_folder, image_name + '.png')
+			if Path(gray_path).exists():
+				continue
+
+			# convert Pytorch tensor -> Numpy, then feedforward
 			input = np.squeeze(input.numpy(), axis=0)
 			image = np.transpose(input, (1, 2, 0))
 			gray_img = self.execute_on_img(image)
 
 			batch_time.update(time.time() - end)
 			end = time.time()
-			check_mkdir(self.gray_folder)
-			image_path, _ = self.data_list[i]
-
-			if self.args.img_name_unique:
-				image_name = Path(image_path).stem
-			else:
-				image_name = get_unique_stem_from_last_k_strs(image_path)
-
-			gray_path = os.path.join(self.gray_folder, image_name + '.png')
 			cv2.imwrite(gray_path, gray_img)
 
 			# todo: update to time remaining.
@@ -522,7 +534,7 @@ class InferenceTask:
 				batch_time=batch_time))
 
 
-	def scale_process_cuda(self, image: np.ndarray, h: int, w: int, stride_rate: float = 2/3):
+	def scale_process_cuda(self, image: np.ndarray, h: int, w: int, stride_rate: float = 2/3) -> np.ndarray:
 		""" First, pad the image. If input is (384x512), then we must pad it up to shape
 		to have shorter side "scaled base_size". 
 
@@ -539,10 +551,8 @@ class InferenceTask:
 		-   stride_rate
 
 		Returns:
-		-   prediction: predictions with shorter side equal to self.base_size
+		-   prediction: Numpy array representing predictions with shorter side equal to self.base_size
 		"""
-		start1 = time.time()                
-
 		ori_h, ori_w, _ = image.shape
 		image, pad_h_half, pad_w_half = pad_to_crop_sz(image, self.crop_h, self.crop_w, self.mean)
 		new_h, new_w, _ = image.shape
@@ -551,9 +561,10 @@ class InferenceTask:
 		grid_h = int(np.ceil(float(new_h-self.crop_h)/stride_h) + 1)
 		grid_w = int(np.ceil(float(new_w-self.crop_w)/stride_w) + 1)
 
-		prediction_crop = torch.zeros((self.pred_dim, new_h, new_w)).cuda()
+		prediction_crop = torch.zeros((self.num_eval_classes, new_h, new_w)).cuda()
 		count_crop = torch.zeros((new_h, new_w)).cuda()
 
+		# loop w/ sliding window, obtain start/end indices
 		for index_h in range(0, grid_h):
 			for index_w in range(0, grid_w):
 				s_h = index_h * stride_h
@@ -576,24 +587,24 @@ class InferenceTask:
 
 		# upsample or shrink predictions back down to scale=1.0
 		prediction = cv2.resize(prediction_crop, (w, h), interpolation=cv2.INTER_LINEAR)
-
 		return prediction
 
 
-	def net_process(self, image: np.ndarray, flip: bool = True):
+	def net_process(self, image: np.ndarray, flip: bool = True) -> torch.Tensor:
 		""" Feed input through the network.
 
 			In addition to running a crop through the network, we can flip
 			the crop horizontally, run both crops through the network, and then
-			average them appropriately.
+			average them appropriately. Afterwards, apply softmax, then convert
+			the prediction to the label taxonomy.
 
 			Args:
-			-   model:
 			-   image:
 			-   flip: boolean, whether to average with flipped patch output
 
 			Returns:
-			-   output:
+			-   output: Pytorch tensor representing network predicting in evaluation
+					taxonomy (not necessarily model taxonomy)
 		"""
 		input = torch.from_numpy(image.transpose((2, 0, 1))).float()
 		normalize_img(input, self.mean, self.std)
@@ -611,14 +622,16 @@ class InferenceTask:
 		if (h_o != h_i) or (w_o != w_i):
 			output = F.interpolate(output, (h_i, w_i), mode='bilinear', align_corners=True)
 
-		if self.output_taxonomy == 'universal':
-			output = self.softmax(output)
-		elif self.output_taxonomy == 'test_dataset':
-			output = self.convert_pred_to_label_tax_and_softmax(output)
+		prediction_conversion_req = self.model_taxonomy != self.eval_taxonomy
+		if prediction_conversion_req:
+			# Either (model_taxonomy='naive', eval_taxonomy='test_dataset')
+			# Or (model_taxonomy='universal', eval_taxonomy='test_dataset')
+			output = self.tc.transform_predictions_test(output, self.args.dataset)
 		else:
-			print('Unrecognized output taxonomy. Quitting....')
-			quit()
-		# print(time.time() - start1, image_scale.shape, h, w)
+			# model & eval tax match, so no conversion needed
+			assert self.model_taxonomy in ['universal','test_dataset']
+			# todo: determine when .cuda() needed here
+			output = self.softmax(output)
 
 		if flip:
 			# take back out the flipped crop, correct its orientation, and average result
@@ -631,28 +644,6 @@ class InferenceTask:
 		# output = output.permute(1,2,0)
 
 		return output
-
-
-	def convert_pred_to_label_tax_and_softmax(self, output):
-		"""
-		"""
-		if not self.args.universal:
-			output = self.tc.transform_predictions_test(output, self.args.dataset)
-		else:
-			output = self.tc.transform_predictions_universal(output, self.args.dataset)
-		return output
-
-
-    # def convert_label_to_pred_taxonomy(self, target): 
-    #     """
-    #     """
-
-    #     if self.args.universal:
-    #         _, target = ToFlatLabel(self.tc, self.args.dataset)(target, target)
-    #         return target.type(torch.uint8).numpy()
-    #     else:
-    #         return target
-
 
 
 if __name__ == '__main__':
