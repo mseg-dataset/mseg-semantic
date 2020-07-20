@@ -95,7 +95,7 @@ Now, run our demo script:
 ```
 model_name=mseg-3m
 model_path=/path/to/downloaded/model/from/google/drive
-config=mseg_semantic/config/test/default_config_360.yaml
+config=mseg_semantic/config/test/default_config_360_ms.yaml
 python -u mseg_semantic/tool/universal_demo.py \
   --config=${config} model_name ${model_name} model_path ${model_path} input_file ${input_file}
 ```
@@ -105,9 +105,9 @@ If you would like to make predictions in a specific dataset's taxonomy, e.g. Cit
 
 ## Testing a Model Trained in the Universal Taxonomy
 
-To compute mIoU scores on a particular dataset, run the following:
+To compute mIoU scores on a particular dataset, run the following (single-scale inference):
 ```
-python mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360.yaml dataset camvid-11 model_path ../pretrained-semantic-models/mseg-3m/mseg-3m.pth model_name mseg-3m
+python mseg_semantic/tool/test_universal_tax.py --config=mseg_semantic/config/test/default_config_360_ss.yaml dataset camvid-11 model_path ../pretrained-semantic-models/mseg-3m/mseg-3m.pth model_name mseg-3m
 ```
 
 ## Testing a Model Trained in the Oracle Taxonomy
@@ -203,3 +203,5 @@ Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6p
 **Q**: How are datasets images read in for training/inference? Should I use the `dataset_apis` from `mseg-api`?
 
 **A**: The `dataset_apis` from `mseg-api` are not for training or inference. They are purely for generating the MSeg dataset labels on disk. We read in the datasets using [`mseg_semantic/utils/dataset.py`](https://github.com/mseg-dataset/mseg-semantic/blob/master/mseg_semantic/utils/dataset.py) and then remap them to the universal space on the fly.
+
+
