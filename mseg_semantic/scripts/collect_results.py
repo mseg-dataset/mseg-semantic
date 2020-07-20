@@ -38,8 +38,6 @@ training_datasets = [
 	'sunrgbd-37_universal'
 ]
 
-# datasets = [d + '_relabel' for d in datasets]
-
 # universal taxonomy models
 u_models = [
 	'coco-panoptic-133-1m',
@@ -108,14 +106,20 @@ def parse_result_file(result_file: str) -> float:
 	return miou
 
 
-def parse_folder(folder, resolution: str):
+def parse_folder(folder, resolution: str, scale: str):
 	"""
 	# folder containing subfolders as 360/720/1080
+
+		Args:
+			folder
+			resolution
+			scale: string representing inference scale option,
+				either 'ss' or 'ms' (single-scale or multi-scale)
 	"""
 	mious = []
 	resolutions = ['360', '720', '1080']
 	for b in resolutions:
-		result_file = os.path.join(folder, b, 'ss', 'results.txt')
+		result_file = os.path.join(folder, b, scale, 'results.txt')
 		# parse_file 
 		mious.append(parse_result_file(result_file))
 
@@ -150,7 +154,12 @@ def geometric_mean(x: np.ndarray) -> float:
 	return prod ** (1/n)
 
 
-def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'harmonic'):
+def collect_results_at_res(
+	datasets: List[str],
+	resolution: str,
+	scale: str,
+	output_format: str,
+	mean_type: str = 'harmonic'):
 	""" """
 	print(' '*60, (' '*5).join(datasets), ' '* 10 + 'mean')
 	for m, name in zip(u_models, u_names):
@@ -162,7 +171,7 @@ def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'ha
 				d += '_relabeled'
 
 			folder = f'/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}'
-			mious = parse_folder(folder, resolution)
+			mious = parse_folder(folder, resolution, scale)
 			results.append(mious)
 	
 		tmp_results = np.array([r[0] for r in results])
@@ -176,8 +185,10 @@ def collect_results_at_res(datasets: List[str], resolution: str, mean_type = 'ha
 		else:
 			print('Unknown mean type')
 			exit()
-		#dump_results_latex(name, results)
-		dump_results_markdown(name, results)
+		if output_format == 'latex':
+			dump_results_latex(name, results)
+		elif output_format == 'markdown':
+			dump_results_markdown(name, results)
 
 
 def dump_results_latex(name: str, results) -> None:
@@ -194,15 +205,7 @@ def dump_results_markdown(name: str, results) -> None:
 	print(name.rjust(50), '  ',    ' '.join(results) + '|')
 
 
-def collect_zero_shot_results() -> None:
-	""" """
-	# 'ms' vs. 'ss'
-	for resolution in ['360','720','1080','max']: #  '480', '2160',
-		print(f'At resolution {resolution}')
-		collect_results_at_res(zs_datasets, resolution)
-
-
-def collect_oracle_results_at_res(resolution: str) -> None:
+def collect_oracle_results_at_res(resolution: str, scale: str, output_format: str) -> None:
 	""" """
 	results = []
 	print(' '*60, (' '*5).join(o_datasets), ' '* 10 + 'mean')
@@ -212,22 +215,30 @@ def collect_oracle_results_at_res(resolution: str) -> None:
 		results.append(mious)
 
 	dump_results_latex('Oracle', results)
-	#dump_results_markdown('Oracle', results)
+	dump_results_markdown('Oracle', results)
 
 
-def collect_oracle_results() -> None:
+def collect_zero_shot_results(scale: str, output_format: str) -> None:
+	""" """
 	# 'ms' vs. 'ss'
 	for resolution in ['360','720','1080','max']: #  '480', '2160',
 		print(f'At resolution {resolution}')
-		collect_oracle_results_at_res(resolution)
+		collect_results_at_res(zs_datasets, resolution, scale, output_format)
 
 
-def collect_training_dataset_results():
+def collect_oracle_results(scale: str, output_format: str) -> None:
+	# 'ms' vs. 'ss'
+	for resolution in ['360','720','1080','max']: #  '480', '2160',
+		print(f'At resolution {resolution}')
+		collect_oracle_results_at_res(resolution, scale, output_format)
+
+
+def collect_training_dataset_results(scale: str, output_format: str):
 	""" """
 	# 'ss' only
 	for resolution in ['360','720','1080','max']: #  '480', '2160',
 		print(f'At resolution {resolution}')
-		collect_results_at_res(training_datasets, resolution)
+		collect_results_at_res(training_datasets, resolution, scale, output_format)
 
 
 if __name__ == "__main__":
@@ -237,19 +248,34 @@ if __name__ == "__main__":
 		"--regime",
 		required=True,
 		type=str,
-		help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` "
+		help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` ",
+		choices=['zero_shot','oracle','training_datasets']
+	)
+	parser.add_argument(
+		"--scale",
+		required=True,
+		type=str,
+		help="ss (single-scale) or ms (multi-scale)",
+		choices=['ss','ms']
+	)
+	parser.add_argument(
+		"--output_format",
+		required=True,
+		type=str,
+		help="latex or markdown",
+		choices=['latex','markdown']
 	)
 	args = parser.parse_args()
-	logger.info(args)
+	print(args)
 
 	if args.regime == 'zero_shot':
-		collect_zero_shot_results()
+		collect_zero_shot_results(args.scale, args.output_format)
 
 	elif args.regime == 'oracle':
-		collect_oracle_results()
+		collect_oracle_results(args.scale, args.output_format)
 
 	elif args.regime == 'training_datasets':
-		collect_training_dataset_results()
+		collect_training_dataset_results(args.scale, args.output_format)
 
 	else:
 		print("Unknown testing regime")
