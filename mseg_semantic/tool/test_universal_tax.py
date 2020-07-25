@@ -116,11 +116,15 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     #os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.test_gpu)
     logger.info(args)
 
-    # always evaluating on val split
-    args.test_list = infos[args.dataset].vallist
+    if args.split == 'val':
+        args.test_list = infos[args.dataset].vallist
+    elif args.split == 'test':
+        args.test_list = infos[args.dataset].testlist
+    else:
+        raise (RuntimeError("Dataset split not recognized for eval: " + args.split + "\n"))
 
     if args.split == 'test':
-        args.vis_freq = 1
+        args.vis_freq = 10
 
     args.num_model_classes = len(get_universal_class_names())
 
