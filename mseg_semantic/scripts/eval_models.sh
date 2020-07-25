@@ -14,7 +14,7 @@ datasets=(
 	
 	ade20k-150
 	bdd
-	# cityscapes-19
+	cityscapes-19
 	coco-panoptic-133
 	idd-39
 	mapillary-public65
