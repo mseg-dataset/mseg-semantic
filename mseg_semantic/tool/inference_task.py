@@ -246,7 +246,7 @@ class InferenceTask:
 			self.tc = NaiveTaxonomyConverter()
 			if args.dataset in self.tc.convs.keys() and use_gpu:
 				self.tc.convs[args.dataset].cuda()
-			self.tc.softmax.cuda()
+			self.tc.softmax.cuda() if self.use_gpu else self.tc.softmax
 			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		elif model_taxonomy == 'universal' and eval_taxonomy == 'test_dataset':
@@ -254,7 +254,7 @@ class InferenceTask:
 			self.tc = TaxonomyConverter()
 			if args.dataset in self.tc.convs.keys() and use_gpu:
 				self.tc.convs[args.dataset].cuda()
-			self.tc.softmax.cuda()
+			self.tc.softmax.cuda() if self.use_gpu else self.tc.softmax
 			self.num_eval_classes = len(load_class_names(args.dataset))
 
 		if self.args.arch == 'psp':
@@ -299,6 +299,7 @@ class InferenceTask:
 			from mseg_semantic.model.seg_hrnet_ocr import get_configured_hrnet_ocr
 			model = get_configured_hrnet_ocr(args.num_model_classes)
 		# logger.info(model)
+		# Wrapping the model in DataParallel is required for cpu evaluation to run correctly. Not sure why this is.
 		model = torch.nn.DataParallel(model)
 		if self.use_gpu:
 			model = model.cuda()
@@ -425,10 +426,15 @@ class InferenceTask:
 		else:
 			# multi-scale, prefer to use fast addition on the GPU
 			prediction = np.zeros((h, w, self.num_eval_classes), dtype=float)
-			prediction = torch.Tensor(prediction).cuda()
+			prediction = torch.Tensor(prediction)
+			if self.use_gpu:
+				prediction = prediction.cuda()
 			for scale in self.scales:
 				image_scaled = resize_by_scaled_short_side(image, self.base_size, scale)
-				prediction = prediction + torch.Tensor(self.scale_process_cuda(image_scaled, h, w)).cuda()
+				image_scaled = torch.Tensor(self.scale_process_cuda(image_scaled, h, w))
+				if self.use_gpu:
+					image_scaled = image_scaled.cuda()
+				prediction = prediction + image_scaled
 
 		prediction /= len(self.scales)
 		prediction = torch.argmax(prediction, axis=2)
@@ -561,8 +567,11 @@ class InferenceTask:
 		grid_h = int(np.ceil(float(new_h-self.crop_h)/stride_h) + 1)
 		grid_w = int(np.ceil(float(new_w-self.crop_w)/stride_w) + 1)
 
-		prediction_crop = torch.zeros((self.num_eval_classes, new_h, new_w)).cuda()
-		count_crop = torch.zeros((new_h, new_w)).cuda()
+		prediction_crop = torch.zeros((self.num_eval_classes, new_h, new_w))
+		count_crop = torch.zeros((new_h, new_w))
+		if self.use_gpu:
+			prediction_crop = prediction_crop.cuda()
+			count_crop = count_crop.cuda()
 
 		# loop w/ sliding window, obtain start/end indices
 		for index_h in range(0, grid_h):
