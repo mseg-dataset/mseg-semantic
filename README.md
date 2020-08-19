@@ -234,9 +234,9 @@ python test_universal_demo.py
 All should also pass.
 
 ## Frequently Asked Questions (FAQ) (identical to FAQ on [`mseg-api` page](https://github.com/mseg-dataset/mseg-api))
-**Q**: Do the weights include the model structure or it's just the weights? If the latter, which model do these weights refer to since under the models directory, since there are several model implementations?
+**Q**: Do the weights include the model structure or it's just the weights? If the latter, which model do these weights refer to? Under the `models` directory, there are several model implementations.
 
-**A**: The pre-trained models follow the HRNet-W48 architecture. The model structure is defined in the code [here](https://github.com/mseg-dataset/mseg-semantic/blob/master/mseg_semantic/model/seg_hrnet.py#L274). The saved weights provide a dictionary between keys (unique IDs for each weight identifying the corresponding layer) and values (the floating point weights).
+**A**: The pre-trained models follow the HRNet-W48 architecture. The model structure is defined in the code [here](https://github.com/mseg-dataset/mseg-semantic/blob/master/mseg_semantic/model/seg_hrnet.py#L274). The saved weights provide a dictionary between keys (unique IDs for each weight identifying the corresponding layer/layer type) and values (the floating point weights).
 
 **Q**: How is testing performed on the test datasets? In the paper you talk about "zero-shot transfer" -- how this is performed? Are the test dataset labels also mapped or included in the unified taxonomy? If you remapped the test dataset labels to the unified taxonomy, are the reported results the performances on the unified label space, or on each test dataset's original label space? How did you you obtain results on the WildDash dataset - which is evaluated by the server - when the MSeg taxonomy may be different from the WildDash dataset.
 
