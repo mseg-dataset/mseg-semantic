@@ -3,8 +3,10 @@
 import time
 start = time.time()
 # time.sleep(2)
+from typing import Dict
 
 import apex
+import torch
 # import cv2
 
 # import math
@@ -30,22 +32,13 @@ NVIDIA Apex has 4 optimization levels:
         things up as cudnn batchnorm is faster anyway.
 """
 
-
-class ToRemappedLabel(object):
-    def __init__(self, tc_init, dataset):
-        self.dataset = dataset
-        self.tc = tc_init
- 
-    def __call__(self, image, label):
-        return image, self.tc.transform_label(label, self.dataset)
- 
 # cv2.ocl.setUseOpenCL(False)
 # cv2.setNumThreads(0)
 
 
 def get_parser():
     import argparse
-    from util import config
+    from mseg_semantic.utils import config
 
     parser = argparse.ArgumentParser(description='PyTorch Semantic Segmentation')
     parser.add_argument('--config', type=str, default='config/ade20k/ade20k_pspnet50.yaml', help='config file')
@@ -82,9 +75,8 @@ def main_process():
 def main():
     """
     """
-    # with open('test_2.txt', 'a') as f:
-    #     f.write('test')
-    #     f.close()
+    import pickle
+
     import torch, os, math
     import torch.backends.cudnn as cudnn
     import torch.nn as nn
@@ -92,19 +84,16 @@ def main():
     import torch.nn.parallel
     import torch.optim
     import torch.utils.data
-
     import torch.multiprocessing as mp
     import torch.distributed as dist
-# from tensorboardX import SummaryWriter
+    # from tensorboardX import SummaryWriter
     from mseg.utils.dataset_config import infos
+    from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
+    from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
-    from util import config
-    from util.verification_utils import verify_architecture
-    from util.avg_meter import AverageMeter, SegmentationAverageMeter
-    from taxonomy.utils_flat import TaxonomyConverter
-    from taxonomy.utils_baseline import StupidTaxonomyConverter
-    import pickle
-
+    from mseg_semantic.utils import config
+    from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
+    from mseg_semantic.util.verification_utils import verify_architecture
 
     print('Using PyTorch version: ', torch.__version__)
     args = get_parser()
@@ -179,8 +168,8 @@ def main():
         main_worker(args.train_gpu, args.ngpus_per_node, args)
 
 
-def get_train_transform_list(args, split):
-    """
+def get_train_transform_list(args, split: str):
+    """ Return the input data transform for training (w/ data augmentations)
         Args:
         -   args:
         -   split
@@ -188,8 +177,8 @@ def get_train_transform_list(args, split):
         Return:
         -   List of transforms
     """
-    from util.normalization_utils import get_imagenet_mean_std
-    from util import transform
+    from mseg_semantic.utils.normalization_utils import get_imagenet_mean_std
+    from mseg_semantic.utils import transform
 
 
     mean, std = get_imagenet_mean_std()
@@ -298,8 +287,6 @@ def load_pretrained_weights(args, model, optimizer):
             # print()
             print(0, max_epoch, model_path, os.path.isfile(model_path))
 
-
-
         
         if os.path.isfile(model_path):
             if main_process():
@@ -351,6 +338,7 @@ def get_model(args, criterion, BatchNorm):
         model = get_configured_hrnet_ocr(args.classes)
     return model
 
+
 def get_optimizer(args, model):
     """
     Create a parameter list, where first 5 entries (ResNet backbone) have low learning rate
@@ -394,7 +382,7 @@ def get_optimizer(args, model):
     return optimizer
 
 
-def get_rank_to_dataset_map(args):
+def get_rank_to_dataset_map(args) -> Dict[int,str]:
     """
         Obtain a mapping from GPU rank (index) to the name of the dataset residing on this GPU.
 
@@ -412,7 +400,7 @@ def get_rank_to_dataset_map(args):
     return rank_to_dataset_map
 
 
-def main_worker(gpu, ngpus_per_node, argss):
+def main_worker(gpu: int, ngpus_per_node: int, argss):
     """
     Consider if a dataset has size 18,000 and is placed on a single GPU, of 4 gpus. 
     Batch size 32. In this case, len(train_data) = 18,000 but len(train_loader) = 2250
@@ -421,16 +409,9 @@ def main_worker(gpu, ngpus_per_node, argss):
     Consider if a dataset has size 118287. If placed on 2/4 gpus with batch size 32.
     In this case, len(train_data) = 118287 and len(train_loader) = 7393.
     """
-
-    # with open('test_3.txt', 'a') as f:
-    #     f.write('test')
-    #     f.close()
     global args
     args = argss
 
-    from util import dataset
-    from taxonomy.utils_flat import TaxonomyConverter
-    from multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
     import apex
     import torch, os, math
     import torch.backends.cudnn as cudnn
@@ -443,17 +424,21 @@ def main_worker(gpu, ngpus_per_node, argss):
     import torch.multiprocessing as mp
     import torch.distributed as dist
     from tensorboardX import SummaryWriter
-    from mseg.utils.dataset_config import infos
 
-    from util import config
-    from util.verification_utils import verify_architecture
-    from util.avg_meter import AverageMeter, SegmentationAverageMeter
-    from util.util import poly_learning_rate
+    from mseg.utils.dataset_config import infos
+    from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
+
+    from mseg_semantic.multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
+    from mseg_semantic.utils import config
+    from mseg_semantic.utils import dataset
+    from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
+    from mseg_semantic.utils.training_utils import poly_learning_rate
+    from mseg_semantic.utils.verification_utils import verify_architecture
 
     # with open('test_mainworker.txt', 'a') as f:
     #     f.write('test\t')
     #     f.close()
-# os.sleep
+    # os.sleep
     # time.sleep(30)
     if args.sync_bn:
         if args.multiprocessing_distributed:
@@ -634,7 +619,7 @@ def main_worker(gpu, ngpus_per_node, argss):
         #         writer.add_scalar('allAcc_val', allAcc_val, epoch_log)
 
 
-def train(train_loader, model, optimizer, epoch):
+def train(train_loader, model, optimizer, epoch: int):
     """
     No MGDA -- whole iteration takes 0.31 sec.
     0.24 sec to run typical backward pass (with no MGDA)
@@ -645,17 +630,12 @@ def train(train_loader, model, optimizer, epoch):
     TODO: Profile which part of Frank-Wolfe is slow
 
     """
-
-    from util.avg_meter import AverageMeter, SegmentationAverageMeter
-    from util.util import poly_learning_rate
-
-    import torch.distributed as dist
-    from multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
-
-
-
     import torch, os, math, time
+    import torch.distributed as dist
 
+    from mseg_semantic.multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
+    from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
+    from mseg_semantic.utils.training_utils import poly_learning_rate
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -775,7 +755,7 @@ def train(train_loader, model, optimizer, epoch):
     return main_loss_meter.avg, mIoU, mAcc, allAcc
 
 
-def forward_backward_full_sync(input, target, model, optimizer, args):
+def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model, optimizer, args):
     """
         Args:
         -   input: Tensor of size (?) representing
@@ -805,8 +785,8 @@ def forward_backward_full_sync(input, target, model, optimizer, args):
     return output, loss, main_loss, aux_loss
     
 
-def forward_backward_mgda(input, target, model, optimizer, args):
-    from multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
+def forward_backward_mgda(input: torch.Tensor, target: torch.Tensor, model, optimizer, args):
+    from mseg_semantic.multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
     """
         We rely upon the ddp.no_sync() of gradients:
         https://github.com/pytorch/pytorch/blob/master/torch/nn/parallel/distributed.py
@@ -830,8 +810,6 @@ def forward_backward_mgda(input, target, model, optimizer, args):
         loss, scales = scale_loss_and_gradients(loss, optimizer, model, args)
         
     return output, loss, main_loss, aux_loss, scales
-
-
 
 
 def validate(val_loader, model, criterion):
