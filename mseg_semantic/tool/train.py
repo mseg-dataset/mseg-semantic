@@ -15,8 +15,6 @@ import torch
 # import pdb
 # import random
 
-# from taxonomy.utils_flat import *
-
 # end = time.time()
 # print(end - start)
 
