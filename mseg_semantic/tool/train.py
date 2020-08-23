@@ -20,23 +20,6 @@ import apex
 
 
 """
-TODO: GET THE MODELS TRAINING, THEN GO BACK LATER AND WRITE THE
-UNIT TESTS FOR TAXONOMY CONVERTER
-
-Should have fixed ratios --> then experiment with it.
-
-Train w/ MGDA
-Train w/o MGDA.
-Get results on the training set as well.
-
-Submit the jobs first -- for all training/test sets.
-
-fix the max_iters -- 1.2 Million examples
-
-make sure we have the right flags to evaluate on the train dataset.
-"""
-
-"""
 NVIDIA Apex has 4 optimization levels:
 
     O0 (FP32 training): basically a no-op. Everything is FP32 just as before.
@@ -46,7 +29,6 @@ NVIDIA Apex has 4 optimization levels:
     O3 (FP16 training): full FP16. Passing keep_batchnorm_fp32=True can speed 
         things up as cudnn batchnorm is faster anyway.
 """
-
 
 
 class ToRemappedLabel(object):
