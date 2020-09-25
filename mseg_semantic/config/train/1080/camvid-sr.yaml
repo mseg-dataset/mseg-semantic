@@ -1,10 +1,5 @@
 DATA:
-  # dataset: [coco-panoptic-v1-wvga, mapillary_vistas_comm-wvga] #, 
-  # dataset: [ade20k-v1-wvga, interiornet-37cls-wvga]
-  # dataset: [coco-panoptic-v3-wvga, mapillary_vistas_comm-wvga, ade20k-v2-wvga, sunrgbd-37-wvga, idd-new-wvga, cityscapes-wvga, bdd-wvga] #, interiornet-37cls-wvga]
   dataset: [camvid-sr]
-  # , ade20k-v1, sunrgbd-37, idd-new, cityscapes, bdd, coco-panoptic-v1, ]
-  # test_dataset: [nyudepthv2-36-wvga, wilddash-18-wvga, voc2012-wvga] # camvid-wvga, 
   universal: False
   # use_multiple_datasets: True
   use_mgda: False # to be determined at argument
@@ -27,16 +22,9 @@ TRAIN:
   ignore_label: 255
   aux_weight: 0.4
   num_examples: 1000000
-  train_gpu: [0, 1, 2, 3, 4, 5, 6,7]
+  train_gpu: [0, 1, 2, 3, 4, 5, 6, 7]
   dataset_gpu_mapping: {
-    # 'coco-panoptic-v1':[0], #,1,2,3,4,5,6], 
-
-    'camvid-sr': [0, 1, 2, 3, 4, 5, 6,7],
-    # 'ade20k-v1': [2],
-    # 'idd-new': [3],
-    # 'cityscapes': [4],
-    # 'sunrgbd-37': [5],
-    # 'bdd': [6],
+    'camvid-sr': [0, 1, 2, 3, 4, 5, 6, 7]
   }
   workers: 32  # data loader workers
   batch_size: 32 # batch size for training
