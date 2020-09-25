@@ -7,15 +7,15 @@ We provide a number of config files for training models. The appropriate config 
 3. In which taxonomy (output space) would you like to train the model to make predictions?
 
 ## Models for Zero-Shot Transfer @1080p Resolution
-| Dataset \ Taxonomy | Unified  | Naive  |
-|:------------------:| | |
+| Dataset \ Taxonomy |  Unified |   Naive  |
+|:------------------:|  :-----: |:--------:| 
 | MSeg Relabeled | | |
-| MSeg Unrelabeled | | config/train/1080_release/mseg-baseline.yaml |
+| MSeg Unrelabeled | config/train/1080_release/mseg-unrelabeled.yaml | config/train/1080_release/mseg-baseline.yaml |
 
 ## Models Trained on a Single Training Dataset
 
 | Dataset | Taxonomy | Path to Config |
-|:------------------:| | |
+|:------------------:| --------------:| --------------: |
 | ADE20K | Unified | 1080_release/single_universal.yaml |
 | BDD | Unified | 1080_release/single_universal.yaml |
 | COCO-Panoptic | Unified | 1080_release/single_universal.yaml |
