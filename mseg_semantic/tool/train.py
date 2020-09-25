@@ -113,7 +113,7 @@ def main():
     
     if len(args.dataset) > 1 and args.universal: # multiple datasets training, must be on universal taxononmy
         if args.tax_version == 0:
-            args.tc = StupidTaxonomyConverter(version=args.tax_version)
+            args.tc = NaiveTaxonomyConverter(version=args.tax_version)
         else:
             if args.finetune:
                 args.tc = TaxonomyConverter(version=args.tax_version, finetune=True, finetune_dataset=args.finetune_dataset)
