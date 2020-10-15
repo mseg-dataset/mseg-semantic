@@ -113,12 +113,9 @@ def main():
     
     if len(args.dataset) > 1 and args.universal: # multiple datasets training, must be on universal taxononmy
         if args.tax_version == 0:
-            args.tc = NaiveTaxonomyConverter(version=args.tax_version)
+            args.tc = NaiveTaxonomyConverter()
         else:
-            if args.finetune:
-                args.tc = TaxonomyConverter(version=args.tax_version, finetune=True, finetune_dataset=args.finetune_dataset)
-            else:
-                args.tc = TaxonomyConverter(version=args.tax_version) #, train_datasets=args.dataset, test_datasets=args.test_dataset) #, train_datasets=args.dataset, test_datasets=args.test_dataset)
+            args.tc = TaxonomyConverter() #, train_datasets=args.dataset, test_datasets=args.test_dataset) #, train_datasets=args.dataset, test_datasets=args.test_dataset)
 
         args.data_root = {dataset:infos[dataset].dataroot for dataset in args.dataset}
         args.train_list = {dataset:infos[dataset].trainlist for dataset in args.dataset}
@@ -126,7 +123,7 @@ def main():
         # args.save_path = args.save_path.replace("{}", '-'.join([infos[dataset].shortname for dataset in args.dataset]))
 
     elif (len(args.dataset) == 1) and args.universal: # single dataset on universal taxonomy training
-        args.tc = TaxonomyConverter(version=args.tax_version, train_datasets=args.dataset)
+        args.tc = TaxonomyConverter(train_datasets=args.dataset)
         args.data_root = infos[args.dataset[0]].dataroot
         args.train_list = infos[args.dataset[0]].trainlist
         args.classes = args.tc.classes
