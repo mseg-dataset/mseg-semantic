@@ -13,7 +13,6 @@ DATA:
   finetune: False
 
 TRAIN:
-  tax_version: 4.0
   arch: hrnet
   network_name: 
   layers: 
