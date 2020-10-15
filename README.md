@@ -36,7 +36,7 @@ This repo is the second of 4 repos that introduce our work. It provides utilitie
 - [` mseg-api`](https://github.com/mseg-dataset/mseg-api): utilities to download the MSeg dataset, prepare the data on disk in a unified taxonomy, on-the-fly mapping to a unified taxonomy during training.
 - [`mseg-mturk`](https://github.com/mseg-dataset/mseg-mturk): utilities to perform large-scale Mechanical Turk re-labeling
 
-One additional repo will be introduced in August 2020:
+One additional repo will be introduced in October 2020:
 - `mseg-panoptic`: provides Panoptic-FPN and Mask-RCNN training, based on Detectron2
 
 ### Dependencies
@@ -216,7 +216,7 @@ We generally follow the recommendations of [Zhao et al.](https://github.com/hszh
 
 ## Training Instructions
 
-Download the HRNet Backbone Model [here](https://1drv.ms/u/s!Aus8VCZ_C_33dKvqI6pBZlifgJk) from the original authors' OneDrive. We use 8 Quadro RTX 6000 cards, each w/ 24 GB of RAM, for training.
+Please refer to [training.md](https://github.com/mseg-dataset/mseg-semantic/blob/master/training.md) for detailed instructions on how to train each of our models. As a frame of reference as to the amount of compute required, we use 8 Quadro RTX 6000 cards, each w/ 24 GB of RAM, for training.
 
 
 ## Running unit tests and integration tests
