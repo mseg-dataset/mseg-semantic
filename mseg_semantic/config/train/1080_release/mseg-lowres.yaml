@@ -1,7 +1,4 @@
 DATA:
-  # dataset: [coco-panoptic-v1-wvga, mapillary_vistas_comm-wvga] #, 
-  # dataset: [ade20k-v1-wvga, interiornet-37cls-wvga]
-  # dataset: [coco-panoptic-v3-wvga, mapillary_vistas_comm-wvga, ade20k-v2-wvga, sunrgbd-37-wvga, idd-new-wvga, cityscapes-wvga, bdd-wvga] #, interiornet-37cls-wvga]
   dataset: [
         ade20k-150-relabeled,
         bdd-relabeled,
@@ -25,13 +22,13 @@ TRAIN:
   train_w: 713
   scale_min: 0.5  # minimum random scale
   scale_max: 2.0  # maximum random scale
-  short_size: 1080
+  short_size: 1080 # image resolution is 1080p at training
   rotate_min: -10  # minimum random rotate
   rotate_max: 10  # maximum random rotate
   zoom_factor: 8  # zoom factor for final prediction during training, be in [1, 2, 4, 8]
   ignore_label: 255
   aux_weight: 0.4
-  num_examples: 1000000
+  num_examples: 1000000 # 1 Million crops per dataset is default training duration
   train_gpu: [0, 1, 2, 3, 4, 5, 6]
   dataset_gpu_mapping: {
         'ade20k-150-relabeled': [0],
