@@ -23,7 +23,7 @@ If you want to train the Relabeled + Unified Tax. model for 3M crops instead of 
 | MSeg Relabeled | config/train/480_release/mseg-3m.yaml | --- |
 | MSeg Unrelabeled | --- | --- |
 
-Note that at 480p, we only re-train our best model (trained on Relabeled MSeg in the Unified taxonomy). The rest of our ablation experiments are carried out at 1080p.
+Note that at 480p, we only re-train w/ our best configuration (a model trained on the Relabeled MSeg Dataset in the Unified taxonomy). The rest of our ablation experiments are carried out at 1080p.
 
 @720p
 | Dataset \ Taxonomy |  Unified |   Naive  |
@@ -31,8 +31,7 @@ Note that at 480p, we only re-train our best model (trained on Relabeled MSeg in
 | MSeg Relabeled | config/train/720_release/mseg-3m.yaml | --- |
 | MSeg Unrelabeled | --- | --- |
 
-Note that at 720p, we only re-train our best model (trained on Relabeled MSeg in the Unified taxonomy). The rest of our ablation experiments are carried out at 1080p.
-
+Note that at 720p, we only re-train w/ our best configuration (a model trained on the Relabeled MSeg Dataset in the Unified taxonomy). The rest of our ablation experiments are carried out at 1080p.
 
 ## Configs for Models Trained on a Single Training Dataset
 
