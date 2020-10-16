@@ -254,4 +254,18 @@ All should also pass.
 
 **A**: The `dataset_apis` from `mseg-api` are not for training or inference. They are purely for generating the MSeg dataset labels on disk. We read in the datasets using [`mseg_semantic/utils/dataset.py`](https://github.com/mseg-dataset/mseg-semantic/blob/master/mseg_semantic/utils/dataset.py) and then remap them to the universal space on the fly.
 
+**Q**: In the training configuration file, each dataset uses one GPU each for multi-dataset training. I don't have enough hardware resources (I only have four GPUs at most)，Can I still train？
 
+**A**: Sure, you can still train by setting to the batch size to a smaller number, but the training will take longer. Another alternative is to traini at a lower input resolution (smaller input crops, see the 480p or 720p configs instead of 1080p config), or to train for fewer iterations.
+
+**Q**: The purpose of using MGDA is unclear -- is it recommended for training?
+
+**A**: Please refer to the section "Algorithms for learning from multiple domains" from our [paper](http://vladlen.info/papers/MSeg.pdf). In our ablation experiments, we found that training with MGDA does not lead to the best model, so we set it to false when training our best models.
+
+**Q**: Does save_path refer to the path saved by the weights after training?
+
+**A**: `save_path` is the directory where the model checkpoints and results will be saved. See [here](https://github.com/mseg-dataset/mseg-semantic/blob/5fd9ed3d22336005ee9f687d50188019873e67d5/mseg_semantic/tool/train.py#L587).
+
+**Q**: Does the `auto_resume` param refer to the weight of breakpoint training, or the mseg-3m.pth provided by the author?
+
+**A**: We use the `auto_resume` config parameter to allow one to continue training if training is interrupted due to a scheduler compute time limit or hardware error. You could also use it to fine-tune a model.
