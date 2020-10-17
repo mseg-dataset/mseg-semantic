@@ -13,7 +13,7 @@ DATA:
   finetune: False
 
 TRAIN:
-  tax_version: 0.0
+  use_naive_taxonomy: True
   arch: hrnet
   network_name: 
   layers: 
