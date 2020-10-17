@@ -13,6 +13,7 @@ DATA:
   finetune: False
 
 TRAIN:
+  use_naive_taxonomy: False
   arch: hrnet
   network_name: 
   layers: 
