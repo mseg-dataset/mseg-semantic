@@ -1,7 +1,4 @@
 DATA:
-  # dataset: [coco-panoptic-v1-wvga, mapillary_vistas_comm-wvga] #, 
-  # dataset: [ade20k-v1-wvga, interiornet-37cls-wvga]
-  # dataset: [coco-panoptic-v3-wvga, mapillary_vistas_comm-wvga, ade20k-v2-wvga, sunrgbd-37-wvga, idd-new-wvga, cityscapes-wvga, bdd-wvga] #, interiornet-37cls-wvga]
   dataset: [
         ade20k-150,
         bdd,
@@ -16,6 +13,7 @@ DATA:
   finetune: False
 
 TRAIN:
+  use_naive_taxonomy: False
   arch: hrnet
   network_name: 
   layers: 
