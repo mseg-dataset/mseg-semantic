@@ -112,10 +112,10 @@ def main():
 
     
     if len(args.dataset) > 1 and args.universal: # multiple datasets training, must be on universal taxononmy
-        if args.tax_version == 0:
+        if args.use_naive_taxonomy:
             args.tc = NaiveTaxonomyConverter()
         else:
-            args.tc = TaxonomyConverter() #, train_datasets=args.dataset, test_datasets=args.test_dataset) #, train_datasets=args.dataset, test_datasets=args.test_dataset)
+            args.tc = TaxonomyConverter()
 
         args.data_root = {dataset:infos[dataset].dataroot for dataset in args.dataset}
         args.train_list = {dataset:infos[dataset].trainlist for dataset in args.dataset}
@@ -199,12 +199,11 @@ def get_train_transform_list(args, split: str):
         quit()
 
     if len(args.dataset) > 1 and args.universal:
-        transform_list += [transform.ToUniversalLabel(args.dataset_name)]
-    elif args.universal:
+        transform_list += [transform.ToUniversalLabel(args.dataset_name, use_naive_taxonomy=args.use_naive_taxonomy)]
+    elif len(args.dataset) == 1 and args.universal:
+        # never run naive taxonomy baseline for training with a single dataset
         transform_list += [transform.ToUniversalLabel(args.dataset[0])]
-    else:
-        transform_list += [transform.ToNaiveUniversalLabel(args.dataset[0])]
-
+        
     return transform.Compose(transform_list)
 
 
