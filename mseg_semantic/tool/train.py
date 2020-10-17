@@ -199,9 +199,11 @@ def get_train_transform_list(args, split: str):
         quit()
 
     if len(args.dataset) > 1 and args.universal:
-        transform_list += [ToFlatLabel(args.tc, args.dataset_name)]
+        transform_list += [transform.ToUniversalLabel(args.dataset_name)]
     elif args.universal:
-        transform_list += [ToFlatLabel(args.tc, args.dataset[0])]
+        transform_list += [transform.ToUniversalLabel(args.dataset[0])]
+    else:
+        transform_list += [transform.ToNaiveUniversalLabel(args.dataset[0])]
 
     return transform.Compose(transform_list)
 
