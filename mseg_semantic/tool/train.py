@@ -119,14 +119,14 @@ def main():
 
         args.data_root = {dataset:infos[dataset].dataroot for dataset in args.dataset}
         args.train_list = {dataset:infos[dataset].trainlist for dataset in args.dataset}
-        args.classes = args.tc.classes
+        args.classes = args.tc.num_uclasses
         # args.save_path = args.save_path.replace("{}", '-'.join([infos[dataset].shortname for dataset in args.dataset]))
 
     elif (len(args.dataset) == 1) and args.universal: # single dataset on universal taxonomy training
         args.tc = TaxonomyConverter(train_datasets=args.dataset)
         args.data_root = infos[args.dataset[0]].dataroot
         args.train_list = infos[args.dataset[0]].trainlist
-        args.classes = args.tc.classes
+        args.classes = args.tc.num_uclasses
         # args.save_path = args.save_path.replace("{}", info[args.dataset].shortname)
 
     elif (len(args.dataset) == 1) and (not args.universal): # single dataset on self taxnonmy training
