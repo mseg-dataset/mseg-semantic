@@ -41,7 +41,7 @@ One additional repo will be introduced in October 2020:
 
 
 ### How fast can your models run?
-Our 480p MSeg model that accepts 473x473 px crops can run at *25.64 fps* on a Quadro P5000 GPU at single-scale inference.
+Our 480p MSeg model that accepts 473x473 px crops can run at **25.64 fps** on a Quadro P5000 GPU at single-scale inference.
 
 ### Dependencies
 
