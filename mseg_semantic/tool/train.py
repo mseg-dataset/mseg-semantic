@@ -226,12 +226,8 @@ def get_dataset_split_transform(
 
 def load_pretrained_weights(args, model, optimizer): 
     """
-        Args:
-        -   args
-        -   model: Passed by reference
-
-        Returns: model (if args.resume is a model, loads the model,
-        if it is a directory, find the latest model in that directory)
+    Returns: model (if args.resume is a model, loads the model,
+    if it is a directory, find the latest model in that directory)
     """
     import torch, os, math
 
@@ -272,7 +268,7 @@ def load_pretrained_weights(args, model, optimizer):
         if main_process():
             logger.info("=> loading latest checkpoint from folder'{}'".format(args.auto_resume))
 
-        print(args.auto_resume)
+        print("Auto resume training? ", args.auto_resume)
         filelist = glob.glob(args.auto_resume + '/*.pth')
         print(os.getcwd())
         print(filelist)
@@ -293,7 +289,6 @@ def load_pretrained_weights(args, model, optimizer):
             filename = 'train_epoch_{}.pth'.format(max_epoch)
 
             model_path = os.path.join(args.auto_resume, filename)
-        # print(model_path)
             logger.info(model_path)
             print(0, max_epoch, model_path, os.path.isfile(model_path))
 
@@ -421,16 +416,25 @@ def get_rank_to_dataset_map(args) -> Dict[int, str]:
 
 def set_number_of_training_iters(args):
     """
-    There are two scenarios:
-        1. We are mixing many datasets together. We determine which dataset this GPU process
-            is assigned to. Afterwards, the max number of iters is the number of 
-        2. We are training with a single dataset.
+    There are two scenarios we consider to determine number of required training iters
+    when training on MSeg:
+    
+    1. We are mixing many datasets together. We determine which dataset this GPU
+            is assigned to. Each GPU runs 1 process, and multiple GPU IDs may be assigned
+            to a single dataset.
+
+            The max number of iters is the number of 
+    
+    2. We are training with a single dataset. Suppose we want to train for 1 million
+        crops in total (args.num_examples). Suppose our dataset has 18k images. Then
+        we will train for 56 epochs. Suppose our training node has 8 GPUs. Then
+        with a batch size of 32, and 8 GPUs, we need ~3906 iterations to reach 1M crops.
     """
     if len(args.dataset) > 1:
         rank_to_dataset_map = get_rank_to_dataset_map(args)
         # # which dataset this gpu is for
         args.dataset_name = rank_to_dataset_map[args.rank]
-        # # within this dataset, its rank
+        # within this dataset, its rank, i.e. 0,1,2,3 etc gpu ID assigned to this dataset
         args.dataset_rank = args.dataset_gpu_mapping[args.dataset_name].index(args.rank)
         args.num_replica_per_dataset = len(args.dataset_gpu_mapping[args.dataset_name])
 
@@ -443,10 +447,12 @@ def set_number_of_training_iters(args):
 
     elif (len(args.dataset) == 1) and (not args.use_mgda):
         from util.txt_utils import read_txt_file
-        num_examples = len(read_txt_file(infos[args.dataset[0]].trainlist))
+        # number of examples for 1 epoch of this dataset
+        num_d_examples = len(read_txt_file(infos[args.dataset[0]].trainlist))
+        # number of examples to train for in total
         num_examples_total = args.num_examples
 
-        args.epochs = math.ceil(num_examples_total / num_examples)
+        args.epochs = math.ceil(num_examples_total / num_d_examples)
         args.max_iters = math.floor(num_examples_total / (args.batch_size * args.ngpus_per_node))
 
         # on small datasets, avoid saving checkpoints too frequently in order to not waste time
@@ -457,14 +463,7 @@ def set_number_of_training_iters(args):
 
 
 def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
-    """
-    Consider if a dataset has size 18,000 and is placed on a single GPU, of 4 gpus. 
-    Batch size 32. In this case, len(train_data) = 18,000 but len(train_loader) = 2250
-    Because effective batch size is 8.
-
-    Consider if a dataset has size 118287. If placed on 2/4 gpus with batch size 32.
-    In this case, len(train_data) = 118287 and len(train_loader) = 7393.
-    """
+    """ Each GPU process will execute this function"""
     global args
     args = argss
 
@@ -538,8 +537,14 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
     model, optimizer, args.resume_iter = load_pretrained_weights(args, model, optimizer)
 
     args = set_number_of_training_iters(args)
+    train_transform = get_dataset_split_transform(args, split='train')  
 
-    train_transform = get_dataset_split_transform(args, split='train')    
+    # Consider if a dataset has size 18,000 and is placed on a single GPU, of 4 gpus. 
+    # Batch size 32. In this case, len(train_data) = 18,000 but len(train_loader) = 2250
+    # Because effective batch size is 8.
+
+    # Consider if a dataset has size 118287. If placed on 2/4 gpus with batch size 32.
+    # In this case, len(train_data) = 118287 and len(train_loader) = 7393.
     if len(args.dataset) > 1:
         # FLATMIX ADDITION
         train_data = dataset.SemData(split='train', data_root=args.data_root[args.dataset_name], data_list=args.train_list[args.dataset_name], transform=train_transform)
@@ -589,7 +594,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
             sampler=val_sampler
         )
 
-    # for epoch in range(args.start_epoch, args.epochs):
     for epoch in range(args.start_epoch, args.epochs + MAX_NUM_EPOCHS):
 
         epoch_log = epoch + 1
@@ -625,15 +629,7 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
 
 
 def train(train_loader, model, optimizer: torch.optim.Optimizer, epoch: int):
-    """
-    No MGDA -- whole iteration takes 0.31 sec.
-    0.24 sec to run typical backward pass (with no MGDA)
-
-    With MGDA -- whole iteration takes 1.10 sec.
-    1.05 sec to run backward pass w/ MGDA subroutine -- scale_loss_and_gradients() in every iteration.
-
-    TODO: Profile which part of Frank-Wolfe is slow
-    """
+    """ Run one training epoch """
     import torch, os, math, time
     import torch.distributed as dist
 
