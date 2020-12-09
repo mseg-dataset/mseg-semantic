@@ -93,29 +93,26 @@ def main():
     from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
     from mseg_semantic.utils.verification_utils import verify_architecture
 
+    assert isinstance(args.train_gpu, list)
     print('Using PyTorch version: ', torch.__version__)
     args = get_parser()
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.train_gpu)
 
-
     ###### FLAT-MIX CODE #######################
-    print(os.environ["CUDA_VISIBLE_DEVICES"])
+    print("CUDA_VISIBLE_DEVICES: ", os.environ["CUDA_VISIBLE_DEVICES"])
 
     # Randomize args.dist_url too avoid conflicts on same machine
     args.dist_url = args.dist_url[:-2] + str(os.getpid() % 100).zfill(2)
 
-
-    if isinstance(args.dataset, str): # only one dataset
+    if isinstance(args.dataset, str): # only one dataset, i.e. 'single'
+        # map to a list of GPU IDs
+        args.dataset_gpu_mapping = {args.dataset: args.train_gpu}
         args.dataset = [args.dataset]
-        print(args.dataset)
-        args.dataset_gpu_mapping = {args.dataset[0]: [0,1,2,3,4,5,6,7]}
+        print("args.dataset=", args.dataset)
 
-    
-    if len(args.dataset) > 1 and args.universal: # multiple datasets training, must be on universal taxononmy
-        if args.use_naive_taxonomy:
-            args.tc = NaiveTaxonomyConverter()
-        else:
-            args.tc = TaxonomyConverter()
+    # train with multiple datasets, must be in the universal taxonomy space
+    elif len(args.dataset) > 1 and args.universal:
+        args.tc = NaiveTaxonomyConverter() if args.use_naive_taxonomy else TaxonomyConverter()
 
         args.data_root = {dataset:infos[dataset].dataroot for dataset in args.dataset}
         args.train_list = {dataset:infos[dataset].trainlist for dataset in args.dataset}
@@ -129,14 +126,13 @@ def main():
         args.classes = args.tc.num_uclasses
         # args.save_path = args.save_path.replace("{}", info[args.dataset].shortname)
 
-    elif (len(args.dataset) == 1) and (not args.universal): # single dataset on self taxnonmy training
+    elif (len(args.dataset) == 1) and (not args.universal): # single dataset on self taxonomy training
         args.data_root = infos[args.dataset[0]].dataroot
         args.train_list = infos[args.dataset[0]].trainlist
         args.classes = infos[args.dataset[0]].num_classes
         # args.save_path = args.save_path.replace("{}", infos[args.dataset].shortname)
     else:
-        print('wrong mode, please check')
-        exit()
+        raise RuntimeError('Incorrect training configuration, please verify your config params.')
     
     # verify arch after args.classes is populated
     verify_architecture(args)
