@@ -488,7 +488,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
 
 
     # FLAT-MIX ADDITIONS 
-    # if args.use_multiple_datasets:
     if len(args.dataset) > 1:
         # args.num_examples = 1800000
 
@@ -531,7 +530,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
             args.save_freq = args.epochs // 100
 
 
-    # if args.use_multiple_datasets:
     if len(args.dataset) > 1:
         # FLATMIX ADDITION
         train_data = dataset.SemData(split='train', data_root=args.data_root[args.dataset_name], data_list=args.train_list[args.dataset_name], transform=train_transform)
