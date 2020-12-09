@@ -10,7 +10,6 @@ DATA:
   universal: True
   use_multiple_datasets: True
   use_mgda: False # to be determined at argument
-  finetune: False
 
 TRAIN:
   use_naive_taxonomy: False

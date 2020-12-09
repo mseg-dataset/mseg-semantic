@@ -9,7 +9,6 @@ DATA:
         sunrgbd-37-relabeled]
   universal: True
   use_mgda: False # to be determined at argument
-  finetune: False
 
 TRAIN:
   use_naive_taxonomy: False
