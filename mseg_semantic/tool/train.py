@@ -84,11 +84,9 @@ def main():
     import torch.utils.data
     import torch.multiprocessing as mp
     import torch.distributed as dist
-    # from tensorboardX import SummaryWriter
     from mseg.utils.dataset_config import infos
     from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
     from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
-
     from mseg_semantic.utils import config
     from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
     from mseg_semantic.utils.verification_utils import verify_architecture
@@ -416,7 +414,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
 
     import torch.multiprocessing as mp
     import torch.distributed as dist
-    from tensorboardX import SummaryWriter
 
     from mseg.utils.dataset_config import infos
     from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
@@ -455,9 +452,8 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
     optimizer = get_optimizer(args, model)
 
     if True:
-        global logger, writer
+        global logger
         logger = get_logger()
-        writer = SummaryWriter(args.save_path)
         args.logger = logger
         
         if main_process():
@@ -573,11 +569,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
         if args.distributed:
             train_sampler.set_epoch(epoch)
         loss_train, mIoU_train, mAcc_train, allAcc_train = train(train_loader, model, optimizer, epoch)
-        # if main_process():
-        #     writer.add_scalar('loss_train', loss_train, epoch_log)
-        #     writer.add_scalar('mIoU_train', mIoU_train, epoch_log)
-        #     writer.add_scalar('mAcc_train', mAcc_train, epoch_log)
-        #     writer.add_scalar('allAcc_train', allAcc_train, epoch_log)
 
         if ((epoch_log % args.save_freq == 0)) and main_process():
             filename = args.save_path + '/train_epoch_' + str(epoch_log) + '.pth'
@@ -603,11 +594,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
 
         # if args.evaluate:
         #     loss_val, mIoU_val, mAcc_val, allAcc_val = validate(val_loader, model, criterion)
-        #     if main_process():
-        #         writer.add_scalar('loss_val', loss_val, epoch_log)
-        #         writer.add_scalar('mIoU_val', mIoU_val, epoch_log)
-        #         writer.add_scalar('mAcc_val', mAcc_val, epoch_log)
-        #         writer.add_scalar('allAcc_val', allAcc_val, epoch_log)
 
 
 def train(train_loader, model, optimizer, epoch: int):
@@ -734,11 +720,6 @@ def train(train_loader, model, optimizer, epoch: int):
 
         if main_process() and current_iter == max_iter - 5: # early exit to prevent iter number not matching between gpus
             break
-        # if main_process():
-        #     writer.add_scalar('loss_train_batch', main_loss_meter.val, current_iter)
-        #     writer.add_scalar('mIoU_train_batch', np.mean(intersection / (union + 1e-10)), current_iter)
-        #     writer.add_scalar('mAcc_train_batch', np.mean(intersection / (target + 1e-10)), current_iter)
-        #     writer.add_scalar('allAcc_train_batch', accuracy, current_iter)
 
     iou_class, accuracy_class, mIoU, mAcc, allAcc = sam.get_metrics()
     # if main_process():
