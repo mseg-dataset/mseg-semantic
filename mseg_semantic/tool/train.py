@@ -2,10 +2,11 @@
 
 import time
 start = time.time()
-from typing import Dict
+from typing import Dict, Union
 
 import apex
 import torch
+import torch.nn as nn
 # import cv2
 
 # import math
@@ -162,7 +163,7 @@ def get_dataset_split_transform(
     args, split: str
 ) -> mseg_semantic.utils.transform.Compose:
     """Return the input data transform (w/ data augmentations)
-    
+
     Args:
         args: experiment parameters
         split: dataset split, either 'train' or 'val'
@@ -256,8 +257,6 @@ def load_pretrained_weights(args, model, optimizer):
             checkpoint = torch.load(args.resume, map_location=lambda storage, loc: storage.cuda())
             # args.start_epoch = checkpoint['epoch']
             args.start_epoch = 0 # we don't rely on this, but on resume_iter
-            if args.finetune:
-                args.start_epoch = 0
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
             resume_iter = checkpoint['current_iter']
@@ -324,77 +323,87 @@ def load_pretrained_weights(args, model, optimizer):
 # optimizer = get_optimizer(args.model)
 
 
-
-def get_model(args, criterion, BatchNorm):
-    """
-        Args:
-        -   
-
-        Returns:
-        -   
-    """
-    if args.arch == 'psp':
+def get_model(
+    args,
+    criterion: nn.Module,
+    BatchNorm: Union[
+        torch.nn.SyncBatchNorm, apex.parallel.SyncBatchNorm, nn.BatchNorm2d
+    ],
+) -> nn.Module:
+    """ Build the semantic segmentation model """
+    if args.arch == "psp":
         from mseg_semantic.model.pspnet import PSPNet
+
         model = PSPNet(
             layers=args.layers,
             classes=args.classes,
             zoom_factor=args.zoom_factor,
             criterion=criterion,
             BatchNorm=BatchNorm,
-            network_name=args.network_name
+            network_name=args.network_name,
         )
-    elif args.arch == 'hrnet':
+    elif args.arch == "hrnet":
         from mseg_semantic.model.seg_hrnet import get_configured_hrnet
-        # note apex batchnorm is hardcoded 
+
+        # note apex batchnorm is hardcoded
         model = get_configured_hrnet(args.classes)
-    elif args.arch == 'hrnet_ocr':
+    elif args.arch == "hrnet_ocr":
         from mseg_semantic.model.seg_hrnet_ocr import get_configured_hrnet_ocr
+
         model = get_configured_hrnet_ocr(args.classes)
     return model
 
 
-def get_optimizer(args, model):
+def get_optimizer(args, model: nn.Module) -> torch.optim.Optimizer:
     """
-    Create a parameter list, where first 5 entries (ResNet backbone) have low learning rate
-    to not clobber pre-trained weights, and later entries (PPM derivatives) have high learning rate.
+    Create an optimizer and provide model parameters to it.
 
-        Args:
-        -   args
-        -   model
-
-        Returns:
-        -   optimizer
+    For PSPNet, the learning rate is module-specfiic; the first 5 entries (ResNet backbone)
+    have low learning rate to not clobber pre-trained weights, and later entries (PPM derivatives)
+    have high learning rate.
     """
     import torch, os, math
 
-    if args.arch == 'hrnet' or args.arch == 'hrnet_ocr':
+    # HRNet settings
+    if args.arch == "hrnet" or args.arch == "hrnet_ocr":
         optimizer = torch.optim.SGD(
             [
                 {
-                    'params': filter(lambda p: p.requires_grad, model.parameters()),
-                    'lr': args.base_lr
-                }],
+                    "params": filter(lambda p: p.requires_grad, model.parameters()),
+                    "lr": args.base_lr,
+                }
+            ],
             lr=args.base_lr,
             momentum=args.momentum,
             weight_decay=args.weight_decay,
         )
         return optimizer
 
-    if args.arch == 'psp':
-        modules_ori = [model.layer0, model.layer1, model.layer2, model.layer3, model.layer4]
-        modules_new = [model.ppm, model.cls, model.aux]
+    if args.arch != "psp":
+        raise RuntimeError("Unknown network architecture")
+    # PSPNet settings
+    modules_original = [
+        model.layer0,
+        model.layer1,
+        model.layer2,
+        model.layer3,
+        model.layer4,
+    ]
+    modules_new = [model.ppm, model.cls, model.aux]
     params_list = []
-    for module in modules_ori:
+    for module in modules_original:
         params_list.append(dict(params=module.parameters(), lr=args.base_lr))
 
     for module in modules_new:
-        if args.finetune:
-            params_list.append(dict(params=module.parameters(), lr=args.base_lr))
-        else:
-            params_list.append(dict(params=module.parameters(), lr=args.base_lr * 10))
+        params_list.append(dict(params=module.parameters(), lr=args.base_lr * 10))
     NUM_PRETRAINED_RESNET_LAYERS = 5
     args.index_split = NUM_PRETRAINED_RESNET_LAYERS
-    optimizer = torch.optim.SGD(params_list, lr=args.base_lr, momentum=args.momentum, weight_decay=args.weight_decay)
+    optimizer = torch.optim.SGD(
+        params_list,
+        lr=args.base_lr,
+        momentum=args.momentum,
+        weight_decay=args.weight_decay,
+    )
     return optimizer
 
 
@@ -455,8 +464,7 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
             # BatchNorm = torch.nn.SyncBatchNorm
             BatchNorm = apex.parallel.SyncBatchNorm
         else:
-            from lib.sync_bn.modules import BatchNorm2d
-            BatchNorm = BatchNorm2d
+            raise RuntimeError("Batch norm not supported for DataParallel at this time")
     else:
         BatchNorm = nn.BatchNorm2d
     print('Using batchnorm variant: ', BatchNorm)
@@ -604,7 +612,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
             # latestname = args.save_path + '/train_epoch_' + str(epoch_log) + '.pth'
             if epoch_log / args.save_freq > 2:
                 # if (epoch_log - 3) % 10 != 0:
-                # if not args.finetune: 
                 deletename = args.save_path + '/train_epoch_' + str(epoch_log - args.save_freq * 2) + '.pth'
                 os.remove(deletename)
 
@@ -702,10 +709,7 @@ def train(train_loader, model, optimizer, epoch: int):
             for index in range(0, args.index_split):
                 optimizer.param_groups[index]['lr'] = current_lr
             for index in range(args.index_split, len(optimizer.param_groups)):
-                if args.finetune:
-                    optimizer.param_groups[index]['lr'] = current_lr 
-                else:
-                    optimizer.param_groups[index]['lr'] = current_lr * 10
+                optimizer.param_groups[index]['lr'] = current_lr * 10
 
         elif args.arch == 'hrnet' or args.arch == 'hrnet_ocr':
             optimizer.param_groups[0]['lr'] = current_lr
