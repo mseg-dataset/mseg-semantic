@@ -317,15 +317,21 @@ def get_model(args, criterion, BatchNorm):
         -   
     """
     if args.arch == 'psp':
-        from model.pspnet import PSPNet
-        model = PSPNet(layers=args.layers, classes=args.classes, zoom_factor=args.zoom_factor, criterion=criterion, BatchNorm=BatchNorm, network_name=args.network_name)
-
+        from mseg_semantic.model.pspnet import PSPNet
+        model = PSPNet(
+            layers=args.layers,
+            classes=args.classes,
+            zoom_factor=args.zoom_factor,
+            criterion=criterion,
+            BatchNorm=BatchNorm,
+            network_name=args.network_name
+        )
     elif args.arch == 'hrnet':
-        from model.seg_hrnet import get_configured_hrnet
+        from mseg_semantic.model.seg_hrnet import get_configured_hrnet
         # note apex batchnorm is hardcoded 
         model = get_configured_hrnet(args.classes)
     elif args.arch == 'hrnet_ocr':
-        from model.seg_hrnet_ocr import get_configured_hrnet_ocr
+        from mseg_semantic.model.seg_hrnet_ocr import get_configured_hrnet_ocr
         model = get_configured_hrnet_ocr(args.classes)
     return model
 
