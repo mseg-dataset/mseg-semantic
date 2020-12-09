@@ -417,35 +417,22 @@ def get_rank_to_dataset_map(args) -> Dict[int, str]:
 def set_number_of_training_iters(args):
     """
     There are two scenarios we consider to determine number of required training iters
-    when training on MSeg:
-    
-    1. We are mixing many datasets together. We determine which dataset this GPU
-            is assigned to. Each GPU runs 1 process, and multiple GPU IDs may be assigned
-            to a single dataset.
+    when training on MSeg. We set a max number of training crops, and then subdivide the
+    work between our GPUs.
 
-            The max number of iters is the number of 
-    
-    2. We are training with a single dataset. Suppose we want to train for 1 million
+    1. We are training with a single dataset. Suppose we want to train for 1 million
         crops in total (args.num_examples). Suppose our dataset has 18k images. Then
         we will train for 56 epochs. Suppose our training node has 8 GPUs. Then
         with a batch size of 32, and 8 GPUs, we need ~3906 iterations to reach 1M crops.
+
+    2. We are mixing many datasets together. We determine which dataset this GPU
+            is assigned to. Each GPU runs 1 process, and multiple GPU IDs (referred to
+            as replicas) may be assigned to a single dataset. The computation is the same
+            as before, except instead of counting all of the GPUs on the node, we only
+            count the number of replicas counting towards this dataset.
     """
-    if len(args.dataset) > 1:
-        rank_to_dataset_map = get_rank_to_dataset_map(args)
-        # # which dataset this gpu is for
-        args.dataset_name = rank_to_dataset_map[args.rank]
-        # within this dataset, its rank, i.e. 0,1,2,3 etc gpu ID assigned to this dataset
-        args.dataset_rank = args.dataset_gpu_mapping[args.dataset_name].index(args.rank)
-        args.num_replica_per_dataset = len(args.dataset_gpu_mapping[args.dataset_name])
-
-        # num_replicas_for_max_dataset = len(args.dataset_gpu_mapping[max_dataset_name])
-        # num_replicas_for_max_dataset = args.num_replica_per_dataset  # assuming the same # replicas for each dataset
-        args.max_iters = math.floor(args.num_examples / (args.batch_size * args.num_replica_per_dataset))
-        # args.max_iters = iters_per_epoch_for_max_dataset * 3 # should be the max_iters for all dataset, args.epochs needs recompute later
-
-        logger.info(f'max_iters = {args.max_iters}')
-
-    elif (len(args.dataset) == 1) and (not args.use_mgda):
+    # single dataset training
+    if (len(args.dataset) == 1) and (not args.use_mgda):
         from util.txt_utils import read_txt_file
         # number of examples for 1 epoch of this dataset
         num_d_examples = len(read_txt_file(infos[args.dataset[0]].trainlist))
@@ -458,6 +445,18 @@ def set_number_of_training_iters(args):
         # on small datasets, avoid saving checkpoints too frequently in order to not waste time
         if args.epochs > 1000:
             args.save_freq = args.epochs // 100
+
+    # multiple dataset training
+    elif len(args.dataset) > 1:
+        rank_to_dataset_map = get_rank_to_dataset_map(args)
+        # # which dataset this gpu is for
+        args.dataset_name = rank_to_dataset_map[args.rank]
+        # within this dataset, its rank, i.e. 0,1,2,3 etc gpu ID assigned to this dataset
+        args.dataset_rank = args.dataset_gpu_mapping[args.dataset_name].index(args.rank)
+        args.num_replica_per_dataset = len(args.dataset_gpu_mapping[args.dataset_name])
+
+        args.max_iters = math.floor(args.num_examples / (args.batch_size * args.num_replica_per_dataset))
+        logger.info(f'max_iters = {args.max_iters}')
 
     return args
 
