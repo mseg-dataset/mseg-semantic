@@ -91,7 +91,7 @@ def main():
 
     from mseg_semantic.utils import config
     from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
-    from mseg_semantic.util.verification_utils import verify_architecture
+    from mseg_semantic.utils.verification_utils import verify_architecture
 
     print('Using PyTorch version: ', torch.__version__)
     args = get_parser()
