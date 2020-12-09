@@ -14,6 +14,7 @@ import torch
 # import pdb
 # import random
 
+import mseg_semantic
 
 """
 NVIDIA Apex has 4 optimization levels:
@@ -29,8 +30,10 @@ NVIDIA Apex has 4 optimization levels:
 # cv2.ocl.setUseOpenCL(False)
 # cv2.setNumThreads(0)
 
+MAX_NUM_EPOCHS = 100000 # we let epochs run forever, then exit when max number of iters is reached
 
 def get_parser():
+    """Merge config parameters and commend line arguments into `cfg` object"""
     import argparse
     from mseg_semantic.utils import config
 
@@ -46,6 +49,7 @@ def get_parser():
 
 
 def get_logger():
+    """ Configure a Python logger to the logging.INFO verbosity level"""
     import logging
     logger_name = "main-logger"
     logger = logging.getLogger(logger_name)
@@ -62,11 +66,11 @@ def worker_init_fn(worker_id):
     random.seed(args.manual_seed + worker_id)
 
 
-def main_process():
+def main_process() -> bool:
     return not args.multiprocessing_distributed or (args.multiprocessing_distributed and args.rank % args.ngpus_per_node == 0)
 
 
-def main():
+def main() -> None:
     """
     """
     import pickle
@@ -154,46 +158,69 @@ def main():
         main_worker(args.train_gpu, args.ngpus_per_node, args)
 
 
-def get_train_transform_list(args, split: str):
-    """ Return the input data transform for training (w/ data augmentations)
-        Args:
-        -   args:
-        -   split
+def get_dataset_split_transform(
+    args, split: str
+) -> mseg_semantic.utils.transform.Compose:
+    """Return the input data transform (w/ data augmentations)
+    
+    Args:
+        args: experiment parameters
+        split: dataset split, either 'train' or 'val'
 
-        Return:
-        -   List of transforms
+    Return:
+        Runtime data transformation object that is callable
     """
     from mseg_semantic.utils.normalization_utils import get_imagenet_mean_std
     from mseg_semantic.utils import transform
 
     mean, std = get_imagenet_mean_std()
-    if split == 'train':
+    if split == "train":
         transform_list = [
             transform.ResizeShort(args.short_size),
             transform.RandScale([args.scale_min, args.scale_max]),
-            transform.RandRotate([args.rotate_min, args.rotate_max], padding=mean, ignore_label=args.ignore_label),
+            transform.RandRotate(
+                [args.rotate_min, args.rotate_max],
+                padding=mean,
+                ignore_label=args.ignore_label,
+            ),
             transform.RandomGaussianBlur(),
             transform.RandomHorizontalFlip(),
-            transform.Crop([args.train_h, args.train_w], crop_type='rand', padding=mean, ignore_label=args.ignore_label),
+            transform.Crop(
+                [args.train_h, args.train_w],
+                crop_type="rand",
+                padding=mean,
+                ignore_label=args.ignore_label,
+            ),
             transform.ToTensor(),
-            transform.Normalize(mean=mean, std=std)
+            transform.Normalize(mean=mean, std=std),
         ]
-    elif split == 'val':
+    elif split == "val":
         transform_list = [
-            transform.Crop([args.train_h, args.train_w], crop_type='center', padding=mean, ignore_label=args.ignore_label),
+            transform.Crop(
+                [args.train_h, args.train_w],
+                crop_type="center",
+                padding=mean,
+                ignore_label=args.ignore_label,
+            ),
             transform.ToTensor(),
-            transform.Normalize(mean=mean, std=std)
+            transform.Normalize(mean=mean, std=std),
         ]
     else:
-        raise RuntimeError('Unknown split. Quitting ...')
+        raise RuntimeError("Unknown split. Quitting ...")
 
     if len(args.dataset) > 1 and args.universal:
-        transform_list += [transform.ToUniversalLabel(args.dataset_name, use_naive_taxonomy=args.use_naive_taxonomy)]
+        transform_list += [
+            transform.ToUniversalLabel(
+                args.dataset_name, use_naive_taxonomy=args.use_naive_taxonomy
+            )
+        ]
     elif len(args.dataset) == 1 and args.universal:
         # never run naive taxonomy baseline for training with a single dataset
         transform_list += [transform.ToUniversalLabel(args.dataset[0])]
-        
+
     return transform.Compose(transform_list)
+
+
 
 
 def load_pretrained_weights(args, model, optimizer): 
@@ -279,15 +306,12 @@ def load_pretrained_weights(args, model, optimizer):
             checkpoint = torch.load(model_path, map_location=lambda storage, loc: storage.cuda())
             # args.start_epoch = checkpoint['epoch']
             args.start_epoch = 0 # we don't rely on this, but on resume_iter
-            # args.epoch_history = 
-            # args.start_epoch = 
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
             resume_iter = checkpoint['current_iter']
 
             args.epoch_history = checkpoint['epoch']
 
-            # print()
             if main_process():
                 logger.info("=> loaded checkpoint '{}' (epoch history: {})".format(model_path, checkpoint['epoch']))
         else:
@@ -475,11 +499,8 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
     model, optimizer, args.resume_iter = load_pretrained_weights(args, model, optimizer)
 
 
-
     # FLAT-MIX ADDITIONS 
     if len(args.dataset) > 1:
-        # args.num_examples = 1800000
-
         rank_to_dataset_map = get_rank_to_dataset_map(args)
         # # which dataset this gpu is for
         args.dataset_name = rank_to_dataset_map[args.rank]
@@ -492,14 +513,9 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
         args.max_iters = math.floor(args.num_examples / (args.batch_size * args.num_replica_per_dataset))
         # args.max_iters = iters_per_epoch_for_max_dataset * 3 # should be the max_iters for all dataset, args.epochs needs recompute later
 
-        # args.max_iters = 1800000
-
         logger.info(f'max_iters = {args.max_iters}')
 
-
-    train_transform = get_train_transform_list(args, split='train')
-    # train_transform = transform.Compose(train_transform_list)
-    
+    train_transform = get_dataset_split_transform(args, split='train')    
 
     if (len(args.dataset) == 1) and (not args.use_mgda):
         # num_examples_coco = infos['coco-panoptic-v1-qvga'].trainlen
@@ -552,7 +568,7 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
     logger.info(f'Train loader has len {len(train_loader)} on {args.rank}')
 
     if args.evaluate:
-        val_transform = get_train_transform_list(args, split='val')
+        val_transform = get_dataset_split_transform(args, split='val')
         # val_transform = transform.Compose(val_transform_list)
         val_data = dataset.SemData(split='val', data_root=args.data_root, data_list=args.val_list, transform=val_transform)
         if args.distributed:
@@ -569,7 +585,7 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
         )
 
     # for epoch in range(args.start_epoch, args.epochs):
-    for epoch in range(args.start_epoch, args.epochs+100000):
+    for epoch in range(args.start_epoch, args.epochs + MAX_NUM_EPOCHS):
 
         epoch_log = epoch + 1
         if args.auto_resume != 'None': # if it is a resumed training
@@ -639,8 +655,7 @@ def train(train_loader, model, optimizer, epoch: int):
     end = time.time()
     max_iter = args.max_iters
     for i, (input, target) in enumerate(train_loader):
-        # pass
-        # if main_process():
+
         data_time.update(time.time() - end)
         if args.zoom_factor != 8:
             h = int((target.size()[1] - 1) / 8 * args.zoom_factor + 1)
@@ -680,7 +695,7 @@ def train(train_loader, model, optimizer, epoch: int):
 
         current_iter = epoch * len(train_loader) + i + 1 + args.resume_iter
         current_lr = poly_learning_rate(args.base_lr, current_iter, max_iter, power=args.power)
-        # current_lr = 0
+
         # logger.info(f'LR:{current_lr}, base_lr: {args.base_lr}, current_iter:{current_iter}, max_iter:{max_iter}, power:{args.power}')
 
         if args.arch == 'psp':
@@ -702,7 +717,6 @@ def train(train_loader, model, optimizer, epoch: int):
         remain_time = '{:02d}:{:02d}:{:02d}'.format(int(t_h), int(t_m), int(t_s))
 
         if (current_iter) % args.print_freq == 0 and True:
-        # if True:
             logger.info('Epoch: [{}/{}][{}/{}] '
                         'Data {data_time.val:.3f} ({data_time.avg:.3f}) '
                         'Batch {batch_time.val:.3f} ({batch_time.avg:.3f}) '
@@ -730,7 +744,6 @@ def train(train_loader, model, optimizer, epoch: int):
             break
 
     iou_class, accuracy_class, mIoU, mAcc, allAcc = sam.get_metrics()
-    # if main_process():
     logger.info('Train result at epoch [{}/{}]: mIoU/mAcc/allAcc {:.4f}/{:.4f}/{:.4f}.'.format(epoch+1, args.epochs, mIoU, mAcc, allAcc))
     return main_loss_meter.avg, mIoU, mAcc, allAcc
 
@@ -766,7 +779,6 @@ def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model,
     
 
 def forward_backward_mgda(input: torch.Tensor, target: torch.Tensor, model, optimizer, args):
-    from mseg_semantic.multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
     """
         We rely upon the ddp.no_sync() of gradients:
         https://github.com/pytorch/pytorch/blob/master/torch/nn/parallel/distributed.py
@@ -784,6 +796,7 @@ def forward_backward_mgda(input: torch.Tensor, target: torch.Tensor, model, opti
         -   main_loss: Tensor of size (?) representing
         -   aux_loss: Tensor of size (?) representing
     """
+    from mseg_semantic.multiobjective_opt.dist_mgda_utils import scale_loss_and_gradients
     with model.no_sync():
         output, main_loss, aux_loss = model(input, target)
         loss = main_loss + args.aux_weight * aux_loss
@@ -850,8 +863,7 @@ def validate(val_loader, model, criterion):
 
 end = time.time()
 print(end-start)
-if __name__ == '__main__':
-    print('main')
 
+if __name__ == '__main__':
 
     main()
