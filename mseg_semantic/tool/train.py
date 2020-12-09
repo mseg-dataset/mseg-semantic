@@ -2,7 +2,6 @@
 
 import time
 start = time.time()
-# time.sleep(2)
 from typing import Dict
 
 import apex
@@ -14,9 +13,6 @@ import torch
 # import os
 # import pdb
 # import random
-
-# end = time.time()
-# print(end - start)
 
 
 """
@@ -170,7 +166,6 @@ def get_train_transform_list(args, split: str):
     from mseg_semantic.utils.normalization_utils import get_imagenet_mean_std
     from mseg_semantic.utils import transform
 
-
     mean, std = get_imagenet_mean_std()
     if split == 'train':
         transform_list = [
@@ -190,8 +185,7 @@ def get_train_transform_list(args, split: str):
             transform.Normalize(mean=mean, std=std)
         ]
     else:
-        print('Unknown split. Quitting ...')
-        quit()
+        raise RuntimeError('Unknown split. Quitting ...')
 
     if len(args.dataset) > 1 and args.universal:
         transform_list += [transform.ToUniversalLabel(args.dataset_name, use_naive_taxonomy=args.use_naive_taxonomy)]
@@ -275,7 +269,6 @@ def load_pretrained_weights(args, model, optimizer):
             model_path = os.path.join(args.auto_resume, filename)
         # print(model_path)
             logger.info(model_path)
-            # print()
             print(0, max_epoch, model_path, os.path.isfile(model_path))
 
         
@@ -304,7 +297,7 @@ def load_pretrained_weights(args, model, optimizer):
 
     return model, optimizer, resume_iter
 
-            # optimizer = get_optimizer(args.model)
+# optimizer = get_optimizer(args.model)
 
 
 
@@ -351,15 +344,16 @@ def get_optimizer(args, model):
     import torch, os, math
 
     if args.arch == 'hrnet' or args.arch == 'hrnet_ocr':
-        optimizer = torch.optim.SGD([{'params':
-                                  filter(lambda p: p.requires_grad,
-                                         model.parameters()),
-                                  'lr': args.base_lr}],
-                                lr=args.base_lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay,
-                                # nesterov=config.TRAIN.NESTEROV,
-                                )
+        optimizer = torch.optim.SGD(
+            [
+                {
+                    'params': filter(lambda p: p.requires_grad, model.parameters()),
+                    'lr': args.base_lr
+                }],
+            lr=args.base_lr,
+            momentum=args.momentum,
+            weight_decay=args.weight_decay,
+        )
         return optimizer
 
     if args.arch == 'psp':
@@ -374,7 +368,8 @@ def get_optimizer(args, model):
             params_list.append(dict(params=module.parameters(), lr=args.base_lr))
         else:
             params_list.append(dict(params=module.parameters(), lr=args.base_lr * 10))
-    args.index_split = 5
+    NUM_PRETRAINED_RESNET_LAYERS = 5
+    args.index_split = NUM_PRETRAINED_RESNET_LAYERS
     optimizer = torch.optim.SGD(params_list, lr=args.base_lr, momentum=args.momentum, weight_decay=args.weight_decay)
     return optimizer
 
@@ -397,7 +392,7 @@ def get_rank_to_dataset_map(args) -> Dict[int,str]:
     return rank_to_dataset_map
 
 
-def main_worker(gpu: int, ngpus_per_node: int, argss):
+def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
     """
     Consider if a dataset has size 18,000 and is placed on a single GPU, of 4 gpus. 
     Batch size 32. In this case, len(train_data) = 18,000 but len(train_loader) = 2250
@@ -431,11 +426,6 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
     from mseg_semantic.utils.training_utils import poly_learning_rate
     from mseg_semantic.utils.verification_utils import verify_architecture
 
-    # with open('test_mainworker.txt', 'a') as f:
-    #     f.write('test\t')
-    #     f.close()
-    # os.sleep
-    # time.sleep(30)
     if args.sync_bn:
         if args.multiprocessing_distributed:
             # BatchNorm = torch.nn.SyncBatchNorm
@@ -457,16 +447,16 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
     model = get_model(args, criterion, BatchNorm)
     optimizer = get_optimizer(args, model)
 
-    if True:
-        global logger
-        logger = get_logger()
-        args.logger = logger
-        
-        if main_process():
-            logger.info(args)
-            logger.info("=> creating model ...")
-            logger.info("Classes: {}".format(args.classes))
-            logger.info(model)
+    global logger
+    logger = get_logger()
+    args.logger = logger
+    
+    if main_process():
+        logger.info(args)
+        logger.info("=> creating model ...")
+        logger.info("Classes: {}".format(args.classes))
+        logger.info(model)
+
     if args.distributed:
         torch.cuda.set_device(gpu)
         args.batch_size = int(args.batch_size / ngpus_per_node)
@@ -550,9 +540,16 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
 
     else:
         train_sampler = None
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=(train_sampler is None), num_workers=args.workers, pin_memory=True, sampler=train_sampler, drop_last=True)
+    train_loader = torch.utils.data.DataLoader(
+        train_data,
+        batch_size=args.batch_size,
+        shuffle=(train_sampler is None),
+        num_workers=args.workers,
+        pin_memory=True,
+        sampler=train_sampler,
+        drop_last=True
+    )
     logger.info(f'Train loader has len {len(train_loader)} on {args.rank}')
-
 
     if args.evaluate:
         val_transform = get_train_transform_list(args, split='val')
@@ -562,7 +559,14 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
             val_sampler = torch.utils.data.distributed.DistributedSampler(val_data)
         else:
             val_sampler = None
-        val_loader = torch.utils.data.DataLoader(val_data, batch_size=args.batch_size_val, shuffle=False, num_workers=args.workers, pin_memory=True, sampler=val_sampler)
+        val_loader = torch.utils.data.DataLoader(
+            val_data,
+            batch_size=args.batch_size_val,
+            shuffle=False,
+            num_workers=args.workers,
+            pin_memory=True,
+            sampler=val_sampler
+        )
 
     # for epoch in range(args.start_epoch, args.epochs):
     for epoch in range(args.start_epoch, args.epochs+100000):
@@ -588,14 +592,12 @@ def main_worker(gpu: int, ngpus_per_node: int, argss):
                 deletename = args.save_path + '/train_epoch_' + str(epoch_log - args.save_freq * 2) + '.pth'
                 os.remove(deletename)
 
-        # if (epoch == args.epochs - 1) and main_process():
         if (epoch_log == args.epochs) and main_process():
             filename = args.save_path + '/train_epoch_final.pth'
             logger.info('Saving checkpoint to: ' + filename)
             torch.save({'epoch': epoch_log, 'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict(), 
                 'current_iter': (epoch_log) * len(train_loader) + args.resume_iter, 'max_iter': args.max_iters}, filename)
             exit()
-
 
 
         # if args.evaluate:
