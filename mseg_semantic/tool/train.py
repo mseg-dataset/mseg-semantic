@@ -93,9 +93,10 @@ def main():
     from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
     from mseg_semantic.utils.verification_utils import verify_architecture
 
-    assert isinstance(args.train_gpu, list)
+
     print('Using PyTorch version: ', torch.__version__)
     args = get_parser()
+    assert isinstance(args.train_gpu, list)
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(x) for x in args.train_gpu)
 
     ###### FLAT-MIX CODE #######################
