@@ -9,7 +9,6 @@ DATA:
         mapillary-public65-relabeled,
         sunrgbd-37-relabeled]
   universal: True
-  use_multiple_datasets: True
   use_mgda: False # to be determined at argument
   finetune: False
 
