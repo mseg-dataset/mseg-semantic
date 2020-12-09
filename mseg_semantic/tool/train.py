@@ -742,20 +742,26 @@ def train(train_loader, model, optimizer: torch.optim.Optimizer, epoch: int):
     return main_loss_meter.avg, mIoU, mAcc, allAcc
 
 
-def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model, optimizer: torch.optim.Optimizer, args):
+def forward_backward_full_sync(
+    input: torch.Tensor,
+    target: torch.Tensor,
+    model,
+    optimizer: torch.optim.Optimizer,
+    args,
+):
     """
-        Args:
-        -   input: Tensor of size (?) representing
-        -   target: Tensor of size (?) representing
-        -   model
-        -   optimizer
-        -   args
+    Args:
+        input: Tensor of size NCHW representing
+        target: Tensor of size (?) representing
+        model
+        optimizer
+        args
 
-        Returns:
-        -   output: Tensor of size (?) representing
-        -   loss: Tensor of size (?) representing
-        -   main_loss: Tensor of size (?) representing
-        -   aux_loss: Tensor of size (?) representing
+    Returns:
+        output: Tensor of size (?) representing
+        loss: Tensor of size (?) representing
+        main_loss: Tensor of size (?) representing
+        aux_loss: Tensor of size (?) representing
     """
     output, main_loss, aux_loss = model(input, target)
     if not args.multiprocessing_distributed:
@@ -769,7 +775,7 @@ def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model,
     else:
         loss.backward()
     return output, loss, main_loss, aux_loss
-    
+
 
 def forward_backward_mgda(input: torch.Tensor, target: torch.Tensor, model, optimizer, args):
     """
