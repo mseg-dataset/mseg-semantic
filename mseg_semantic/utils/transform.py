@@ -8,6 +8,7 @@ import numbers
 import random
 import torch
 
+from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 
 """
@@ -50,9 +51,12 @@ class ToTensor(object):
 
 
 class ToUniversalLabel(object):
-    def __init__(self, dataset):
+    def __init__(self, dataset: str, use_naive_taxonomy: bool = False) -> None:
         self.dataset = dataset
-        self.tax_converter = TaxonomyConverter()
+        if use_naive_taxonomy:
+            self.tax_converter = NaiveTaxonomyConverter()
+        else:
+            self.tax_converter = TaxonomyConverter()
 
     def __call__(self, image, label):
         return image, self.tax_converter.transform_label(label, self.dataset)
