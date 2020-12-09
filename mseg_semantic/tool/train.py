@@ -407,22 +407,53 @@ def get_optimizer(args, model: nn.Module) -> torch.optim.Optimizer:
     return optimizer
 
 
-def get_rank_to_dataset_map(args) -> Dict[int,str]:
+def get_rank_to_dataset_map(args) -> Dict[int, str]:
     """
-        Obtain a mapping from GPU rank (index) to the name of the dataset residing on this GPU.
-
-        Args:
-        -   args
-
-        Returns:
-        -   rank_to_dataset_map
+    Obtain a mapping from GPU rank (index) to the name of the dataset residing on this GPU.
     """
     rank_to_dataset_map = {}
     for dataset, gpu_idxs in args.dataset_gpu_mapping.items():
         for gpu_idx in gpu_idxs:
             rank_to_dataset_map[gpu_idx] = dataset
-    print('Rank to dataset map: ', rank_to_dataset_map)
+    logger.info("Rank to dataset map: ", rank_to_dataset_map)
     return rank_to_dataset_map
+
+
+def set_number_of_training_iters(args):
+    """
+    There are two scenarios:
+        1. We are mixing many datasets together. We determine which dataset this GPU process
+            is assigned to. Afterwards, the max number of iters is the number of 
+        2. We are training with a single dataset.
+    """
+    if len(args.dataset) > 1:
+        rank_to_dataset_map = get_rank_to_dataset_map(args)
+        # # which dataset this gpu is for
+        args.dataset_name = rank_to_dataset_map[args.rank]
+        # # within this dataset, its rank
+        args.dataset_rank = args.dataset_gpu_mapping[args.dataset_name].index(args.rank)
+        args.num_replica_per_dataset = len(args.dataset_gpu_mapping[args.dataset_name])
+
+        # num_replicas_for_max_dataset = len(args.dataset_gpu_mapping[max_dataset_name])
+        # num_replicas_for_max_dataset = args.num_replica_per_dataset  # assuming the same # replicas for each dataset
+        args.max_iters = math.floor(args.num_examples / (args.batch_size * args.num_replica_per_dataset))
+        # args.max_iters = iters_per_epoch_for_max_dataset * 3 # should be the max_iters for all dataset, args.epochs needs recompute later
+
+        logger.info(f'max_iters = {args.max_iters}')
+
+    elif (len(args.dataset) == 1) and (not args.use_mgda):
+        from util.txt_utils import read_txt_file
+        num_examples = len(read_txt_file(infos[args.dataset[0]].trainlist))
+        num_examples_total = args.num_examples
+
+        args.epochs = math.ceil(num_examples_total / num_examples)
+        args.max_iters = math.floor(num_examples_total / (args.batch_size * args.ngpus_per_node))
+
+        # on small datasets, avoid saving checkpoints too frequently in order to not waste time
+        if args.epochs > 1000:
+            args.save_freq = args.epochs // 100
+
+    return args
 
 
 def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
@@ -506,43 +537,9 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
 
     model, optimizer, args.resume_iter = load_pretrained_weights(args, model, optimizer)
 
-
-    # FLAT-MIX ADDITIONS 
-    if len(args.dataset) > 1:
-        rank_to_dataset_map = get_rank_to_dataset_map(args)
-        # # which dataset this gpu is for
-        args.dataset_name = rank_to_dataset_map[args.rank]
-        # # within this dataset, its rank
-        args.dataset_rank = args.dataset_gpu_mapping[args.dataset_name].index(args.rank)
-        args.num_replica_per_dataset = len(args.dataset_gpu_mapping[args.dataset_name])
-
-        # num_replicas_for_max_dataset = len(args.dataset_gpu_mapping[max_dataset_name])
-        # num_replicas_for_max_dataset = args.num_replica_per_dataset  # assuming the same # replicas for each dataset
-        args.max_iters = math.floor(args.num_examples / (args.batch_size * args.num_replica_per_dataset))
-        # args.max_iters = iters_per_epoch_for_max_dataset * 3 # should be the max_iters for all dataset, args.epochs needs recompute later
-
-        logger.info(f'max_iters = {args.max_iters}')
+    args = set_number_of_training_iters(args)
 
     train_transform = get_dataset_split_transform(args, split='train')    
-
-    if (len(args.dataset) == 1) and (not args.use_mgda):
-        # num_examples_coco = infos['coco-panoptic-v1-qvga'].trainlen
-        # num_examples = infos[args.dataset].trainlen 
-        from util.txt_utils import read_txt_file
-        num_examples = len(read_txt_file(infos[args.dataset[0]].trainlist))
-
-        # num_examples_total = num_examples_coco * 10
-
-        num_examples_total = args.num_examples
-
-        args.epochs = math.ceil(num_examples_total / num_examples)
-        args.max_iters = math.floor(num_examples_total / (args.batch_size * args.ngpus_per_node))
-
-        # avoid too frequent saving to waste time, on small datasets
-        if args.epochs > 1000:
-            args.save_freq = args.epochs // 100
-
-
     if len(args.dataset) > 1:
         # FLATMIX ADDITION
         train_data = dataset.SemData(split='train', data_root=args.data_root[args.dataset_name], data_list=args.train_list[args.dataset_name], transform=train_transform)
@@ -627,7 +624,7 @@ def main_worker(gpu: int, ngpus_per_node: int, argss) -> None:
         #     loss_val, mIoU_val, mAcc_val, allAcc_val = validate(val_loader, model, criterion)
 
 
-def train(train_loader, model, optimizer, epoch: int):
+def train(train_loader, model, optimizer: torch.optim.Optimizer, epoch: int):
     """
     No MGDA -- whole iteration takes 0.31 sec.
     0.24 sec to run typical backward pass (with no MGDA)
@@ -636,7 +633,6 @@ def train(train_loader, model, optimizer, epoch: int):
     1.05 sec to run backward pass w/ MGDA subroutine -- scale_loss_and_gradients() in every iteration.
 
     TODO: Profile which part of Frank-Wolfe is slow
-
     """
     import torch, os, math, time
     import torch.distributed as dist
@@ -653,12 +649,7 @@ def train(train_loader, model, optimizer, epoch: int):
     sam = SegmentationAverageMeter()
 
     model.train()
-    # set bn to be eval() and see the norm
-    # def set_bn_eval(m):
-    #     classname = m.__class__.__name__
-    #     if classname.find('BatchNorm') != -1:
-    #         m.eval()
-    # model.apply(set_bn_eval)
+
     end = time.time()
     max_iter = args.max_iters
     for i, (input, target) in enumerate(train_loader):
@@ -698,7 +689,6 @@ def train(train_loader, model, optimizer, epoch: int):
 
         # print(len(train_loader))
         # logger.info(len(train_loader))
-
 
         current_iter = epoch * len(train_loader) + i + 1 + args.resume_iter
         current_lr = poly_learning_rate(args.base_lr, current_iter, max_iter, power=args.power)
@@ -752,7 +742,7 @@ def train(train_loader, model, optimizer, epoch: int):
     return main_loss_meter.avg, mIoU, mAcc, allAcc
 
 
-def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model, optimizer, args):
+def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model, optimizer: torch.optim.Optimizer, args):
     """
         Args:
         -   input: Tensor of size (?) representing
@@ -771,7 +761,6 @@ def forward_backward_full_sync(input: torch.Tensor, target: torch.Tensor, model,
     if not args.multiprocessing_distributed:
         main_loss, aux_loss = torch.mean(main_loss), torch.mean(aux_loss)
     loss = main_loss + args.aux_weight * aux_loss
-
 
     optimizer.zero_grad()
     if args.use_apex and args.multiprocessing_distributed:
@@ -809,7 +798,7 @@ def forward_backward_mgda(input: torch.Tensor, target: torch.Tensor, model, opti
     return output, loss, main_loss, aux_loss, scales
 
 
-def validate(val_loader, model, criterion):
+def validate(val_loader, model, criterion: nn.Module):
     if main_process():
         logger.info('>>>>>>>>>>>>>>>> Start Evaluation >>>>>>>>>>>>>>>>')
     batch_time = AverageMeter()
