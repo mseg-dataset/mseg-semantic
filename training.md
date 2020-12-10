@@ -12,10 +12,10 @@ We provide a number of config files for training models. The appropriate config 
 @1080p Resolution
 | Dataset \ Taxonomy |  Unified |   Naive  |
 |:------------------:|  :-----: |:--------:| 
-| MSeg Relabeled | config/train/1080_release/mseg-lowres.yaml | --- |
-| MSeg Unrelabeled | config/train/1080_release/mseg-unrelabeled.yaml | config/train/1080_release/mseg-baseline.yaml |
+| MSeg Relabeled | config/train/1080_release/mseg-relabeled-1m.yaml | --- |
+| MSeg Unrelabeled | config/train/1080_release/mseg-unrelabeled.yaml | config/train/1080_release/mseg-naive-baseline.yaml |
 
-If you want to train the Relabeled + Unified Tax. model for 3M crops instead of 1M, use `mseg_semantic/config/train/1080_release/mseg-lowres-3m.yaml`.
+If you want to train the Relabeled + Unified Tax. model for 3M crops instead of 1M, use `mseg_semantic/config/train/1080_release/mseg-relabeled-3m.yaml`.
 
 @480p
 | Dataset \ Taxonomy |  Unified |   Naive  |
