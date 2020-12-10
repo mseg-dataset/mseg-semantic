@@ -1,32 +1,24 @@
 #!/usr/bin/python3
 
+import math
 import time
 start = time.time()
 from typing import Dict, Union
+# import numpy as np
+# import os
+# import pdb
+# import random
 
 import apex
 import torch
 import torch.nn as nn
 # import cv2
 
-# import math
-# import numpy as np
-# import os
-# import pdb
-# import random
-
 import mseg_semantic
 from mseg_semantic.utils import transform
 
 """
-NVIDIA Apex has 4 optimization levels:
-
-    O0 (FP32 training): basically a no-op. Everything is FP32 just as before.
-    O1 (Conservative Mixed Precision): only some whitelist ops are done in FP16.
-    O2 (Fast Mixed Precision): this is the standard mixed precision training. 
-        It maintains FP32 master weights and optimizer.step acts directly on the FP32 master weights.
-    O3 (FP16 training): full FP16. Passing keep_batchnorm_fp32=True can speed 
-        things up as cudnn batchnorm is faster anyway.
+Script to train models on the MSeg dataset using Pytorch DDP.
 """
 
 # cv2.ocl.setUseOpenCL(False)
