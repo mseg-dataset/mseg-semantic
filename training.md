@@ -51,3 +51,12 @@ vs. config/train/480/single_universal.yaml
 ## Training Baseline Models with Multi-Task Learning and CCSA
 
 We also provide code to train models using multi-task learning (MGDA, specifically) and a domain generalization technique called CCSA. Please refer to [multiobjective_opt/README.md]() and [domain_generalization/README.md](), respectively.
+
+## Apex Library
+We use the 'O0' optimization level from Apex. NVIDIA Apex has 4 optimization levels, and we use the first:
+- O0 (FP32 training): basically a no-op. Everything is FP32 just as before.
+- O1 (Conservative Mixed Precision): only some whitelist ops are done in FP16.
+- O2 (Fast Mixed Precision): this is the standard mixed precision training. 
+        It maintains FP32 master weights and optimizer.step acts directly on the FP32 master weights.
+- O3 (FP16 training): full FP16. Passing keep_batchnorm_fp32=True can speed 
+        things up as cudnn batchnorm is faster anyway.
