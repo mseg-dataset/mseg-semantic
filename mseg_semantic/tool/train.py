@@ -16,6 +16,7 @@ import torch.nn as nn
 # import random
 
 import mseg_semantic
+from mseg_semantic.utils import transform
 
 """
 NVIDIA Apex has 4 optimization levels:
@@ -161,7 +162,7 @@ def main() -> None:
 
 def get_dataset_split_transform(
     args, split: str
-) -> mseg_semantic.utils.transform.Compose:
+) -> transform.Compose:
     """Return the input data transform (w/ data augmentations)
 
     Args:
@@ -172,7 +173,6 @@ def get_dataset_split_transform(
         Runtime data transformation object that is callable
     """
     from mseg_semantic.utils.normalization_utils import get_imagenet_mean_std
-    from mseg_semantic.utils import transform
 
     mean, std = get_imagenet_mean_std()
     if split == "train":
