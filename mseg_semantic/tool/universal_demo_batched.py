@@ -65,7 +65,7 @@ def get_parser() -> CfgNode:
     """ """
     parser = argparse.ArgumentParser(description='PyTorch Semantic Segmentation')
     parser.add_argument('--config', type=str, 
-        default=f'{_ROOT}/config/final_test/1080/default_config_360.yaml', help='config file')
+        default=f'{_ROOT}/config/test/default_config_360_ss.yaml', help='config file')
     parser.add_argument('--file_save', type=str, default='default', help='eval result to save, when lightweight option is on')
     parser.add_argument('opts', help='see config/ade20k/ade20k_pspnet50.yaml for all options', 
         default=None, nargs=argparse.REMAINDER) # model path is passed in 
