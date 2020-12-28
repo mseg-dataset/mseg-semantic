@@ -150,10 +150,10 @@ Below we report the performance of individually-trained models that serve as bas
 
 You can obtain the following table by running 
 ```python
-python collect_results.py --regime zero_shot --scale ss --output_format markdown
-python collect_results.py --regime oracle --scale ss --output_format markdown
+python mseg_semantic/scripts/collect_results.py --regime zero_shot --scale ss --output_format markdown
+python mseg_semantic/scripts/collect_results.py --regime oracle --scale ss --output_format markdown
 ```
-after `./eval_models.sh`:
+after `./mseg_semantic/scripts/eval_models.sh`:
 
 Abbreviated Dataset Names: VOC = PASCAL VOC, PC = PASCAL Context, WD = WildDash, SN = ScanNet
 
