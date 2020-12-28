@@ -4,9 +4,12 @@ import torch.utils.data
 from typing import List, Tuple
 
 from mseg_semantic.utils import dataset, transform, config
+from mseg_semantic.utils.normalization_utils import get_imagenet_mean_std
 
-
-def create_test_loader(args) -> Tuple[torch.utils.data.dataloader.DataLoader, List[Tuple[str,str]]]:
+def create_test_loader(
+	args,
+	preprocess_imgs_in_loader: bool = False
+) -> Tuple[torch.utils.data.dataloader.DataLoader, List[Tuple[str,str]]]:
 	"""
 		Create a Pytorch dataloader from a dataroot and list of 
 		relative paths.
@@ -17,7 +20,17 @@ def create_test_loader(args) -> Tuple[torch.utils.data.dataloader.DataLoader, Li
 		-	test_loader
 		-	data_list: list of 2-tuples (relative rgb path, relative label path)
 	"""
-	test_transform = transform.Compose([transform.ToTensor()])
+	if preprocess_imgs_in_loader:
+		# resize and normalize images in advance
+		mean, std = get_imagenet_mean_std()
+		test_transform = transform.Compose([
+			transform.ResizeShort(args.base_size),
+			transform.ToTensor(),
+			transform.Normalize(mean=mean, std=std)
+		])
+	else:
+		# no resizing on the fly using OpenCV and also normalize images on the fly
+		test_transform = transform.Compose([transform.ToTensor()])
 	test_data = dataset.SemData(
 		split=args.split,
 		data_root=args.data_root,
