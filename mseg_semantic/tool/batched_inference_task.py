@@ -15,6 +15,7 @@ import torch
 from mseg.utils.dir_utils import check_mkdir
 
 from mseg_semantic.tool.inference_task import InferenceTask
+from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
 
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
