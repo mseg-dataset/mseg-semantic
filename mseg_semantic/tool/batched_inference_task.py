@@ -15,10 +15,13 @@ import torch
 from mseg.utils.dir_utils import check_mkdir
 
 from mseg_semantic.tool.inference_task import InferenceTask
+from mseg_semantic.utils.logger_utils import get_logger
 from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
 
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
+
+logger = get_logger()
 
 
 def pad_to_crop_sz_batched(
@@ -60,7 +63,7 @@ class BatchedInferenceTask(InferenceTask):
 		if is_dir:
 			# argument is a path to a directory
 			self.create_path_lists_from_dir()
-			test_loader, self.data_list = create_test_loader(self.args)
+			test_loader, self.data_list = create_test_loader(self.args, use_batched_inference=True)
 			self.execute_on_dataloader_batched(test_loader)
 
 		else:
