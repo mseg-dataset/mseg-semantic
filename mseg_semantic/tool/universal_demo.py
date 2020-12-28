@@ -3,13 +3,10 @@
 import argparse
 import cv2
 import logging
-import time
 import numpy as np
 import os
-from pathlib import Path
-import pdb
 import time
-
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 from mseg.utils.names_utils import load_class_names, get_universal_class_names
