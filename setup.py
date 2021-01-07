@@ -25,6 +25,9 @@ if platform.system() == "Windows":
     print("mseg-semantic currently does not support Windows, please use Linux/Mac OS")
     sys.exit(1)
 
+with open('requirements.txt', 'r') as f:
+    requirements_list = f.read().splitlines()
+
 setup(
     name="mseg_semantic",
     version="1.0.0",
@@ -48,22 +51,5 @@ setup(
     package_data={"mseg_semantic": []},
     include_package_data=True,
     python_requires=">= 3.6",
-    install_requires=[
-        "apex",
-        "imageio",
-        "matplotlib",
-        "numpy",
-        "opencv-python>=4.1.0.25",
-        "pandas>=0.23.1",
-        "PyYAML",
-        "pillow",
-        "imageio",
-        "recordclass",
-        "scipy>=1.2.1",
-        "sklearn",
-        "torch",
-        "tqdm",
-        "typing_extensions",
-        "yacs"
-    ]
+    install_requires=requirements_list
 )
