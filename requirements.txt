@@ -1,9 +1,9 @@
 apex
 imageio
 matplotlib
-numpy>=1.16.5
+numpy>=1.19.5
 opencv-python>=4.1.0.25
-pandas>=0.23.1
+pandas>=1.2.0
 Pillow
 PyYAML
 recordclass
