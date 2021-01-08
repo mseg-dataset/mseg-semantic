@@ -2,9 +2,9 @@
 
 import logging
 import os
-from pathlib import Path
 import pdb
 import time
+from pathlib import Path
 from typing import List, Tuple
 
 import cv2
@@ -534,7 +534,7 @@ class InferenceTask:
 				batch_time=batch_time))
 
 
-	def scale_process_cuda(self, image: np.ndarray, h: int, w: int, stride_rate: float = 2/3) -> np.ndarray:
+	def scale_process_cuda(self, image: np.ndarray, raw_h: int, raw_w: int, stride_rate: float = 2/3) -> np.ndarray:
 		""" First, pad the image. If input is (384x512), then we must pad it up to shape
 		to have shorter side "scaled base_size". 
 
@@ -545,15 +545,15 @@ class InferenceTask:
 		has passed through the sliding window.
 
 		Args:
-		-   image: Array, representing image where shortest edge is adjusted to base_size
-		-   h: integer representing raw image height, e.g. for NYU it is 480
-		-   w: integer representing raw image width, e.g. for NYU it is 640
-		-   stride_rate
+		    image: Array, representing image where shortest edge is adjusted to base_size
+		    raw_h: integer representing native/raw image height on disk, e.g. for NYU it is 480
+		    raw_w: integer representing native/raw image width on disk, e.g. for NYU it is 640
+		    stride_rate: stride rate of sliding window operation
 
 		Returns:
-		-   prediction: Numpy array representing predictions with shorter side equal to self.base_size
+		    prediction: Numpy array representing predictions with shorter side equal to self.base_size
 		"""
-		ori_h, ori_w, _ = image.shape
+		resized_h, resized_w, _ = image.shape
 		image, pad_h_half, pad_w_half = pad_to_crop_sz(image, self.crop_h, self.crop_w, self.mean)
 		new_h, new_w, _ = image.shape
 		stride_h = int(np.ceil(self.crop_h*stride_rate))
@@ -567,6 +567,8 @@ class InferenceTask:
 		# loop w/ sliding window, obtain start/end indices
 		for index_h in range(0, grid_h):
 			for index_w in range(0, grid_w):
+				# height indices are s_h to e_h
+				# width indices are s_w to e_w
 				s_h = index_h * stride_h
 				e_h = min(s_h + self.crop_h, new_h)
 				s_h = e_h - self.crop_h
@@ -579,14 +581,14 @@ class InferenceTask:
 
 		prediction_crop /= count_crop.unsqueeze(0)
 		# disregard predictions from padded portion of image
-		prediction_crop = prediction_crop[:, pad_h_half:pad_h_half+ori_h, pad_w_half:pad_w_half+ori_w]
+		prediction_crop = prediction_crop[:, pad_h_half:pad_h_half+rezied_h, pad_w_half:pad_w_half+resized_w]
 
 		# CHW -> HWC
 		prediction_crop = prediction_crop.permute(1,2,0)
 		prediction_crop = prediction_crop.data.cpu().numpy()
 
 		# upsample or shrink predictions back down to scale=1.0
-		prediction = cv2.resize(prediction_crop, (w, h), interpolation=cv2.INTER_LINEAR)
+		prediction = cv2.resize(prediction_crop, (raw_w, raw_h), interpolation=cv2.INTER_LINEAR)
 		return prediction
 
 
