@@ -532,8 +532,8 @@ class InferenceTask:
 		    prediction: Numpy array representing predictions with shorter side equal to self.base_size
 		"""
 		resized_h, resized_w, _ = image.shape
-		image, pad_h_half, pad_w_half = pad_to_crop_sz(image, self.crop_h, self.crop_w, self.mean)
-		new_h, new_w, _ = image.shape
+		padded_image, pad_h_half, pad_w_half = pad_to_crop_sz(image, self.crop_h, self.crop_w, self.mean)
+		new_h, new_w, _ = padded_image.shape
 		stride_h = int(np.ceil(self.crop_h*stride_rate))
 		stride_w = int(np.ceil(self.crop_w*stride_rate))
 		grid_h = int(np.ceil(float(new_h-self.crop_h)/stride_h) + 1)
@@ -545,21 +545,21 @@ class InferenceTask:
 		# loop w/ sliding window, obtain start/end indices
 		for index_h in range(0, grid_h):
 			for index_w in range(0, grid_w):
-				# height indices are s_h to e_h
-				# width indices are s_w to e_w
+				# height indices are s_h to e_h (start h index to end h index)
+				# width indices are s_w to e_w (start w index to end w index)
 				s_h = index_h * stride_h
 				e_h = min(s_h + self.crop_h, new_h)
 				s_h = e_h - self.crop_h
 				s_w = index_w * stride_w
 				e_w = min(s_w + self.crop_w, new_w)
 				s_w = e_w - self.crop_w
-				image_crop = image[s_h:e_h, s_w:e_w].copy()
+				image_crop = padded_image[s_h:e_h, s_w:e_w].copy()
 				count_crop[s_h:e_h, s_w:e_w] += 1
 				prediction_crop[:, s_h:e_h, s_w:e_w] += self.net_process(image_crop)
 
 		prediction_crop /= count_crop.unsqueeze(0)
 		# disregard predictions from padded portion of image
-		prediction_crop = prediction_crop[:, pad_h_half:pad_h_half+rezied_h, pad_w_half:pad_w_half+resized_w]
+		prediction_crop = prediction_crop[:, pad_h_half:pad_h_half+resized_h, pad_w_half:pad_w_half+resized_w]
 
 		# CHW -> HWC
 		prediction_crop = prediction_crop.permute(1,2,0)
