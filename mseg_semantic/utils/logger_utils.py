@@ -2,7 +2,7 @@ import logging
 
 def get_logger():
     """ Set up a logger to print out log messages in the following format:
-    {TIME} {LOGGING LEVEL} {FILE GENERATING MESSAGE} line {LINE NUMBER} {MESSAGE}
+    {TIME} {LOGGING LEVEL} {FILENAME GENERATING THE LOG MESSAGE} line {LINE NUMBER} {LOG MESSAGE}
     """
     logger_name = "main-logger"
     logger = logging.getLogger(logger_name)
