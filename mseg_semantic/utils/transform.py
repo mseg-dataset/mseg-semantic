@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
 import collections
-import cv2
 import math
+import random
+from typing import Tuple
+
+import cv2
 import numpy as np
 import numbers
-import random
 import torch
 
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
@@ -93,16 +95,16 @@ class Resize(object):
         label = cv2.resize(label, self.size[::-1], interpolation=cv2.INTER_NEAREST)
         return image, label
 
+    
 class ResizeShort(object):
-    # Resize the input to the given size, 'size' is a 2-element tuple or list in the order of (h, w).
-    def __init__(self, size):
-        # assert (isinstance(size, collections.Iterable) and len(size) == 2)
+    """Resize the input such that its shorter size meets the prescribed size.
+    Note that 'size' is a float or int.
+    """
+    def __init__(self, size: float):
         self.size = size
 
-    def __call__(self, image, label):
-        # print()
-        # print(image.shape, label.shape)
-        # output = 
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray,np.ndarray]:
+        """ Resize image such that the shorter side equals predefined size. """
         old_image_shape, old_label_shape = image.shape, label.shape
         h, w = image.shape[0], image.shape[1]
         shorter_size = min(h, w)
@@ -118,9 +120,6 @@ class ResizeShort(object):
         image = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
         label = cv2.resize(label, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
 
-        # print(image.shape, label.shape, old_image_shape, old_label_shape)
-        # exit()
-        # print(image.shape, label.shape)
         return image, label
 
 
