@@ -47,7 +47,7 @@ def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
     logger.info(args)
     logger.info("=> creating model ...")
     args.num_model_classes = len(args.u_classes)
-
+    
     itask = BatchedInferenceTask(
         args,
         base_size = args.base_size,
@@ -86,6 +86,9 @@ if __name__ == '__main__':
 
     assert isinstance(args.model_name, str)
     assert isinstance(args.model_path, str)
+    assert isinstance(args.input_file, str)
+    if not os.path.isdir(args.input_file):
+        raise RuntimeError("Please provide a valid image directory using the input_file argument")
 
     if args.dataset == 'default':
         args.dataset = Path(args.input_file).stem
