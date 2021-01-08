@@ -29,7 +29,7 @@ logger = get_logger()
 cv2.ocl.setUseOpenCL(False)
 
 
-def run_universal_demo(args, use_gpu: bool = True) -> None:
+def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
     """
         Args:
         -   args:
@@ -91,4 +91,4 @@ if __name__ == '__main__':
         args.dataset = Path(args.input_file).stem
 
     print(args)
-    run_universal_demo(args, use_gpu)
+    run_universal_demo_batched(args, use_gpu)
