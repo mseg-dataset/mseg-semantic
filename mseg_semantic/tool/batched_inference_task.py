@@ -73,47 +73,47 @@ class BatchedInferenceTask(InferenceTask):
 		logger.info('<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<')
 
 
-def execute_on_dataloader_batched(self, test_loader: torch.utils.data.dataloader.DataLoader):
-	""" Optimize throughput through the network by batched inference, instead of single image inference
-	"""
-	if self.args.save_folder == 'default':
-		self.args.save_folder = f'{_ROOT}/temp_files/{self.args.model_name}_{self.args.dataset}_universal_{self.scales_str}/{self.args.base_size}'
+	def execute_on_dataloader_batched(self, test_loader: torch.utils.data.dataloader.DataLoader):
+		""" Optimize throughput through the network by batched inference, instead of single image inference
+		"""
+		if self.args.save_folder == 'default':
+			self.args.save_folder = f'{_ROOT}/temp_files/{self.args.model_name}_{self.args.dataset}_universal_{self.scales_str}/{self.args.base_size}'
 
-	os.makedirs(self.args.save_folder, exist_ok=True)
-	gray_folder = os.path.join(self.args.save_folder, 'gray')
-	self.gray_folder = gray_folder
+		os.makedirs(self.args.save_folder, exist_ok=True)
+		gray_folder = os.path.join(self.args.save_folder, 'gray')
+		self.gray_folder = gray_folder
 
-	data_time = AverageMeter()
-	batch_time = AverageMeter()
-	end = time.time()
-
-	check_mkdir(self.gray_folder)
-
-	for i, (input, _) in enumerate(test_loader):
-		logger.info(f"On batch {i}")
-		data_time.update(time.time() - end)
-
-		gray_batch = self.execute_on_batch(input)
-		batch_sz = input.shape[0]
-		# dump results to disk
-		for j in range(batch_sz):
-			# determine path for grayscale label map
-			image_path, _ = self.data_list[i*self.args.batch_size_val + j]
-			if self.args.img_name_unique:
-				image_name = Path(image_path).stem
-			else:
-				image_name = get_unique_stem_from_last_k_strs(image_path)
-			gray_path = os.path.join(self.gray_folder, image_name + '.png')
-			cv2.imwrite(gray_path, gray_batch[j])
-
-		batch_time.update(time.time() - end)
+		data_time = AverageMeter()
+		batch_time = AverageMeter()
 		end = time.time()
 
-		if ((i+1) % self.args.print_freq == 0) or (i+1 == len(test_loader)):
-			logger.info(f'Test: [{i+1}/{len(test_loader)}] '
-				f'Data {data_time.val:.3f} (avg={data_time.avg:.3f})'
-				f'Batch {batch_time.val:.3f} (avg={batch_time.avg:.3f})'
-			)
+		check_mkdir(self.gray_folder)
+
+		for i, (input, _) in enumerate(test_loader):
+			logger.info(f"On batch {i}")
+			data_time.update(time.time() - end)
+
+			gray_batch = self.execute_on_batch(input)
+			batch_sz = input.shape[0]
+			# dump results to disk
+			for j in range(batch_sz):
+				# determine path for grayscale label map
+				image_path, _ = self.data_list[i*self.args.batch_size_val + j]
+				if self.args.img_name_unique:
+					image_name = Path(image_path).stem
+				else:
+					image_name = get_unique_stem_from_last_k_strs(image_path)
+				gray_path = os.path.join(self.gray_folder, image_name + '.png')
+				cv2.imwrite(gray_path, gray_batch[j])
+
+			batch_time.update(time.time() - end)
+			end = time.time()
+
+			if ((i+1) % self.args.print_freq == 0) or (i+1 == len(test_loader)):
+				logger.info(f'Test: [{i+1}/{len(test_loader)}] '
+					f'Data {data_time.val:.3f} (avg={data_time.avg:.3f})'
+					f'Batch {batch_time.val:.3f} (avg={batch_time.avg:.3f})'
+				)
 
 
 	def execute_on_batch(self, batch: torch.Tensor) -> np.ndarray:
