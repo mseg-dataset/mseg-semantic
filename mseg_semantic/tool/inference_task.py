@@ -99,13 +99,14 @@ def resize_by_scaled_short_side(
 	base_size: int,
 	scale: float
 	) -> np.ndarray:
-	"""
-		Args:
-		-	image: Numpy array of shape ()
-		-	scale: 
-
-		Returns:
-		-	image_scaled: 
+	""" Equivalent to ResizeShort(), but functional, instead of OOP paradigm, and w/ scale param.
+	
+	Args:
+	    image: Numpy array of shape ()
+	    scale: scaling factor for image
+	
+	Returns:
+	    image_scaled: 
 	"""
 	h, w, _ = image.shape
 	short_size = round(scale * base_size)
@@ -133,21 +134,21 @@ def pad_to_crop_sz(
 	destination image. The areas to the left, to the right, above and below the 
 	copied source image will be filled with extrapolated pixels, in this case the 
 	provided mean pixel intensity.
-
-		Args:
-		-	image:
-		-	crop_h: integer representing crop height
-		-	crop_w: integer representing crop width
-
-		Returns:
-		-	image: Numpy array of shape (crop_h x crop_w) representing a 
-				square image, with short side of square is at least crop size.
-		-	pad_h_half: half the number of pixels used as padding along height dim
-		-	pad_w_half" half the number of pixels used as padding along width dim
+	
+	Args:
+	    image:
+	    crop_h: integer representing crop height
+	    crop_w: integer representing crop width
+	
+	Returns:
+	    image: Numpy array of shape (crop_h x crop_w) representing a 
+	           square image, with short side of square is at least crop size.
+	     pad_h_half: half the number of pixels used as padding along height dim
+	     pad_w_half" half the number of pixels used as padding along width dim
 	"""
-	ori_h, ori_w, _ = image.shape
-	pad_h = max(crop_h - ori_h, 0)
-	pad_w = max(crop_w - ori_w, 0)
+	orig_h, orig_w, _ = image.shape
+	pad_h = max(crop_h - orig_h, 0)
+	pad_w = max(crop_w - orig_w, 0)
 	pad_h_half = int(pad_h / 2)
 	pad_w_half = int(pad_w / 2)
 	if pad_h > 0 or pad_w > 0:
@@ -193,18 +194,17 @@ class InferenceTask:
 
 		'args' should contain at least 5 fields (shown below).
 		See brief explanation at top of file regarding taxonomy arg configurations.
-
-			Args:
-			-	args:
-			-	base_size:
-			-	crop_h: integer representing crop height, e.g. 473
-			-	crop_w: integer representing crop width, e.g. 473
-			-	input_file: could be absolute path to .txt file, .mp4 file,
-					or to a directory full of jpg images
-			-	model_taxonomy: taxonomy in which trained model makes predictions
-			-	eval_taxonomy: taxonomy in which trained model is evaluated
-			-	scales
-			-	use_gpu: TODO, not supporting cpu at this time
+		
+		Args:
+		    args: experiment configuration arguments
+		    base_size: shorter side of image
+		    crop_h: integer representing crop height, e.g. 473
+		    crop_w: integer representing crop width, e.g. 473
+		    input_file: could be absolute path to .txt file, .mp4 file, or to a directory full of jpg images
+		    model_taxonomy: taxonomy in which trained model makes predictions
+		    eval_taxonomy: taxonomy in which trained model is evaluated
+		    scales: floats representing image scales for multi-scale inference
+		    use_gpu: TODO, not supporting cpu at this time
 		"""
 		self.args = args
 
@@ -272,16 +272,15 @@ class InferenceTask:
 
 
 	def load_model(self, args):
-		"""
-		Load Pytorch pre-trained model from disk of type 
-		torch.nn.DataParallel. Note that
-		`args.num_model_classes` will be size of logits output.
-
-			Args:
-			-   args: 
-
-			Returns:
-			-   model
+		"""Load Pytorch pre-trained model from disk of type torch.nn.DataParallel. 
+		
+		Note that `args.num_model_classes` will be size of logits output.
+		
+		Args:
+		    args: 
+		
+		Returns:
+		    model
 		"""
 		if args.arch == 'psp':
 			model = PSPNet(
@@ -355,10 +354,7 @@ class InferenceTask:
 		logger.info('<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<')
 
 	def render_single_img_pred(self, min_resolution: int = 1080):
-		"""
-		Since overlaid class text is difficult to read below 1080p, we upsample
-		predictions.
-		"""
+		"""Since overlaid class text is difficult to read below 1080p, we upsample predictions."""
 		in_fname_stem = Path(self.input_file).stem
 		output_gray_fpath = f'{in_fname_stem}_gray.jpg'
 		output_demo_fpath = f'{in_fname_stem}_overlaid_classes.jpg'
@@ -382,16 +378,7 @@ class InferenceTask:
 		imageio.imwrite(output_gray_fpath, pred_label_img)
 
 	def create_path_lists_from_dir(self) -> None:
-		"""
-		Populate a .txt file with relative paths that will be used to create 
-		a Pytorch dataloader.
-
-			Args:
-			-	None
-
-			Returns:
-			-	None
-		"""
+		"""Populate a .txt file with relative paths that will be used to create a Pytorch dataloader."""
 		self.args.data_root = self.input_file
 		txt_output_dir = str(Path(f'{_ROOT}/temp_files').resolve())
 		txt_save_fpath = dump_relpath_txt(self.input_file, txt_output_dir)
@@ -407,12 +394,12 @@ class InferenceTask:
 		For example, if trained on small images, we must shrink down the image in 
 		testing (preserving the aspect ratio), based on the parameter "base_size",
 		which is the short side of the image.
-
-			Args:
-			-	image: Numpy array representing RGB image
-			
-			Returns:
-			-	gray_img: prediction, representing predicted label map
+		
+		Args:
+		    image: Numpy array representing RGB image
+		
+		Returns:
+		    gray_img: prediction, representing predicted label map
 		"""
 		h, w, _ = image.shape
 		is_single_scale = len(self.scales) == 1
@@ -439,14 +426,7 @@ class InferenceTask:
 	def execute_on_video(self, max_num_frames: int = 5000, min_resolution: int = 1080) -> None:
 		"""
 		input_file is a path to a video file.
-		Read frames from an RGB video file, and write overlaid
-		predictions into a new video file.
-			
-			Args:
-			-	None
-
-			Returns:
-			-	None
+		Read frames from an RGB video file, and write overlaid predictions into a new video file.
 		"""
 		in_fname_stem = Path(self.input_file).stem
 		out_fname = f'{in_fname_stem}_{self.args.model_name}_universal'
@@ -482,12 +462,10 @@ class InferenceTask:
 		writer.complete()
 
 	def execute_on_dataloader(self, test_loader: torch.utils.data.dataloader.DataLoader):
-		"""
-			Args:
-			-   test_loader: 
-
-			Returns:
-			-   None
+		"""Run a pretrained model over each batch in a dataloader.
+		
+		Args:
+		     test_loader: 
 		"""
 		if self.args.save_folder == 'default':
 			self.args.save_folder = f'{_ROOT}/temp_files/{self.args.model_name}_{self.args.dataset}_universal_{self.scales_str}/{self.args.base_size}'
@@ -594,19 +572,19 @@ class InferenceTask:
 
 	def net_process(self, image: np.ndarray, flip: bool = True) -> torch.Tensor:
 		""" Feed input through the network.
-
-			In addition to running a crop through the network, we can flip
-			the crop horizontally, run both crops through the network, and then
-			average them appropriately. Afterwards, apply softmax, then convert
-			the prediction to the label taxonomy.
-
-			Args:
-			-   image:
-			-   flip: boolean, whether to average with flipped patch output
-
-			Returns:
-			-   output: Pytorch tensor representing network predicting in evaluation
-					taxonomy (not necessarily model taxonomy)
+		
+		In addition to running a crop through the network, we can flip
+		the crop horizontally, run both crops through the network, and then
+		average them appropriately. Afterwards, apply softmax, then convert
+		the prediction to the label taxonomy.
+		
+		Args:
+		    image:
+		    flip: boolean, whether to average with flipped patch output
+		
+		Returns:
+		    output: Pytorch tensor representing network predicting in evaluation taxonomy 
+		            (not necessarily the model taxonomy)
 		"""
 		input = torch.from_numpy(image.transpose((2, 0, 1))).float()
 		normalize_img(input, self.mean, self.std)
