@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 
 import argparse
-import cv2
-import numpy as np
+import math
 import os
 import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+import cv2
+import numpy as np
 from mseg.utils.names_utils import load_class_names, get_universal_class_names
 
 from mseg_semantic.utils import config
@@ -19,14 +20,45 @@ from mseg_semantic.tool.batched_inference_task import BatchedInferenceTask
 _ROOT = Path(__file__).resolve().parent.parent
 
 """
-Run inference over all images in a directory, over all frames of a video,
+Run single-scale inference over all images in a directory, over all frames of a video,
 or over all images specified in a .txt file.
+
+We assume a fixed image size for the whole dataset, and you must provide the
+native image width and height at the command line. The "base size" will be
+set automatically (config param will be ignored) such that the image is
+scaled up to the largest possible size while fitting within the crop.
 """
 
 
 logger = get_logger()
 
 cv2.ocl.setUseOpenCL(False)
+
+
+def determine_max_possible_base_size(h: int, w: int, crop_sz: int) -> int:
+    """ Given a crop size and original image dims for aspect ratio, determine
+    the max base_size that will fit within the crop.
+    """
+    longer_size = max(h, w)
+    if longer_size == h:
+        scale = crop_sz / float(h)
+        base_size = math.floor(w * scale)
+    else:
+        scale = crop_sz / float(w)
+        base_size = math.floor(h * scale)
+        
+    return base_size
+
+def test_determine_max_possible_base_size():
+    """ """
+    native_img_height = 1200
+    native_img_width = 1920
+    base_size = determine_max_possible_base_size(
+        h=native_img_height,
+        w=native_img_width,
+        crop_sz=473
+    )
+    assert base_size = 295
 
 
 def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
@@ -47,6 +79,11 @@ def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
     logger.info(args)
     logger.info("=> creating model ...")
     args.num_model_classes = len(args.u_classes)
+    args.base_size = determine_max_possible_base_size(
+        h=args.native_img_h,
+        w=args.native_img_w,
+        crop_sz=min(args.test_h,args.test_w)
+    )
     
     itask = BatchedInferenceTask(
         args,
@@ -84,6 +121,8 @@ if __name__ == '__main__':
     use_gpu = True
     args = get_parser()
 
+    assert isinstance(args.native_img_w, int)
+    assert isinstance(args.native_img_h, int)
     assert isinstance(args.model_name, str)
     assert isinstance(args.model_path, str)
     assert isinstance(args.input_file, str)
