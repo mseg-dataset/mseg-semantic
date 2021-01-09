@@ -58,7 +58,7 @@ def test_determine_max_possible_base_size():
         w=native_img_width,
         crop_sz=473
     )
-    assert base_size = 295
+    assert base_size == 295
 
 
 def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
