@@ -214,7 +214,7 @@ class BatchedInferenceTask(InferenceTask):
 		if flip:
 			# take back out the flipped crop, correct its orientation, and average result
 			split_idx = (n//2)
-			output = ( output[:split_idx] + output[split_idx:] ) / 2
+			output = ( output[:split_idx] + output[split_idx:].flip(3) ) / 2
 
 		return output
 
