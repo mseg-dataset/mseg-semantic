@@ -119,14 +119,9 @@ class BatchedInferenceTask(InferenceTask):
 
 	def execute_on_batch(self, batch: torch.Tensor) -> np.ndarray:
 		""" Only allows for single-scale inference in batch processing mode for now """
-		n, _, h, w = batch.shape
-
-		pdb.set_trace()
-		# set to a new height and width here
-
 		start = time.time()
-		# single-scale, do addition and argmax on CPU
-		logits = self.scale_process_cuda_batched(batch, h, w)
+		# single-scale, do addition and argmax on CPU, interp back to native resolution
+		logits = self.scale_process_cuda_batched(batch, args.native_img_h,args.native_img_w)
 		predictions = torch.argmax(logits, axis=1)
 		end = time.time()
 		duration = end - start
@@ -141,14 +136,16 @@ class BatchedInferenceTask(InferenceTask):
 	def scale_process_cuda_batched(
 		self,
 		batch: torch.Tensor,
-		h: int,
-		w: int,
+		native_h: int,
+		native_w: int,
 		stride_rate: float = 2/3
 	) -> np.ndarray:
 		""" Note: we scale up the image to fit exactly within the crop size
 
 		Args:
 			batch: NCHW tensor
+			native_h: image height @ native/raw image resolution, as found originally on disk
+			native_w: image width @ native/raw image resolution, as found originally on disk
 		Returns:
 			NCHW tensor where dimensions are (N, num_classes, H, W)
 		"""
@@ -167,7 +164,7 @@ class BatchedInferenceTask(InferenceTask):
 		prediction_crops = prediction_crops[:, :, pad_h_half:pad_h_half + orig_h, pad_w_half: pad_w_half + orig_w]
 		prediction_crops = torch.nn.functional.interpolate(
 			prediction_crops,
-			size=(h,w),
+			size=(native_h,native_w),
 			mode='bilinear',
 			align_corners=True
 		)
