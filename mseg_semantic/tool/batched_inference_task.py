@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 from typing import List, Tuple
 
+import cv2
 import numpy as np
 import torch
 from mseg.utils.dir_utils import check_mkdir
