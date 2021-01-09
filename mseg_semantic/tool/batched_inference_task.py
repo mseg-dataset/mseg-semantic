@@ -121,7 +121,7 @@ class BatchedInferenceTask(InferenceTask):
 		""" Only allows for single-scale inference in batch processing mode for now """
 		start = time.time()
 		# single-scale, do addition and argmax on CPU, interp back to native resolution
-		logits = self.scale_process_cuda_batched(batch, args.native_img_h,args.native_img_w)
+		logits = self.scale_process_cuda_batched(batch, self.args.native_img_h, self.args.native_img_w)
 		predictions = torch.argmax(logits, axis=1)
 		end = time.time()
 		duration = end - start
@@ -143,11 +143,11 @@ class BatchedInferenceTask(InferenceTask):
 		""" Note: we scale up the image to fit exactly within the crop size
 
 		Args:
-			batch: NCHW tensor
-			native_h: image height @ native/raw image resolution, as found originally on disk
-			native_w: image width @ native/raw image resolution, as found originally on disk
+		    batch: NCHW tensor
+		    native_h: image height @ native/raw image resolution, as found originally on disk
+		    native_w: image width @ native/raw image resolution, as found originally on disk
 		Returns:
-			NCHW tensor where dimensions are (N, num_classes, H, W)
+		    NCHW tensor where dimensions are (N, num_classes, H, W)
 		"""
 		n, _, orig_h, orig_w = batch.shape
 
