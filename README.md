@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.com/mseg-dataset/mseg-semantic.svg?branch=master)](https://travis-ci.com/mseg-dataset/mseg-semantic)
-
 ![Python package](https://github.com/mseg-dataset/mseg-semantic/workflows/Python%20package/badge.svg?branch=master)Try out our models in [Google Colab on your own images](https://colab.research.google.com/drive/1ctyBEf74uA-7R8sidi026OvNb4WlKkG1?usp=sharing)!
 
 This repo includes the **semantic segmentation pre-trained models, training and inference code** for the paper:
