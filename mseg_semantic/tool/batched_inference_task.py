@@ -56,7 +56,10 @@ def pad_to_crop_sz_batched(
 
 
 class BatchedInferenceTask(InferenceTask):
-
+	"""Subclass of InferenceTask that performs inference over batches from a dataset, instead
+	of processing each frame one-by-one. Uses Pytorch (not OpenCV) for all interpolation/padding ops.
+	"""
+	
 	def execute(self) -> None:
 		""" """
 		logger.info('>>>>>>>>>>>>>> Start inference task >>>>>>>>>>>>>')
