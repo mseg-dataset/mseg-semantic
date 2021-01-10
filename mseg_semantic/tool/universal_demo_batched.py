@@ -49,17 +49,6 @@ def determine_max_possible_base_size(h: int, w: int, crop_sz: int) -> int:
         
     return base_size
 
-def test_determine_max_possible_base_size():
-    """ """
-    native_img_height = 1200
-    native_img_width = 1920
-    base_size = determine_max_possible_base_size(
-        h=native_img_height,
-        w=native_img_width,
-        crop_sz=473
-    )
-    assert base_size == 295
-
 
 def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
     """
