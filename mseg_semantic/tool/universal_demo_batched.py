@@ -116,7 +116,14 @@ def get_parser() -> CfgNode:
 
 
 if __name__ == '__main__':
-    """
+    """Example usage:
+        python mseg_semantic/tool/universal_demo_batched.py
+          --config mseg_semantic/config/test/480/default_config_batched_ss.yaml
+          native_img_h 1200
+          native_img_w 1920
+          model_name mseg-3m-480p
+          model_path ./pretrained-semantic-models/mseg-3m-480p/mseg-3m-480p.pth
+          input_file ~/argoverse/train1/273c1883-673a-36bf-b124-88311b1a80be/ring_front_center
     """
     use_gpu = True
     args = get_parser()
