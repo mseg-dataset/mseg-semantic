@@ -116,7 +116,7 @@ def get_parser() -> CfgNode:
 
 
 if __name__ == '__main__':
-    """Example usage:
+    """Example CLI usage:
         python mseg_semantic/tool/universal_demo_batched.py
           --config mseg_semantic/config/test/480/default_config_batched_ss.yaml
           native_img_h 1200
