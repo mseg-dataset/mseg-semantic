@@ -3,7 +3,7 @@
 import collections
 import math
 import random
-from typing import Tuple
+from typing import Tuple, Union
 
 import cv2
 import numpy as np
@@ -16,7 +16,12 @@ from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 """
 Provides a set of Pytorch transforms that use OpenCV instead of PIL (Pytorch default)
 for image manipulation.
+
+Most transformations are applied identically to both the image and ground truth label map.
+
+Modified from https://github.com/hszhao/semseg/blob/master/util/transform.py
 """
+
 
 class Compose(object):
     # Composes segtransforms: segtransform.Compose([segtransform.RandScale([0.5, 2.0]), segtransform.ToTensor()])
@@ -33,8 +38,9 @@ class ToTensor(object):
     # Converts numpy.ndarray (H x W x C) to a torch.FloatTensor of shape (C x H x W).
     def __call__(self, image, label):
         if not isinstance(image, np.ndarray) or not isinstance(label, np.ndarray):
-            raise (RuntimeError("segtransform.ToTensor() only handle np.ndarray"
-                                "[eg: data readed by cv2.imread()].\n"))
+            raise (
+                RuntimeError("segtransform.ToTensor() only handle np.ndarray" "[eg: data readed by cv2.imread()].\n")
+            )
         if len(image.shape) > 3 or len(image.shape) < 2:
             raise (RuntimeError("segtransform.ToTensor() only handle np.ndarray with 3 dims or 2 dims.\n"))
         if len(image.shape) == 2:
@@ -74,7 +80,7 @@ class Normalize(object):
         self.mean = mean
         self.std = std
 
-    def __call__(self, image, label):
+    def __call__(self, image: torch.Tensor, label: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         if self.std is None:
             for t, m in zip(image, self.mean):
                 t.sub_(m)
@@ -87,23 +93,24 @@ class Normalize(object):
 class Resize(object):
     # Resize the input to the given size, 'size' is a 2-element tuple or list in the order of (h, w).
     def __init__(self, size):
-        assert (isinstance(size, collections.Iterable) and len(size) == 2)
+        assert isinstance(size, collections.Iterable) and len(size) == 2
         self.size = size
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         image = cv2.resize(image, self.size[::-1], interpolation=cv2.INTER_LINEAR)
         label = cv2.resize(label, self.size[::-1], interpolation=cv2.INTER_NEAREST)
         return image, label
 
-    
+
 class ResizeShort(object):
     """Resize the input such that its shorter size meets the prescribed size.
     Note that 'size' is a float or int.
     """
-    def __init__(self, size: float):
+
+    def __init__(self, size: Union[int, float]) -> None:
         self.size = size
 
-    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray,np.ndarray]:
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """ Resize image such that the shorter side equals predefined size. """
         old_image_shape, old_label_shape = image.shape, label.shape
         h, w = image.shape[0], image.shape[1]
@@ -126,23 +133,40 @@ class ResizeShort(object):
 class RandScale(object):
     # Randomly resize image & label with scale factor in [scale_min, scale_max]
     def __init__(self, scale, aspect_ratio=None):
-        assert (isinstance(scale, collections.Iterable) and len(scale) == 2)
-        if isinstance(scale, collections.Iterable) and len(scale) == 2 \
-                and isinstance(scale[0], numbers.Number) and isinstance(scale[1], numbers.Number) \
-                and 0 < scale[0] < scale[1]:
+        assert isinstance(scale, collections.Iterable) and len(scale) == 2
+        if (
+            isinstance(scale, collections.Iterable)
+            and len(scale) == 2
+            and isinstance(scale[0], numbers.Number)
+            and isinstance(scale[1], numbers.Number)
+            and 0 < scale[0] < scale[1]
+        ):
             self.scale = scale
         else:
             raise (RuntimeError("segtransform.RandScale() scale param error.\n"))
         if aspect_ratio is None:
             self.aspect_ratio = aspect_ratio
-        elif isinstance(aspect_ratio, collections.Iterable) and len(aspect_ratio) == 2 \
-                and isinstance(aspect_ratio[0], numbers.Number) and isinstance(aspect_ratio[1], numbers.Number) \
-                and 0 < aspect_ratio[0] < aspect_ratio[1]:
+        elif (
+            isinstance(aspect_ratio, collections.Iterable)
+            and len(aspect_ratio) == 2
+            and isinstance(aspect_ratio[0], numbers.Number)
+            and isinstance(aspect_ratio[1], numbers.Number)
+            and 0 < aspect_ratio[0] < aspect_ratio[1]
+        ):
             self.aspect_ratio = aspect_ratio
         else:
             raise (RuntimeError("segtransform.RandScale() aspect_ratio param error.\n"))
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Randomly scale an RGB image and label map identically.
+
+        Args:
+            image: array of shape (H,W,C) representing RGB image
+            label: array of shape (H,W) representing ground truth label map
+        Returns:
+            image: array of shape (H,W,C) representing *randomly scaled* RGB image
+            label: array of shape (H,W) representing *randomly scaled* ground truth label map
+        """
         temp_scale = self.scale[0] + (self.scale[1] - self.scale[0]) * random.random()
         temp_aspect_ratio = 1.0
         if self.aspect_ratio is not None:
@@ -161,18 +185,24 @@ class Crop(object):
         size (sequence or int): Desired output size of the crop. If size is an
         int instead of sequence like (h, w), a square crop (size, size) is made.
     """
-    def __init__(self, size, crop_type='center', padding=None, ignore_label=255):
+
+    def __init__(self, size, crop_type: str = "center", padding=None, ignore_label: int = 255) -> None:
         if isinstance(size, int):
             self.crop_h = size
             self.crop_w = size
-        elif isinstance(size, collections.Iterable) and len(size) == 2 \
-                and isinstance(size[0], int) and isinstance(size[1], int) \
-                and size[0] > 0 and size[1] > 0:
+        elif (
+            isinstance(size, collections.Iterable)
+            and len(size) == 2
+            and isinstance(size[0], int)
+            and isinstance(size[1], int)
+            and size[0] > 0
+            and size[1] > 0
+        ):
             self.crop_h = size[0]
             self.crop_w = size[1]
         else:
             raise (RuntimeError("crop size error.\n"))
-        if crop_type == 'center' or crop_type == 'rand':
+        if crop_type == "center" or crop_type == "rand":
             self.crop_type = crop_type
         else:
             raise (RuntimeError("crop type error: rand | center\n"))
@@ -192,7 +222,8 @@ class Crop(object):
         else:
             raise (RuntimeError("ignore_label should be an integer number\n"))
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Return a random crop or center crop of the specified size, from both an RGB image and label map"""
         h, w = label.shape
         pad_h = max(self.crop_h - h, 0)
         pad_w = max(self.crop_w - w, 0)
@@ -201,24 +232,42 @@ class Crop(object):
         if pad_h > 0 or pad_w > 0:
             if self.padding is None:
                 raise (RuntimeError("segtransform.Crop() need padding while padding argument is None\n"))
-            image = cv2.copyMakeBorder(image, pad_h_half, pad_h - pad_h_half, pad_w_half, pad_w - pad_w_half, cv2.BORDER_CONSTANT, value=self.padding)
-            label = cv2.copyMakeBorder(label, pad_h_half, pad_h - pad_h_half, pad_w_half, pad_w - pad_w_half, cv2.BORDER_CONSTANT, value=self.ignore_label)
+            image = cv2.copyMakeBorder(
+                image,
+                pad_h_half,
+                pad_h - pad_h_half,
+                pad_w_half,
+                pad_w - pad_w_half,
+                cv2.BORDER_CONSTANT,
+                value=self.padding,
+            )
+            label = cv2.copyMakeBorder(
+                label,
+                pad_h_half,
+                pad_h - pad_h_half,
+                pad_w_half,
+                pad_w - pad_w_half,
+                cv2.BORDER_CONSTANT,
+                value=self.ignore_label,
+            )
         h, w = label.shape
-        if self.crop_type == 'rand':
+        if self.crop_type == "rand":
             h_off = random.randint(0, h - self.crop_h)
             w_off = random.randint(0, w - self.crop_w)
         else:
             h_off = int((h - self.crop_h) / 2)
             w_off = int((w - self.crop_w) / 2)
-        image = image[h_off:h_off+self.crop_h, w_off:w_off+self.crop_w]
-        label = label[h_off:h_off+self.crop_h, w_off:w_off+self.crop_w]
+        image = image[h_off : h_off + self.crop_h, w_off : w_off + self.crop_w]
+        label = label[h_off : h_off + self.crop_h, w_off : w_off + self.crop_w]
         return image, label
 
 
 class RandRotate(object):
     # Randomly rotate image & label with rotate factor in [rotate_min, rotate_max]
-    def __init__(self, rotate, padding, ignore_label=255, p=0.5):
-        assert (isinstance(rotate, collections.Iterable) and len(rotate) == 2)
+    def __init__(
+        self, rotate: Tuple[float, float], padding: Tuple[int, int, int], ignore_label: int = 255, p: float = 0.5
+    ) -> None:
+        assert isinstance(rotate, collections.Iterable) and len(rotate) == 2
         if isinstance(rotate[0], numbers.Number) and isinstance(rotate[1], numbers.Number) and rotate[0] < rotate[1]:
             self.rotate = rotate
         else:
@@ -233,13 +282,31 @@ class RandRotate(object):
         self.ignore_label = ignore_label
         self.p = p
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """With probability p, apply a random rotation to both an RGB image and label map.
+
+        Args:
+            image: array of shape (H,W,C) representing RGB image
+            label: array of shape (H,W) representing ground truth label map
+        Returns:
+            image: array of shape (H,W,C) representing *randomly rotated* RGB image
+            label: array of shape (H,W) representing *randomly rotated* ground truth label map
+        """
         if random.random() < self.p:
             angle = self.rotate[0] + (self.rotate[1] - self.rotate[0]) * random.random()
             h, w = label.shape
             matrix = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1)
-            image = cv2.warpAffine(image, matrix, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=self.padding)
-            label = cv2.warpAffine(label, matrix, (w, h), flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=self.ignore_label)
+            image = cv2.warpAffine(
+                image, matrix, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=self.padding
+            )
+            label = cv2.warpAffine(
+                label,
+                matrix,
+                (w, h),
+                flags=cv2.INTER_NEAREST,
+                borderMode=cv2.BORDER_CONSTANT,
+                borderValue=self.ignore_label,
+            )
         return image, label
 
 
@@ -247,7 +314,16 @@ class RandomHorizontalFlip(object):
     def __init__(self, p=0.5):
         self.p = p
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """With probability p, horizontally flip both an RGB image and label map.
+
+        Args:
+            image: array of shape (H,W,C) representing RGB image
+            label: array of shape (H,W) representing ground truth label map
+        Returns:
+            image: array of shape (H,W,C) representing *randomly hflipped* RGB image
+            label: array of shape (H,W) representing *randomly hflipped* ground truth label map
+        """
         if random.random() < self.p:
             image = cv2.flip(image, 1)
             label = cv2.flip(label, 1)
@@ -255,10 +331,19 @@ class RandomHorizontalFlip(object):
 
 
 class RandomVerticalFlip(object):
-    def __init__(self, p=0.5):
+    def __init__(self, p: float = 0.5) -> None:
         self.p = p
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """With probability p, vertically flip both an RGB image and label map.
+
+        Args:
+            image: array of shape (H,W,C) representing RGB image
+            label: array of shape (H,W) representing ground truth label map
+        Returns:
+            image: array of shape (H,W,C) representing *randomly vflipped* RGB image
+            label: array of shape (H,W) representing *randomly vflipped* ground truth label map
+        """
         if random.random() < self.p:
             image = cv2.flip(image, 0)
             label = cv2.flip(label, 0)
@@ -266,10 +351,19 @@ class RandomVerticalFlip(object):
 
 
 class RandomGaussianBlur(object):
-    def __init__(self, radius=5):
+    def __init__(self, radius: float = 5) -> None:
         self.radius = radius
 
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """With probability p, blur an RGB image with a (radius x radius) Gaussian kernel.
+
+        Args:
+            image: array of shape (H,W,C) representing RGB image
+            label: array of shape (H,W) representing ground truth label map
+        Returns:
+            image: array of shape (H,W,C) representing *randomly blurred* RGB image
+            label: array of shape (H,W) representing the unmodified ground truth label map
+        """
         if random.random() < 0.5:
             image = cv2.GaussianBlur(image, (self.radius, self.radius), 0)
         return image, label
