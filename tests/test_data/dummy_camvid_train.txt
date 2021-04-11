@@ -1,0 +1,3 @@
+701_StillsRaw_full/0001TP_006690.png semseg11/0001TP_006690_L.png
+701_StillsRaw_full/0001TP_006720.png semseg11/0001TP_006720_L.png
+701_StillsRaw_full/0001TP_006750.png semseg11/0001TP_006750_L.png
