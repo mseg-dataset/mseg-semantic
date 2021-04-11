@@ -13,8 +13,6 @@ def test_make_dataset() -> None:
 	data_list_fpath = str(TEST_DATA_ROOT / "dummy_camvid_train.txt")
 	image_label_list = make_dataset(split, data_root, data_list_fpath)
 
-	pdb.set_trace()
-
 	expected_image_label_list = [
 		(f"{data_root}/701_StillsRaw_full/0001TP_006690.png", f"{data_root}/semseg11/0001TP_006690_L.png"),
 		(f"{data_root}/701_StillsRaw_full/0001TP_006720.png", f"{data_root}/semseg11/0001TP_006720_L.png"),
