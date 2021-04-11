@@ -23,26 +23,22 @@ def is_image_file(filename: str) -> bool:
     return any(filename_lower.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
-def make_dataset(
-    split: str = 'train',
-    data_root: str = None,
-    data_list = None
-    ) -> List[Tuple[str,str]]:
+def make_dataset(split: str, data_root: str, data_list_fpath: str) -> List[Tuple[str,str]]:
     """ Create list of (image file path, label file path) pairs.
     
     Args:
         split: string representing split of data set to use, must be either 'train','val','test'
         data_root: path to where data lives, and where relative image paths are relative to
-        data_list: path to .txt file with relative image paths
+        data_list_fpath: path to .txt file with relative image paths
     Returns:
-        image_label_list: list of 2-tuples, each 2-tuple is comprised of a relative image path
-            and a relative label path
+        image_label_list: list of 2-tuples, each 2-tuple is comprised of an absolute image path
+            and an absolute label path
     """
     assert split in ['train', 'val', 'test']
-    if not os.path.isfile(data_list):
-        raise (RuntimeError("Image list file do not exist: " + data_list + "\n"))
+    if not os.path.isfile(data_list_fpath):
+        raise (RuntimeError("Image list file do not exist: " + data_list_fpath + "\n"))
     image_label_list = []
-    list_read = open(data_list).readlines()
+    list_read = open(data_list_fpath).readlines()
     print("Totally {} samples in {} set.".format(len(list_read), split))
 
     for line in list_read:
@@ -80,7 +76,7 @@ class SemData(Dataset):
         Args:
             split: string representing split of data set to use, must be either 'train','val','test'
             data_root: path to where data lives, and where relative image paths are relative to
-            data_list: path to .txt file with relative image paths
+            data_list: path to .txt file containing relative image paths
             transform: Pytorch torchvision transform
         """
         self.split = split
