@@ -7,6 +7,7 @@ from typing import List, Tuple
 import cv2
 import imageio
 import numpy as np
+import torch
 from torch.utils.data import Dataset
 
 """
