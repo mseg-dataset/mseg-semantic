@@ -1,40 +1,42 @@
 #!/usr/bin/python3
 
+import os
+import os.path
+from typing import List, Tuple
+
 import cv2
 import imageio
 import numpy as np
-import os
-import os.path
-import pdb
+import torch
 from torch.utils.data import Dataset
-from typing import List, Tuple
 
 """
 Could duplicate samples here to reduce overhead between epochs.
+Modified from https://github.com/hszhao/semseg/blob/master/util/dataset.py
 """
 
 IMG_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.ppm', '.bmp', '.pgm']
 
 
-def is_image_file(filename):
+def is_image_file(filename: str) -> bool:
     filename_lower = filename.lower()
     return any(filename_lower.endswith(extension) for extension in IMG_EXTENSIONS)
 
 
 def make_dataset(
-    split: str='train',
-    data_root: str=None,
-    data_list=None
+    split: str = 'train',
+    data_root: str = None,
+    data_list = None
     ) -> List[Tuple[str,str]]:
-    """
-        Args:
-        -   split: string representing split of data set to use, must be either 'train','val','test'
-        -   data_root: path to where data lives, and where relative image paths are relative to
-        -   data_list: path to .txt file with relative image paths
-        
-        Returns:
-        -   image_label_list: list of 2-tuples, each 2-tuple is comprised of a relative image path
-                and a relative label path
+    """ Create list of (image file path, label file path) pairs.
+    
+    Args:
+        split: string representing split of data set to use, must be either 'train','val','test'
+        data_root: path to where data lives, and where relative image paths are relative to
+        data_list: path to .txt file with relative image paths
+    Returns:
+        image_label_list: list of 2-tuples, each 2-tuple is comprised of a relative image path
+            and a relative label path
     """
     assert split in ['train', 'val', 'test']
     if not os.path.isfile(data_list):
@@ -72,25 +74,23 @@ def make_dataset(
 
 
 class SemData(Dataset):
-    def __init__(self, split: str='train', data_root: str=None, data_list: str=None, transform=None):
-        """
-            Args:
-            -   split: string representing split of data set to use, must be either 'train','val','test'
-            -   data_root: path to where data lives, and where relative image paths are relative to
-            -   data_list: path to .txt file with relative image paths
-            -   transform: Pytorch torchvision transform
-
-            Returns:
-            -   None
+    def __init__(self, split: str = 'train', data_root: str = None, data_list: str = None, transform = None) -> None:
+        """Dataloader class for semantic segmentation datasets.
+        
+        Args:
+            split: string representing split of data set to use, must be either 'train','val','test'
+            data_root: path to where data lives, and where relative image paths are relative to
+            data_list: path to .txt file with relative image paths
+            transform: Pytorch torchvision transform
         """
         self.split = split
         self.data_list = make_dataset(split, data_root, data_list)
         self.transform = transform
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data_list)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """ """
         image_path, label_path = self.data_list[index]
         image = cv2.imread(image_path, cv2.IMREAD_COLOR)  # BGR 3 channel ndarray wiht shape H * W * 3
