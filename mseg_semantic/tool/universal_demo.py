@@ -68,7 +68,8 @@ def run_universal_demo(args, use_gpu: bool = True) -> None:
         input_file=args.input_file,
         model_taxonomy='universal',
         eval_taxonomy='universal',
-        scales = args.scales
+        scales = args.scales,
+        use_gpu=use_gpu
     )
     itask.execute()
 
