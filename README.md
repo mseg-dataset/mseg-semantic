@@ -226,7 +226,7 @@ We generally follow the recommendations of [Zhao et al.](https://github.com/hszh
 
 ## Training Instructions
 
-Please refer to [training.md](https://github.com/mseg-dataset/mseg-semantic/blob/master/training.md) for detailed instructions on how to train each of our models. As a frame of reference as to the amount of compute required, we use 8 Quadro RTX 6000 cards, each w/ 24 GB of RAM, for training.
+Please refer to [training.md](https://github.com/mseg-dataset/mseg-semantic/blob/master/training.md) for detailed instructions on how to train each of our models. As a frame of reference as to the amount of compute required, we use 8 Quadro RTX 6000 cards, each w/ 24 GB of RAM, for training. The 3 million crop models took ~2-3 weeks to train on such hardware, and the 1 million crop models took ~4-7 days.
 
 
 ## Running unit tests and integration tests
