@@ -1,0 +1,53 @@
+DATA:
+  dataset: single
+  universal: False
+  use_mgda: False # to be determined at argument
+
+TRAIN:
+  use_naive_taxonomy: False
+  arch: hrnet
+  network_name: 
+  layers: 
+  sync_bn: True  # adopt sync_bn or not
+  train_h: 713
+  train_w: 713
+  scale_min: 0.5  # minimum random scale
+  scale_max: 2.0  # maximum random scale
+  short_size: 1080
+  rotate_min: -10  # minimum random rotate
+  rotate_max: 10  # maximum random rotate
+  zoom_factor: 8  # zoom factor for final prediction during training, be in [1, 2, 4, 8]
+  ignore_label: 255
+  aux_weight: 0.4
+  num_examples: 1000000
+  train_gpu: [0, 1, 2, 3, 4, 5, 6, 7]
+  dataset_gpu_mapping: {
+    'single': [0, 1, 2, 3, 4, 5, 6, 7],
+  }
+  workers: 32  # data loader workers
+  batch_size: 32 # batch size for training
+  batch_size_val: 1  # batch size for validation during training, memory and speed tradeoff
+  base_lr: 0.01
+  epochs: 10
+  start_epoch: 0
+  power: 0.9
+  momentum: 0.9
+  weight_decay: 0.0001
+  manual_seed:
+  print_freq: 10
+  save_freq: 1
+  save_path: default
+  weight:  # path to initial weight (default: none)
+  resume:  # path to latest checkpoint (default: none)
+  auto_resume: None
+  evaluate: False  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+Distributed:
+  dist_url: tcp://127.0.0.1:6795
+  dist_backend: 'nccl'
+  multiprocessing_distributed: True
+  world_size: 1
+  rank: 0
+  use_apex: True
+  opt_level: 'O0'
+  keep_batchnorm_fp32:
+  loss_scale:
