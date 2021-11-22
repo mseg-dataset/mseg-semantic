@@ -295,3 +295,25 @@ All should also pass.
 **Q**: Does the `auto_resume` param refer to the weight of breakpoint training, or the mseg-3m.pth provided by the author?
 
 **A**: We use the `auto_resume` config parameter to allow one to continue training if training is interrupted due to a scheduler compute time limit or hardware error. You could also use it to fine-tune a model.
+
+------------------------------------------------------
+
+**Q**: Could I know how to map the predicted label iD to the ID on cityscapes? Do you have any code/dictionary to achieve this?
+
+**A**: There are two Cityscape taxonomies (cityscapes-19 and cityscapes-34), although cityscapes-19 is more commonly used for evaluation. The classes in these taxonomies are enumerated in mseg-api [here](https://github.com/mseg-dataset/mseg-api/blob/master/mseg/dataset_lists/cityscapes-19/cityscapes-19_names.txt) and [here](https://github.com/mseg-dataset/mseg-api/blob/master/mseg/dataset_lists/cityscapes-34/cityscapes-34_names.txt)
+
+We have released both unified models (trained on many datasets, list available [here](https://github.com/mseg-dataset/mseg-semantic#mseg-pre-trained-models])) and models trained on single datasets, listed [here](https://github.com/mseg-dataset/mseg-semantic#other-baseline-models-from-our-paper).
+
+If you use a unified model for testing, our code maps class scores from the unified taxonomy to cityscapes classes. We discuss this in a section of our [paper](http://vladlen.info/papers/MSeg.pdf) (page 6, top-right under **Using the MSeg taxonomy on a held-out dataset**). The mapping is available in [MSeg_master.tsv](https://github.com/mseg-dataset/mseg-api/blob/master/mseg/class_remapping_files/MSeg_master.tsv), if you compare the `universal` and `wilddash-19` columns (wilddash-19 shares the same classes with cityscapes-19)
+
+If instead you used a model specifically trained on cityscapes, e.g. `cityscapes-19-1m`, which we call an "oracle model" since it is trained and tested on different splits of the same dataset, then the output classes are already immediately in the desired taxonomy.
+
+Our inference code that dumps model results in any particular taxonomy is available here:
+https://github.com/mseg-dataset/mseg-semantic/blob/master/mseg_semantic/scripts/eval_models.sh
+
+
+
+
+
+
+
