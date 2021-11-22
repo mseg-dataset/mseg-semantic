@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
-import imageio
-import numpy as np
 from pathlib import Path
-import pdb
+from typing import List, Tuple
 
-from mseg.utils.txt_utils import read_txt_file
-from mseg.utils.dir_utils import check_mkdir
-from mseg.utils.names_utils import load_class_names
+import imageio
+import mseg.utils.dir_utils as dir_utils
+import mseg.utils.names_utils as names_utils
+import mseg.utils.txt_utils as txt_utils
+import numpy as np
 
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.test_universal_tax import get_excluded_class_ids
@@ -16,7 +16,7 @@ from mseg_semantic.utils.config import CfgNode
 _ROOT = Path(__file__).resolve().parent
 
 
-def get_dummy_datalist():
+def get_dummy_datalist() -> List[Tuple[str,str]]:
     """
     Write dummy camvid data.
     Expect inter [4,2,1]
@@ -39,7 +39,7 @@ def get_dummy_datalist():
     # intersection, [1, 0, 0])
     # union, [2, 1, 0]
 
-    check_mkdir(f"{_ROOT}/accuracy_calculator_data/ground_truth")
+    dir_utils.check_mkdir(f"{_ROOT}/accuracy_calculator_data/ground_truth")
     gt_fpath1 = f"{_ROOT}/accuracy_calculator_data/ground_truth/img1.png"
     gt_fpath2 = f"{_ROOT}/accuracy_calculator_data/ground_truth/img2.png"
     gt_fpath3 = f"{_ROOT}/accuracy_calculator_data/ground_truth/img3.png"
@@ -48,7 +48,7 @@ def get_dummy_datalist():
     imageio.imwrite(gt_fpath2, target2)
     imageio.imwrite(gt_fpath3, target3)
 
-    check_mkdir(f"{_ROOT}/accuracy_calculator_data/gray")
+    dir_utils.check_mkdir(f"{_ROOT}/accuracy_calculator_data/gray")
     imageio.imwrite(f"{_ROOT}/accuracy_calculator_data/gray/img1.png", pred1)
     imageio.imwrite(f"{_ROOT}/accuracy_calculator_data/gray/img2.png", pred2)
     imageio.imwrite(f"{_ROOT}/accuracy_calculator_data/gray/img3.png", pred3)
@@ -62,7 +62,7 @@ def get_dummy_datalist():
     return data_list
 
 
-def test_constructor():
+def test_constructor() -> None:
     """ """
     args = CfgNode()
     args.img_name_unique = True
@@ -73,7 +73,7 @@ def test_constructor():
 
     data_list = get_dummy_datalist()
     dataset_name = "camvid-11"
-    class_names = load_class_names(dataset_name)
+    class_names = names_utils.load_class_names(dataset_name)
     camvid_class_names = [
         "Building",
         "Tree",
@@ -103,7 +103,7 @@ def test_constructor():
     )
 
 
-def test_execute():
+def test_execute() -> None:
     """ """
     args = CfgNode()
     args.img_name_unique = True
@@ -114,7 +114,7 @@ def test_execute():
 
     data_list = get_dummy_datalist()
     dataset_name = "camvid-11"
-    class_names = load_class_names(dataset_name)
+    class_names = names_utils.load_class_names(dataset_name)
     camvid_class_names = [
         "Building",
         "Tree",
@@ -146,7 +146,7 @@ def test_execute():
     ac.compute_metrics(save_vis=False)
 
     results_txt_fpath = f"{_ROOT}/accuracy_calculator_data/results.txt"
-    lines = read_txt_file(results_txt_fpath, strip_newlines=False)
+    lines = txt_utils.read_txt_file(results_txt_fpath, strip_newlines=False)
 
     assert "Eval result: mIoU/mAcc/allAcc 0.1792" in lines[0]
     assert "Class_00 result: iou/accuracy 0.5714/1.0000, name: Building." in lines[1]
@@ -162,7 +162,7 @@ def test_execute():
     assert "Class_10 result: iou/accuracy 0.0000/0.0000, name: Bicyclist." in lines[11]
 
 
-def test_relabeled_data_example():
+def test_relabeled_data_example() -> None:
     """ """
     pass
     # pdb.set_trace()
