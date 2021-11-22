@@ -5,7 +5,6 @@ Run inference over all images in a directory, over all frames of a video,
 or over all images specified in a .txt file.
 """
 
-
 import argparse
 import logging
 import os
