@@ -1,4 +1,7 @@
+"""Utilities for setting up a Python logger."""
+
 import logging
+
 
 def get_logger() -> logging.Logger:
     """ Set up a logger to print out log messages in the following format:

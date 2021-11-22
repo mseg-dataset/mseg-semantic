@@ -5,11 +5,12 @@ import torch
 import torch.distributed as dist
 from typing import List
 
-from mseg_semantic.utils.iou import intersectionAndUnion, intersectionAndUnionGPU
+import mseg_semantic.utils.iou as iou_utils
 
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
+
     def __init__(self) -> None:
         self.reset()
 
@@ -25,57 +26,47 @@ class AverageMeter(object):
         self.count += n
         self.avg = self.sum / self.count
 
+
 class SegmentationAverageMeter(AverageMeter):
-    """ 
-    An AverageMeter designed specifically for evaluating segmentation results.
-    """
+    """An AverageMeter designed specifically for evaluating segmentation results."""
+
     def __init__(self) -> None:
-        """ Initialize object. """
+        """Initialize object."""
         self.intersection_meter = AverageMeter()
         self.union_meter = AverageMeter()
         self.target_meter = AverageMeter()
         self.accuracy = 0
 
-    def update_metrics_cpu(self, pred, target, num_classes) -> None:
+    def update_metrics_cpu(self, pred: np.ndarray, target: np.ndarray, num_classes: int) -> None:
         """
-            Args:
-            -   pred
-            -   target
-            -   classes
-
-            Returns:
-            -   None
+        Args:
+            pred
+            target
+            classes
         """
-        intersection, union, target = intersectionAndUnion(pred, target, num_classes)
+        intersection, union, target = iou_utils.intersectionAndUnion(pred, target, num_classes)
         self.intersection_meter.update(intersection)
         self.union_meter.update(union)
         self.target_meter.update(target)
         self.accuracy = sum(self.intersection_meter.val) / (sum(self.target_meter.val) + 1e-10)
-        self.intersection = 0.
+        self.intersection = 0.0
 
     def update_metrics_gpu(
-        self,
-        pred: torch.Tensor,
-        target: torch.Tensor,
-        num_classes: int,
-        ignore_idx: int,
-        is_distributed: bool):
-        """ 
-            Args:
-            -    pred
-            -   target
-            -   num_classes
-            -   ignore_idx
-
-            Returns:
-            -   None
+        self, pred: torch.Tensor, target: torch.Tensor, num_classes: int, ignore_idx: int, is_distributed: bool
+    ) -> None:
         """
-        intersection, union, target = intersectionAndUnionGPU(pred, target, num_classes, ignore_idx)
+        Args:
+            pred:
+            target:
+            num_classes:
+            ignore_idx:
+        """
+        intersection, union, target = iou_utils.intersectionAndUnionGPU(pred, target, num_classes, ignore_idx)
         if is_distributed:
             dist.all_reduce(intersection), dist.all_reduce(union), dist.all_reduce(target)
         self.intersection = intersection.cpu().numpy()
         union, target = union.cpu().numpy(), target.cpu().numpy()
-        
+
         self.intersection_meter.update(self.intersection)
         self.union_meter.update(union)
         self.target_meter.update(target)
@@ -83,15 +74,16 @@ class SegmentationAverageMeter(AverageMeter):
 
     def get_metrics(self, exclude: bool = False, exclude_ids: List[int] = None):
         """
-            Args:
-            -   None
+        Args:
+            exclude:
+            exclude_ids:
 
-            Returns:
-            -   iou_class: Array
-            -   accuracy_class: Array
-            -   mIoU: float
-            -   mAcc: float
-            -   allAcc: float
+        Returns:
+            iou_class: Array
+            accuracy_class: Array
+            mIoU: float
+            mAcc: float
+            allAcc: float
         """
         iou_class = self.intersection_meter.sum / (self.union_meter.sum + 1e-10)
         accuracy_class = self.intersection_meter.sum / (self.target_meter.sum + 1e-10)
@@ -100,7 +92,7 @@ class SegmentationAverageMeter(AverageMeter):
             mIoU = np.mean(exclusion(iou_class, exclude_ids))
             mAcc = np.mean(exclusion(accuracy_class, exclude_ids))
 
-            #print('original miou is:, ', np.mean(iou_class))
+            # print('original miou is:, ', np.mean(iou_class))
         else:
             mIoU = np.mean(iou_class)
             mAcc = np.mean(accuracy_class)
@@ -109,10 +101,8 @@ class SegmentationAverageMeter(AverageMeter):
 
 
 def exclusion(array: np.ndarray, excluded_ids: List[int]) -> np.ndarray:
-    """ take in array of IoU/Acc., return non-excluded IoU/acc values """
+    """take in array of IoU/Acc., return non-excluded IoU/acc values"""
     all_ids = np.arange(array.size)
     # valid indices --> take complement of set intersection
     relevant_array = array[~np.in1d(all_ids, excluded_ids)]
     return relevant_array
-
-
