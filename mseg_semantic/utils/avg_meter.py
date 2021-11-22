@@ -53,7 +53,7 @@ class SegmentationAverageMeter(AverageMeter):
 
     def update_metrics_gpu(
         self, pred: torch.Tensor, target: torch.Tensor, num_classes: int, ignore_idx: int, is_distributed: bool
-    ):
+    ) -> None:
         """
         Args:
             pred:
