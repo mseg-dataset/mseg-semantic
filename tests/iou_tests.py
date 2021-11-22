@@ -17,7 +17,9 @@ def test_intersectionAndUnion_2classes() -> None:
     num_classes = 2
 
     # contain the number of samples in each bin.
-    area_intersection, area_union, area_target = iou_utils.intersectionAndUnion(pred, target, K=num_classes, ignore_index=255)
+    area_intersection, area_union, area_target = iou_utils.intersectionAndUnion(
+        pred, target, K=num_classes, ignore_index=255
+    )
     assert area_intersection.shape == (2,)
     assert area_union.shape == (2,)
     assert area_target.shape == (2,)
@@ -44,7 +46,9 @@ def test_intersectionAndUnion_3classes() -> None:
     num_classes = 3
 
     # contain the number of samples in each bin.
-    area_intersection, area_union, area_target = iou_utils.intersectionAndUnion(pred, target, K=num_classes, ignore_index=255)
+    area_intersection, area_union, area_target = iou_utils.intersectionAndUnion(
+        pred, target, K=num_classes, ignore_index=255
+    )
     assert area_intersection.shape == (3,)
     assert area_union.shape == (3,)
     assert area_target.shape == (3,)
@@ -99,7 +103,9 @@ def test_intersectionAndUnion_ignore_label() -> None:
     num_classes = 2
 
     # contain the number of samples in each bin.
-    area_intersection, area_union, area_target = iou_utils.intersectionAndUnion(pred, target, K=num_classes, ignore_index=255)
+    area_intersection, area_union, area_target = iou_utils.intersectionAndUnion(
+        pred, target, K=num_classes, ignore_index=255
+    )
     assert area_intersection.shape == (2,)
     assert area_union.shape == (2,)
     assert area_target.shape == (2,)
