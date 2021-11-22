@@ -2,7 +2,7 @@
 
 import os
 import os.path
-from typing import List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import cv2
 import imageio
@@ -31,7 +31,7 @@ def make_dataset(split: str, data_root: str, data_list_fpath: str) -> List[Tuple
         split: string representing split of data set to use, must be either 'train','val','test'
         data_root: path to where data lives, and where relative image paths are relative to
         data_list_fpath: path to .txt file with relative image paths
-    
+
     Returns:
         image_label_list: list of 2-tuples, each 2-tuple is comprised of an absolute image path
             and an absolute label path
@@ -72,7 +72,9 @@ def make_dataset(split: str, data_root: str, data_list_fpath: str) -> List[Tuple
 
 
 class SemData(Dataset):
-    def __init__(self, split: str = "train", data_root: str = None, data_list: str = None, transform=None) -> None:
+    def __init__(
+        self, split: str = "train", data_root: str = None, data_list: str = None, transform: Optional[Callable] = None
+    ) -> None:
         """Dataloader class for semantic segmentation datasets.
 
         Args:
