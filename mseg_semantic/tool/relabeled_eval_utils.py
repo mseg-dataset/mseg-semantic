@@ -16,6 +16,7 @@ Penalizing in the person/motorcyclist case seems unfair to the relabeled
 model, since it gets at least as good as the unrelabeled model
 lose-lose unless we specify the full hierarchy and employ it
 """
+from typing import Tuple
 
 import numpy as np
 import torch
