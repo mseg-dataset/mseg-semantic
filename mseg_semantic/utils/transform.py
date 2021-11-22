@@ -111,7 +111,7 @@ class ResizeShort(object):
         self.size = size
 
     def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        """ Resize image such that the shorter side equals predefined size. """
+        """Resize image such that the shorter side equals predefined size."""
         old_image_shape, old_label_shape = image.shape, label.shape
         h, w = image.shape[0], image.shape[1]
         shorter_size = min(h, w)
