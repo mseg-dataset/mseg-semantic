@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
+from typing import Tuple
+
 import numpy as np
 import torch
 from torch import nn
-from typing import Tuple
+
 
 """
 Utilies to compute quantities required to compute IoU per class
@@ -14,10 +16,10 @@ on a single image, using Numpy or Pytorch.
 def intersectionAndUnion(
     output: np.ndarray, target: np.ndarray, K: int, ignore_index: int = 255
 ) -> Tuple[np.array, np.array, np.array]:
-    """
-    Compute IoU on Numpy arrays on CPU. We will be reasoning about each
-    matrix cell individually, so we can reshape (flatten) these arrays
-    into column vectors and the evaluation result won’t change. Compare
+    """Compute IoU on Numpy arrays on CPU.
+
+    We will be reasoning about each matrix cell individually, so we can reshape (flatten)
+    these arrays into column vectors and the evaluation result won’t change. Compare
     horizontally-corresponding cells. Wherever ground truth (target)
     pixels should be ignored, set prediction also to the ignore label.
     `intersection` represents values (class indices) in cells where
@@ -25,20 +27,20 @@ def intersectionAndUnion(
 
     Note output and target sizes are N or N * L or N * H * W
 
-        Args:
-        -   output: Numpy array represeting predicted label map,
-                each value in range 0 to K - 1.
-        -   target: Numpy array representing ground truth label map,
-                each value in range 0 to K - 1.
-        -   K: integer number of possible classes
-        -   ignore_index: integer representing class index to ignore
+    Args:
+        output: Numpy array represeting predicted label map,
+            each value in range 0 to K - 1.
+        target: Numpy array representing ground truth label map,
+            each value in range 0 to K - 1.
+        K: integer number of possible classes
+        ignore_index: integer representing class index to ignore
 
-        Returns:
-        -   area_intersection: 1d Numpy array of length (K,) with counts
-                for each of K classes, where pred & target matched
-        -   area_union: 1d Numpy array of length (K,) with counts
-        -   area_target: 1d Numpy array of length (K,) with bin counts
-                for each of K classes, present in this GT label map.
+    Returns:
+        area_intersection: 1d Numpy array of length (K,) with counts
+            for each of K classes, where pred & target matched
+        area_union: 1d Numpy array of length (K,) with counts
+        area_target: 1d Numpy array of length (K,) with bin counts
+            for each of K classes, present in this GT label map.
     """
     assert output.ndim in [1, 2, 3]
     assert output.shape == target.shape
@@ -58,23 +60,25 @@ def intersectionAndUnion(
 def intersectionAndUnionGPU(
     output: torch.Tensor, target: torch.Tensor, K: int, ignore_index: int = 255, cuda_available: bool = True
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """
-    Note output and target sizes are N or N * L or N * H * W
-        Args:
-        -   output: Pytorch tensor represeting predicted label map,
-                each value in range 0 to K - 1.
-        -   target: Pytorch tensor representing ground truth label map,
-                each value in range 0 to K - 1.
-        -   K: integer number of possible classes
-        -   ignore_index: integer representing class index to ignore
-        -   cuda_available: CUDA is available to Pytorch to use
+    """Compute IoU on the GPU.
 
-        Returns:
-        -   area_intersection: 1d Pytorch tensor of length (K,) with counts
-                for each of K classes, where pred & target matched
-        -   area_union: 1d Pytorch tensor of length (K,) with counts
-        -   area_target: 1d Pytorch tensor of length (K,) with bin counts
-                for each of K classes, present in this GT label map.
+    Note output and target sizes are N or N * L or N * H * W
+
+    Args:
+        output: Pytorch tensor represeting predicted label map,
+            each value in range 0 to K - 1.
+        target: Pytorch tensor representing ground truth label map,
+            each value in range 0 to K - 1.
+        K: integer number of possible classes
+        ignore_index: integer representing class index to ignore
+        cuda_available: CUDA is available to Pytorch to use
+
+    Returns:
+        area_intersection: 1d Pytorch tensor of length (K,) with counts
+            for each of K classes, where pred & target matched
+        area_union: 1d Pytorch tensor of length (K,) with counts
+        area_target: 1d Pytorch tensor of length (K,) with bin counts
+            for each of K classes, present in this GT label map.
     """
     assert output.dim() in [1, 2, 3]
     assert output.shape == target.shape
