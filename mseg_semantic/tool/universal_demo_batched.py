@@ -36,7 +36,7 @@ cv2.ocl.setUseOpenCL(False)
 
 
 def determine_max_possible_base_size(h: int, w: int, crop_sz: int) -> int:
-    """ Given a crop size and original image dims for aspect ratio, determine
+    """Given a crop size and original image dims for aspect ratio, determine
     the max base_size that will fit within the crop.
     """
     longer_size = max(h, w)
@@ -46,17 +46,17 @@ def determine_max_possible_base_size(h: int, w: int, crop_sz: int) -> int:
     else:
         scale = crop_sz / float(w)
         base_size = math.floor(h * scale)
-        
+
     return base_size
 
 
 def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
     """
-        Args:
-        -   args:
-        -   use_gpu
+    Args:
+        args:
+        use_gpu: whether to use GPU for inference.
     """
-    if 'scannet' in args.dataset:
+    if "scannet" in args.dataset:
         args.img_name_unique = False
     else:
         args.img_name_unique = True
@@ -64,37 +64,39 @@ def run_universal_demo_batched(args, use_gpu: bool = True) -> None:
     args.u_classes = get_universal_class_names()
     args.print_freq = 10
 
-    args.split = 'test'
+    args.split = "test"
     logger.info(args)
     logger.info("=> creating model ...")
     args.num_model_classes = len(args.u_classes)
     args.base_size = determine_max_possible_base_size(
-        h=args.native_img_h,
-        w=args.native_img_w,
-        crop_sz=min(args.test_h,args.test_w)
+        h=args.native_img_h, w=args.native_img_w, crop_sz=min(args.test_h, args.test_w)
     )
-    
+
     itask = BatchedInferenceTask(
         args,
-        base_size = args.base_size,
-        crop_h = args.test_h,
-        crop_w = args.test_w,
+        base_size=args.base_size,
+        crop_h=args.test_h,
+        crop_w=args.test_w,
         input_file=args.input_file,
-        model_taxonomy='universal',
-        eval_taxonomy='universal',
-        scales = args.scales
+        model_taxonomy="universal",
+        eval_taxonomy="universal",
+        scales=args.scales,
     )
     itask.execute()
 
 
 def get_parser() -> CfgNode:
     """ """
-    parser = argparse.ArgumentParser(description='PyTorch Semantic Segmentation')
-    parser.add_argument('--config', type=str, 
-        default=f'{_ROOT}/config/test/default_config_360_ss.yaml', help='config file')
-    parser.add_argument('--file_save', type=str, default='default', help='eval result to save, when lightweight option is on')
-    parser.add_argument('opts', help='see config/ade20k/ade20k_pspnet50.yaml for all options', 
-        default=None, nargs=argparse.REMAINDER) # model path is passed in 
+    parser = argparse.ArgumentParser(description="PyTorch Semantic Segmentation")
+    parser.add_argument(
+        "--config", type=str, default=f"{_ROOT}/config/test/default_config_360_ss.yaml", help="config file"
+    )
+    parser.add_argument(
+        "--file_save", type=str, default="default", help="eval result to save, when lightweight option is on"
+    )
+    parser.add_argument(
+        "opts", help="see config/ade20k/ade20k_pspnet50.yaml for all options", default=None, nargs=argparse.REMAINDER
+    )  # model path is passed in
     args = parser.parse_args()
     print(args)
     assert args.config is not None
@@ -104,15 +106,15 @@ def get_parser() -> CfgNode:
     return cfg
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """Example CLI usage:
-        python mseg_semantic/tool/universal_demo_batched.py
-          --config mseg_semantic/config/test/480/default_config_batched_ss.yaml
-          native_img_h 1200
-          native_img_w 1920
-          model_name mseg-3m-480p
-          model_path ./pretrained-semantic-models/mseg-3m-480p/mseg-3m-480p.pth
-          input_file ~/argoverse/train1/273c1883-673a-36bf-b124-88311b1a80be/ring_front_center
+    python mseg_semantic/tool/universal_demo_batched.py
+      --config mseg_semantic/config/test/480/default_config_batched_ss.yaml
+      native_img_h 1200
+      native_img_w 1920
+      model_name mseg-3m-480p
+      model_path ./pretrained-semantic-models/mseg-3m-480p/mseg-3m-480p.pth
+      input_file ~/argoverse/train1/273c1883-673a-36bf-b124-88311b1a80be/ring_front_center
     """
     use_gpu = True
     args = get_parser()
@@ -125,7 +127,7 @@ if __name__ == '__main__':
     if not os.path.isdir(args.input_file):
         raise RuntimeError("Please provide a valid image directory using the input_file argument")
 
-    if args.dataset == 'default':
+    if args.dataset == "default":
         args.dataset = Path(args.input_file).stem
 
     print(args)
