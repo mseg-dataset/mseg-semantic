@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+from typing import Optional
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -9,7 +11,7 @@ import pdb
 
 
 class PPM(nn.Module):
-    def __init__(self, in_dim, reduction_dim, bins, BatchNorm):
+    def __init__(self, in_dim: int, reduction_dim: int, bins, BatchNorm) -> None:
         super(PPM, self).__init__()
         self.features = []
         for bin in bins:
@@ -25,7 +27,7 @@ class PPM(nn.Module):
             )
         self.features = nn.ModuleList(self.features)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x_size = x.size()
         out = [x]
         for f in self.features:
@@ -36,17 +38,17 @@ class PPM(nn.Module):
 class PSPNet(nn.Module):
     def __init__(
         self,
-        layers=50,
+        layers: int = 50,
         bins=(1, 2, 3, 6),
-        dropout=0.1,
-        classes=2,
-        zoom_factor=8,
-        use_ppm=True,
+        dropout: float = 0.1,
+        classes: int = 2,
+        zoom_factor: int = 8,
+        use_ppm: bool =True,
         criterion=nn.CrossEntropyLoss(ignore_index=255),
         BatchNorm=nn.BatchNorm2d,
-        pretrained=True,
+        pretrained: bool = True,
         network_name=None,
-    ):
+    ) -> None:
         super(PSPNet, self).__init__()
         assert layers in [50, 101, 152]
         assert 2048 % len(bins) == 0
@@ -126,7 +128,7 @@ class PSPNet(nn.Module):
                 nn.Conv2d(256, classes, kernel_size=1),
             )
 
-    def forward(self, x, y=None):
+    def forward(self, x: torch.Tensor, y: Optional[torch.Tensor] = None) -> torch.Tensor:
         x_size = x.size()
         assert (x_size[2] - 1) % 8 == 0 and (x_size[3] - 1) % 8 == 0
         h = int((x_size[2] - 1) / 8 * self.zoom_factor + 1)
