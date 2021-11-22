@@ -133,7 +133,7 @@ def pad_to_crop_sz(
         image: Numpy array of shape (crop_h x crop_w) representing a
                square image, with short side of square is at least crop size.
         pad_h_half: half the number of pixels used as padding along height dim
-        pad_w_half" half the number of pixels used as padding along width dim
+        pad_w_half: half the number of pixels used as padding along width dim
     """
     orig_h, orig_w, _ = image.shape
     pad_h = max(crop_h - orig_h, 0)
