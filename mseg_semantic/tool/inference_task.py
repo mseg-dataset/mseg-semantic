@@ -132,8 +132,8 @@ def pad_to_crop_sz(
     Returns:
         image: Numpy array of shape (crop_h x crop_w) representing a
                square image, with short side of square is at least crop size.
-         pad_h_half: half the number of pixels used as padding along height dim
-         pad_w_half" half the number of pixels used as padding along width dim
+        pad_h_half: half the number of pixels used as padding along height dim
+        pad_w_half" half the number of pixels used as padding along width dim
     """
     orig_h, orig_w, _ = image.shape
     pad_h = max(crop_h - orig_h, 0)
@@ -156,7 +156,7 @@ def pad_to_crop_sz(
 def imread_rgb(img_fpath: str) -> np.ndarray:
     """
     Returns:
-    -	RGB 3 channel nd-array with shape H * W * 3
+        RGB 3 channel nd-array with shape (H, W, 3)
     """
     bgr_img = cv2.imread(img_fpath, cv2.IMREAD_COLOR)
     rgb_img = cv2.cvtColor(bgr_img, cv2.COLOR_BGR2RGB)
@@ -569,7 +569,7 @@ class InferenceTask:
 
         Returns:
             output: Pytorch tensor representing network predicting in evaluation taxonomy
-                    (not necessarily the model taxonomy)
+                (not necessarily the model taxonomy)
         """
         input = torch.from_numpy(image.transpose((2, 0, 1))).float()
         normalization_utils.normalize_img(input, self.mean, self.std)
