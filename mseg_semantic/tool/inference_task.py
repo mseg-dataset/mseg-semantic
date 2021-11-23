@@ -16,8 +16,8 @@ import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torch.utils.data
 
+import mseg.utils.names_utils as names_utils
 from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
-from mseg.utils.names_utils import get_universal_class_names, load_class_names
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.utils.resize_util import resize_img_by_short_side
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
@@ -176,7 +176,7 @@ class InferenceTask:
         eval_taxonomy: str,
         scales: List[float],
         use_gpu: bool = True,
-    ):
+    ) -> None:
         """
         We always use the ImageNet mean and standard deviation for normalization.
         mean: 3-tuple of floats, representing pixel mean value
@@ -230,14 +230,14 @@ class InferenceTask:
 
         elif model_taxonomy == "test_dataset" and eval_taxonomy == "test_dataset":
             # no conversion of predictions required
-            self.num_eval_classes = len(load_class_names(args.dataset))
+            self.num_eval_classes = len(names_utils.load_class_names(args.dataset))
 
         elif model_taxonomy == "naive" and eval_taxonomy == "test_dataset":
             self.tc = NaiveTaxonomyConverter()
             if args.dataset in self.tc.convs.keys() and use_gpu:
                 self.tc.convs[args.dataset].cuda()
             self.tc.softmax.cuda()
-            self.num_eval_classes = len(load_class_names(args.dataset))
+            self.num_eval_classes = len(names_utils.load_class_names(args.dataset))
 
         elif model_taxonomy == "universal" and eval_taxonomy == "test_dataset":
             # no label conversion required here, only predictions converted
@@ -245,14 +245,14 @@ class InferenceTask:
             if args.dataset in self.tc.convs.keys() and use_gpu:
                 self.tc.convs[args.dataset].cuda()
             self.tc.softmax.cuda()
-            self.num_eval_classes = len(load_class_names(args.dataset))
+            self.num_eval_classes = len(names_utils.load_class_names(args.dataset))
 
         if self.args.arch == "psp":
             assert isinstance(self.args.zoom_factor, int)
             assert isinstance(self.args.network_name, int)
 
         # `id_to_class_name_map` only used for visualizing universal taxonomy
-        self.id_to_class_name_map = {i: classname for i, classname in enumerate(get_universal_class_names())}
+        self.id_to_class_name_map = {i: classname for i, classname in enumerate(names_utils.get_universal_class_names())}
 
         # indicate which scales were used to make predictions
         # (multi-scale vs. single-scale)
