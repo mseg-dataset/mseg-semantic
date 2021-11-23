@@ -16,7 +16,6 @@ import time
 from mseg.utils.dataset_config import infos
 from mseg.utils.names_utils import load_class_names, get_universal_class_names
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter, DEFAULT_TRAIN_DATASETS, TEST_DATASETS
-from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
