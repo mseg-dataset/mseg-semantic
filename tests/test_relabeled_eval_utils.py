@@ -140,9 +140,16 @@ def test_eval_relabeled_pair_annotated_as_unlabel() -> None:
     # since the counter & cabinet could not be separated w/o
     # drawing new boundary, mark both as `unlabeled`, i.e. 255
     wall = relabeled_names.index("wall")
+    # fmt: off
     target_img_relabeled = np.array(
-        [[wall, wall, wall, wall], [255, 255, 255, 255], [255, 255, 255, 255], [255, 255, 255, 255]]
+        [
+            [wall, wall, wall, wall],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255]
+        ]
     ).astype(np.uint8)
+    # fmt: on
 
     orig_to_u_transform = ToUniversalLabel(orig_dname)
     relabeled_to_u_transform = ToUniversalLabel(relabeled_dname)
@@ -154,14 +161,28 @@ def test_eval_relabeled_pair_annotated_as_unlabel() -> None:
     assert acc_diff == 25
 
     wall = u_names.index("wall")
+    # fmt: off
     gt_pred_unrel = np.array(
-        [[wall, wall, wall, wall], [255, 255, 255, 255], [255, 255, 255, 255], [255, 255, 255, 255]], dtype=np.uint8
+        [
+            [wall, wall, wall, wall],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255]
+        ], dtype=np.uint8
     )
+    # fmt: on
     assert np.allclose(pred_unrel, gt_pred_unrel)
 
+    # fmt: off
     gt_target_gt_univ = np.array(
-        [[wall, wall, wall, wall], [255, 255, 255, 255], [255, 255, 255, 255], [255, 255, 255, 255]], dtype=np.uint8
+        [
+            [wall, wall, wall, wall],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255],
+            [255, 255, 255, 255]
+        ], dtype=np.uint8
     )
+    # fmt: on
     assert np.allclose(target_gt_univ, gt_target_gt_univ)
 
 
