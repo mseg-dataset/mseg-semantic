@@ -1,6 +1,4 @@
-
-
-"""Test a model w/ a naive merge taxonomy."""
+"""Test a model w/ that makes predictions in the "naive merge" taxonomy."""
 
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
@@ -8,28 +6,28 @@ from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
 
 
+def test_naive_taxonomy_model(args) -> None:
+    """
+    python -u ../tool/test_naive_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
+    """
 
-def test_naive_taxonomy_model() -> None:
-	"""
-	python -u ../tool/test_naive_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
-	"""
+    """
+    args.save_folder, str)
+    args.dataset, str)
+    args.img_name_unique, bool)
+    args.print_freq, int)
+    args.num_model_classes, int)
+    args.model_path, str)
+    """
 
-	"""
-	args.save_folder, str)
-	args.dataset, str)
-	args.img_name_unique, bool)
-	args.print_freq, int)
-	args.num_model_classes, int)
-	args.model_path, str)
-	"""
+    import pdb; pdb.set_trace()
 
-	args = None
-	use_gpu = False
-	input_file = None
-	scales = None
-	eval_taxonomy = "test_dataset"
+    use_gpu = False
+    input_file = None
+    scales = None
+    eval_taxonomy = "test_dataset"
 
-	it = InferenceTask(
+    it = InferenceTask(
         args=args,
         base_size=args.base_size,
         crop_h=args.test_h,
@@ -38,15 +36,15 @@ def test_naive_taxonomy_model() -> None:
         model_taxonomy="naive",
         eval_taxonomy=eval_taxonomy,
         scales=args.scales,
-        use_gpu=use_gpu
+        use_gpu=use_gpu,
     )
 
-	ntc = NaiveTaxonomyConverter()
-	class_names = ntc.get_naive_taxonomy_classnames()
-	num_eval_classes = 9999
-	dataset_name = None
-	test_data_list = None
-	excluded_ids = None
+    ntc = NaiveTaxonomyConverter()
+    class_names = ntc.get_naive_taxonomy_classnames()
+    num_eval_classes = 9999
+    dataset_name = None
+    test_data_list = None
+    excluded_ids = None
     ac = AccuracyCalculator(
         args=args,
         data_list=test_data_list,
