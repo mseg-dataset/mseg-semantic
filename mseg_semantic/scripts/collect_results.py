@@ -33,9 +33,6 @@ RESULTS_BASE_ROOT = "/srv/scratch/jlambert30/MSeg/pretrained-semantic-models"
 # zero_shot_datasets
 zs_datasets = ["voc2012", "pascal-context-60", "camvid-11", "wilddash-19", "kitti-19", "scannet-20"]
 
-# oracle-trained datasets
-o_datasets = ["voc2012", "pascal-context-60", "camvid-11", "kitti-19", "scannet-20"]
-
 training_datasets = [
     "coco-panoptic-133_universal",
     "ade20k-150_universal",
@@ -81,9 +78,13 @@ u_names = [
 # 'naive'
 
 # oracle taxonomy names
-o_models = ["voc2012-1m", "pascal-context-60-1m", "camvid-11-1m", "kitti-19-1m", "scannet-20-1m"]
+ORACLE_MODELS = ["voc2012-1m", "pascal-context-60-1m", "camvid-11-1m", "kitti-19-1m", "scannet-20-1m"]
 
-o_names = ["VOC Oracle", "PASCAL Context Oracle", "Camvid Oracle", "KITTI Oracle", "ScanNet Oracle"]
+ORACLE_NAMES = ["VOC Oracle", "PASCAL Context Oracle", "Camvid Oracle", "KITTI Oracle", "ScanNet Oracle"]
+
+# oracle-trained datasets
+ORACLE_DATASETS = ["voc2012", "pascal-context-60", "camvid-11", "kitti-19", "scannet-20"]
+
 
 VERBOSE = False
 
@@ -194,7 +195,7 @@ def collect_results_at_res(
 
 def dump_results_latex(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in LaTeX syntax."""
-    results = [ "{:.1f}".format(r).rjust(5) for r in results]
+    results = ["{:.1f}".format(r).rjust(5) for r in results]
     results = ["$ " + r + " $" for r in results]
     print(name.rjust(50), " & ", " & ".join(results) + "\\\\")
 
@@ -209,13 +210,15 @@ def dump_results_markdown(name: str, results: List[float]) -> None:
 def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
     """
     Args:
-        resolution:
-        scale:
-        output_format:
+        resolution: either "360", "720", "1080", or "max", which represents the best result
+            over all 3 aforementioned resolutions.
+        scale: string representing inference scale option,
+            either 'ss' or 'ms' (single-scale or multi-scale)
+        output_format: syntax for STDOUT result table formatting.
     """
     results = []
     print(" " * 60, (" " * 5).join(o_datasets), " " * 10 + "mean")
-    for m, name, d in zip(o_models, o_names, o_datasets):
+    for m, name, d in zip(ORACLE_MODELS, ORACLE_NAMES, ORACLE_DATASETS):
         folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
         miou = parse_folder(folder, resolution, scale)
         results.append(miou)
@@ -235,6 +238,10 @@ def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> N
 
 
 def collect_oracle_results(scale: str, output_format: PrintOutputFormat) -> None:
+    """Collect the results of oracle-trained models.
+
+    `Oracle' means trained on train split of test dataset, tested on test split of same test dataset.
+    """
     # 'ms' vs. 'ss'
     for resolution in ["360", "720", "1080", "max"]:  #  '480', '2160',
         print(f"At resolution {resolution}")
@@ -263,7 +270,11 @@ if __name__ == "__main__":
         "--scale", required=True, type=str, help="ss (single-scale) or ms (multi-scale)", choices=["ss", "ms"]
     )
     parser.add_argument(
-        "--output_format", required=True, type=str, help="latex or markdown", choices=["latex", "markdown"]
+        "--output_format",
+        required=True,
+        type=str,
+        help="syntax for STDOUT result table formatting (latex or markdown)",
+        choices=["latex", "markdown"],
     )
     args = parser.parse_args()
     print(args)
