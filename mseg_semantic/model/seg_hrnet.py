@@ -15,7 +15,7 @@ import os
 import logging
 import functools
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 import hydra
 import numpy as np
@@ -124,10 +124,19 @@ class Bottleneck(nn.Module):
 
 class HighResolutionModule(nn.Module):
     def __init__(
-        self, num_branches, blocks, num_blocks, num_inchannels, num_channels, fuse_method, multi_scale_output=True
+        self,
+        num_branches: int,
+        blocks: Union[BasicBlock, Bottleneck],
+        num_blocks: List[int],
+        num_inchannels: List[int],
+        num_channels: List[int],
+        fuse_method: str,
+        multi_scale_output: bool = True,
     ) -> None:
         """ """
-        import pdb; pdb.set_trace()
+        import pdb
+
+        pdb.set_trace()
         super(HighResolutionModule, self).__init__()
         self._check_branches(num_branches, blocks, num_blocks, num_inchannels, num_channels)
 
@@ -141,7 +150,9 @@ class HighResolutionModule(nn.Module):
         self.fuse_layers = self._make_fuse_layers()
         self.relu = nn.ReLU(inplace=True)
 
-    def _check_branches(self, num_branches, blocks, num_blocks, num_inchannels, num_channels):
+    def _check_branches(
+        self, num_branches: int, blocks, num_blocks: List[int], num_inchannels: List[int], num_channels: List[int]
+    ) -> None:
         """ """
         if num_branches != len(num_blocks):
             error_msg = "NUM_BRANCHES({}) <> NUM_BLOCKS({})".format(num_branches, len(num_blocks))
@@ -158,7 +169,15 @@ class HighResolutionModule(nn.Module):
             logger.error(error_msg)
             raise ValueError(error_msg)
 
-    def _make_one_branch(self, branch_index, block, num_blocks, num_channels, stride=1):
+    def _make_one_branch(
+        self,
+        branch_index: int,
+        block: Union[BasicBlock, Bottleneck],
+        num_blocks: List[int],
+        num_channels: List[int],
+        stride: int = 1,
+    ) -> nn.Module:
+        """ """
         downsample = None
         if stride != 1 or self.num_inchannels[branch_index] != num_channels[branch_index] * block.expansion:
             downsample = nn.Sequential(
@@ -180,7 +199,9 @@ class HighResolutionModule(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _make_branches(self, num_branches, block, num_blocks, num_channels):
+    def _make_branches(
+        self, num_branches: int, block: Union[BasicBlock, Bottleneck], num_blocks: List[int], num_channels: List[int]
+    ) -> nn.ModuleList:
         branches = []
 
         for i in range(num_branches):
@@ -325,7 +346,9 @@ class HighResolutionNet(nn.Module):
             ),
         )
 
-    def _make_transition_layer(self, num_channels_pre_layer: List[int], num_channels_cur_layer: List[int]) -> nn.ModuleList:
+    def _make_transition_layer(
+        self, num_channels_pre_layer: List[int], num_channels_cur_layer: List[int]
+    ) -> nn.ModuleList:
         """
         Use 3x3 convolutions, with stride 2 and padding 1.
         """
@@ -382,14 +405,11 @@ class HighResolutionNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _make_stage(self, layer_config: HRNetStageConfig, num_inchannels, multi_scale_output: bool = True) -> nn.Module:
+    def _make_stage(
+        self, layer_config: HRNetStageConfig, num_inchannels: List[int], multi_scale_output: bool = True
+    ) -> nn.Module:
         """ """
         num_modules = layer_config.NUM_MODULES
-        num_branches = layer_config.NUM_BRANCHES
-        num_blocks = layer_config.NUM_BLOCKS
-        num_channels = layer_config.NUM_CHANNELS
-        block = blocks_dict[layer_config.BLOCK]
-        fuse_method = layer_config.FUSE_METHOD
 
         modules = []
         for i in range(num_modules):
@@ -400,7 +420,13 @@ class HighResolutionNet(nn.Module):
                 reset_multi_scale_output = True
             modules.append(
                 HighResolutionModule(
-                    num_branches, block, num_blocks, num_inchannels, num_channels, fuse_method, reset_multi_scale_output
+                    num_branches=layer_config.NUM_BRANCHES,
+                    block=blocks_dict[layer_config.BLOCK],
+                    num_blocks=layer_config.NUM_BLOCKS,
+                    num_inchannels=num_inchannels,
+                    num_channels=layer_config.NUM_CHANNELS,
+                    fuse_method=layer_config.FUSE_METHOD,
+                    multi_scale_output=reset_multi_scale_output,
                 )
             )
             num_inchannels = modules[-1].get_num_inchannels()
@@ -481,7 +507,7 @@ class HighResolutionNet(nn.Module):
     def init_weights(self, load_imagenet_model: bool = False, imagenet_ckpt_fpath: str = "") -> None:
         """For training, we use a model pretrained on ImageNet. Irrelevant at inference.
         Args:
-            load_imagenet_model: 
+            load_imagenet_model:
             imagenet_ckpt_fpath: str representing path to pretrained model.
         """
         logger.info("=> init weights from normal distribution")
@@ -510,7 +536,12 @@ class HighResolutionNet(nn.Module):
 
 
 def get_seg_model(
-    cfg: HRNetArchConfig, criterion: nn.Module, n_classes: int, load_imagenet_model: bool = False, imagenet_ckpt_fpath: str = "", **kwargs
+    cfg: HRNetArchConfig,
+    criterion: nn.Module,
+    n_classes: int,
+    load_imagenet_model: bool = False,
+    imagenet_ckpt_fpath: str = "",
+    **kwargs
 ) -> nn.Module:
     model = HighResolutionNet(cfg, criterion, n_classes, **kwargs)
     model.init_weights(load_imagenet_model, imagenet_ckpt_fpath)
@@ -550,7 +581,9 @@ def get_configured_hrnet(
 
 if __name__ == "__main__":
     """ """
-    import pdb; pdb.set_trace()
+    import pdb
+
+    pdb.set_trace()
     imagenet_ckpt_fpath = ""
     load_imagenet_model = False
     model = get_configured_hrnet(180, load_imagenet_model, imagenet_ckpt_fpath)
