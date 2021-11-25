@@ -258,7 +258,10 @@ class HighResolutionModule(nn.Module):
         return self.num_inchannels
 
     def forward(self, x):
-        print("forward x shape: ", x.shape, x.dtype)
+        print("forward x shape: ", len(x))
+        for x_ in x:
+            print("shape: ", x_.shape)
+
         if self.num_branches == 1:
             return [self.branches[0](x[0])]
 
