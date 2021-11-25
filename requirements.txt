@@ -1,4 +1,3 @@
-apex
 imageio
 matplotlib
 numpy>=1.19.5
@@ -12,4 +11,3 @@ sklearn
 torch
 tqdm
 typing_extensions
-yacs
