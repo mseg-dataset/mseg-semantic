@@ -217,8 +217,8 @@ def collect_oracle_results_at_res(resolution: str, scale: str, output_format: Pr
     results = []
     print(" " * 60, (" " * 5).join(o_datasets), " " * 10 + "mean")
     for m, name, d in zip(o_models, o_names, o_datasets):
-        folder = f"/srv/scratch/jlambert30/MSeg/pretrained-semantic-models/{m}/{m}/{d}"
-        miou = parse_folder(folder, resolution)
+        folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
+        miou = parse_folder(folder, resolution, scale)
         results.append(miou)
 
     dump_results_latex("Oracle", results)
