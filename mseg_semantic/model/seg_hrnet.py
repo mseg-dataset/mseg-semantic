@@ -263,7 +263,7 @@ class HighResolutionModule(nn.Module):
             x: list of Pytorch tensors.
 
         Returns:
-            x_fuse:
+            x_fuse: list of Pytorch tensors.
         """
         if self.num_branches == 1:
             return [self.branches[0](x[0])]
