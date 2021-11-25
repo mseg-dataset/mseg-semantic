@@ -24,6 +24,7 @@ from scipy.stats.mstats import gmean
 
 class PrintOutputFormat(str, Enum):
     """ """
+
     LaTeX: str = "LaTeX"
     MARKDOWN: str = "MARKDOWN"
 
