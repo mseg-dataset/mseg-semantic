@@ -542,7 +542,7 @@ def get_configured_hrnet(
         cfg = hydra.compose(config_name="seg_hrnet.yaml")
         logger.info("Using config: ")
         logger.info(OmegaConf.to_yaml(cfg))
-        config: HRNetArchConfig = instantiate(cfg.SceneOptimizer)
+        config: HRNetArchConfig = instantiate(cfg.HRNetArchConfig)
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     model = get_seg_model(config, criterion, n_classes, load_imagenet_model, imagenet_ckpt_fpath)
