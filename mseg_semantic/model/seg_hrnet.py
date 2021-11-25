@@ -8,6 +8,7 @@ import os
 import logging
 import functools
 from pathlib import Path
+from typing import List, Optional
 
 import numpy as np
 import torch
@@ -32,7 +33,7 @@ logger = logging.getLogger(__name__)
 _ROOT = Path(__file__).resolve().parent
 
 
-def conv3x3(in_planes, out_planes, stride=1):
+def conv3x3(in_planes: int, out_planes: int, stride: int = 1) -> nn.Module:
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
@@ -45,7 +46,7 @@ class BasicBlock(nn.Module):
 
     expansion = 1
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample=None) -> None:
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = BatchNorm2d(planes, momentum=BN_MOMENTUM)
@@ -55,7 +56,7 @@ class BasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
 
         out = self.conv1(x)
@@ -82,7 +83,7 @@ class Bottleneck(nn.Module):
 
     expansion = 4
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None):
+    def __init__(self, inplanes: int, planes: int, stride: int = 1, downsample=None) -> None:
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = BatchNorm2d(planes, momentum=BN_MOMENTUM)
@@ -94,7 +95,7 @@ class Bottleneck(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
 
         out = self.conv1(x)
@@ -135,6 +136,7 @@ class HighResolutionModule(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
     def _check_branches(self, num_branches, blocks, num_blocks, num_inchannels, num_channels):
+        """ """
         if num_branches != len(num_blocks):
             error_msg = "NUM_BRANCHES({}) <> NUM_BLOCKS({})".format(num_branches, len(num_blocks))
             logger.error(error_msg)
@@ -257,7 +259,7 @@ blocks_dict = {"BASIC": BasicBlock, "BOTTLENECK": Bottleneck}
 
 
 class HighResolutionNet(nn.Module):
-    def __init__(self, config, criterion, n_classes, **kwargs):
+    def __init__(self, config, criterion, n_classes: int, **kwargs):
         extra = config.MODEL.EXTRA
         super(HighResolutionNet, self).__init__()
 
@@ -318,7 +320,7 @@ class HighResolutionNet(nn.Module):
             ),
         )
 
-    def _make_transition_layer(self, num_channels_pre_layer, num_channels_cur_layer):
+    def _make_transition_layer(self, num_channels_pre_layer: List[int], num_channels_cur_layer: List[int]):
         """
         Use 3x3 convolutions, with stride 2 and padding 1.
         """
@@ -399,7 +401,7 @@ class HighResolutionNet(nn.Module):
 
         return nn.Sequential(*modules), num_inchannels
 
-    def forward(self, x, y=None):
+    def forward(self, x: torch.Tensor, y: Optional[torch.Tensor] = None):
         """
         Network starts from a stem of two strided 3 × 3 convolutions
         decreasing the resolution to 1/4.
