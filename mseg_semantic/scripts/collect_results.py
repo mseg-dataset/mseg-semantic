@@ -195,6 +195,7 @@ def collect_results_at_res(
 
 def dump_results_latex(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in LaTeX syntax."""
+    import pdb; pdb.set_trace()
     results = ["/".join(["{:.1f}".format(r).rjust(5) for r in x]) for x in results]
     results = ["$ " + r + " $" for r in results]
     print(name.rjust(50), " & ", " & ".join(results) + "\\\\")
