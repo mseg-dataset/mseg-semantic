@@ -202,7 +202,6 @@ def dump_results_latex(name: str, results: List[float]) -> None:
 
 def dump_results_markdown(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in Markdown syntax."""
-    import pdb; pdb.set_trace()
     results = ["{:.1f}".format(r).rjust(5) for r in results]
     results = ["| " + r + "" for r in results]
     print(name.rjust(50), "  ", " ".join(results) + "|")
