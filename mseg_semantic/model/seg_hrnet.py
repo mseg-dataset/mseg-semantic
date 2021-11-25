@@ -263,7 +263,7 @@ class HighResolutionModule(nn.Module):
             x: list of Pytorch tensors.
 
         Returns:
-            x_fuse: 
+            x_fuse:
         """
         if self.num_branches == 1:
             return [self.branches[0](x[0])]
@@ -391,7 +391,9 @@ class HighResolutionNet(nn.Module):
 
         return nn.ModuleList(transition_layers)
 
-    def _make_layer(self, block: Union[BasicBlock, Bottleneck], inplanes: int, planes: int, blocks: int, stride: int = 1) -> nn.Module:
+    def _make_layer(
+        self, block: Union[BasicBlock, Bottleneck], inplanes: int, planes: int, blocks: int, stride: int = 1
+    ) -> nn.Module:
         """
         Identical to ResNet `_make_layer()`, except `inplanes` is an
         explicit argument rather than class attribute, and batch norm
