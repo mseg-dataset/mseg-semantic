@@ -8,6 +8,9 @@ Results are expected in the following folder structure,
     where "M" is a model name, and "D" is a dataset name, e.g.
 
     {RESULTS_BASE_ROOT}/camvid-11-1m/camvid-11-1m/camvid-11/360/ss/results.txt 
+
+Note: models trained on a single training dataset are trained in the universal taxonomy, to avoid
+having to hand-specify 7 * 6 = 42 train to test taxonomy mappings.
 """
 
 import argparse
@@ -16,13 +19,12 @@ from enum import Enum
 from typing import List
 
 import numpy as np
-
 # import scipy.stats.hmean as hmean
 from scipy.stats.mstats import gmean
 
 
 class PrintOutputFormat(str, Enum):
-    """ """
+    """syntax for STDOUT table formatting."""
 
     LaTeX: str = "LaTeX"
     MARKDOWN: str = "MARKDOWN"
@@ -77,9 +79,9 @@ u_names = [
 ]
 # 'naive'
 
-# oracle taxonomy names
+# oracle taxonomy model filenames
 ORACLE_MODELS = ["voc2012-1m", "pascal-context-60-1m", "camvid-11-1m", "kitti-19-1m", "scannet-20-1m"]
-
+# formal names for models above
 ORACLE_NAMES = ["VOC Oracle", "PASCAL Context Oracle", "Camvid Oracle", "KITTI Oracle", "ScanNet Oracle"]
 
 # oracle-trained datasets

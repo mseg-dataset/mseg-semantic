@@ -258,7 +258,7 @@ class InferenceTask:
         # (multi-scale vs. single-scale)
         self.scales_str = "ms" if len(args.scales) > 1 else "ss"
 
-    def load_model(self, args):
+    def load_model(self, args) -> nn.Module:
         """Load Pytorch pre-trained model from disk of type torch.nn.DataParallel.
 
         Note that `args.num_model_classes` will be size of logits output.
@@ -446,11 +446,11 @@ class InferenceTask:
         reader.complete()
         writer.complete()
 
-    def execute_on_dataloader(self, test_loader: torch.utils.data.dataloader.DataLoader):
+    def execute_on_dataloader(self, test_loader: torch.utils.data.dataloader.DataLoader) -> None:
         """Run a pretrained model over each batch in a dataloader.
 
         Args:
-             test_loader:
+             test_loader: dataloader.
         """
         if self.args.save_folder == "default":
             self.args.save_folder = f"{_ROOT}/temp_files/{self.args.model_name}_{self.args.dataset}_universal_{self.scales_str}/{self.args.base_size}"
