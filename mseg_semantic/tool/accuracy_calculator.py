@@ -28,24 +28,12 @@ from mseg.utils.mask_utils import (
 )
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter, DEFAULT_TRAIN_DATASETS
+from mseg_semantic.tool.relabeled_eval_utils import eval_rel_model_pred_on_unrel_data
 from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
 from mseg_semantic.utils.confusion_matrix_renderer import ConfusionMatrixRenderer
 from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
 from mseg_semantic.utils.transform import ToUniversalLabel
-from mseg_semantic.tool.relabeled_eval_utils import eval_rel_model_pred_on_unrel_data
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
+from mseg_semantic.utils.logger_utils import get_logger
 
 
 logger = get_logger()
@@ -234,7 +222,7 @@ class AccuracyCalculator:
                     self.id_to_class_name_map,
                 )
 
-    def print_results(self):
+    def print_results(self) -> None:
         """
         Dump per-class IoUs and mIoU to stdout.
         """
