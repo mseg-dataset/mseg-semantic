@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres gpu:3
+#SBATCH --gpus 3
 #SBATCH --partition=short
 #SBATCH --signal=USR1@300
 #SBATCH --requeue
