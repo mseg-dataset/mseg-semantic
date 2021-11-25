@@ -220,8 +220,10 @@ def collect_oracle_results_at_res(resolution: str, scale: str, output_format: Pr
         miou = parse_folder(folder, resolution, scale)
         results.append(miou)
 
-    dump_results_latex("Oracle", results)
-    dump_results_markdown("Oracle", results)
+    if output_format == PrintOutputFormat.LaTeX:
+        dump_results_latex("Oracle", results)
+    elif output_format == PrintOutputFormat.MARKDOWN:
+        dump_results_markdown("Oracle", results)
 
 
 def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> None:
