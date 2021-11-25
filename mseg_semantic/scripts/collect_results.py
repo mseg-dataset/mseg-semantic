@@ -202,13 +202,16 @@ def dump_results_latex(name: str, results: List[float]) -> None:
 
 def dump_results_markdown(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in Markdown syntax."""
+    import pdb; pdb.set_trace()
     results = ["{:.1f}".format(r).rjust(5) for r in results]
     results = ["| " + r + "" for r in results]
     print(name.rjust(50), "  ", " ".join(results) + "|")
 
 
 def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
-    """
+    """For all test datasets (except WildDash), aggregate the results of the corresponding
+    oracle models at a specific resolution (from resolution-specific .txt files in subfolders).
+
     Args:
         resolution: either "360", "720", "1080", or "max", which represents the best result
             over all 3 aforementioned resolutions.
@@ -230,7 +233,9 @@ def collect_oracle_results_at_res(resolution: str, scale: str, output_format: Pr
 
 
 def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> None:
-    """ """
+    """Collect the results of zero-shot cross-dataset generalization experiments.
+
+    """
     # 'ms' vs. 'ss'
     for resolution in ["360", "720", "1080", "max"]:  #  '480', '2160',
         print(f"At resolution {resolution}")
