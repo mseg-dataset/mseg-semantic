@@ -179,11 +179,11 @@ def collect_results_at_res(
         tmp_results = np.array(results)
         if mean_type == "harmonic":
             # results.append([len(tmp_results) / np.sum(1.0/np.array(tmp_results))])
-            results.append([harmonic_mean(tmp_results)])
+            results.append(harmonic_mean(tmp_results))
         elif mean_type == "arithmetic":
-            results.append([arithmetic_mean(tmp_results)])
+            results.append(arithmetic_mean(tmp_results))
         elif mean_type == "geometric":
-            results.append([geometric_mean(tmp_results)])
+            results.append(geometric_mean(tmp_results))
         else:
             print("Unknown mean type")
             exit()
