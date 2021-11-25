@@ -1,5 +1,12 @@
 #!/usr/bin/python3
 
+"""
+"High-Resolution Representations for Labeling Pixels and Regions"
+https://arxiv.org/pdf/1904.04514.pdf
+
+Code adopted from https://github.com/HRNet/HRNet-Semantic-Segmentation
+"""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -10,21 +17,18 @@ import functools
 from pathlib import Path
 from typing import List, Optional
 
+import hydra
 import numpy as np
 import torch
 import torch.nn as nn
 import torch._utils
 import torch.nn.functional as F
+from hydra.utils import instantiate
+from omegaconf import OmegaConf
+
+from mseg_semantic.model.seg_hrnet_config import HRNetArchConfig, HRNetStageConfig
 
 import pdb
-
-
-"""
-"High-Resolution Representations for Labeling Pixels and Regions"
-https://arxiv.org/pdf/1904.04514.pdf
-
-Code adopted from https://github.com/HRNet/HRNet-Semantic-Segmentation
-"""
 
 BatchNorm2d = torch.nn.SyncBatchNorm
 BN_MOMENTUM = 0.01
@@ -122,6 +126,8 @@ class HighResolutionModule(nn.Module):
     def __init__(
         self, num_branches, blocks, num_blocks, num_inchannels, num_channels, fuse_method, multi_scale_output=True
     ) -> None:
+        """ """
+        import pdb; pdb.set_trace()
         super(HighResolutionModule, self).__init__()
         self._check_branches(num_branches, blocks, num_blocks, num_inchannels, num_channels)
 
@@ -259,12 +265,12 @@ blocks_dict = {"BASIC": BasicBlock, "BOTTLENECK": Bottleneck}
 
 
 class HighResolutionNet(nn.Module):
-    def __init__(self, config, criterion, n_classes: int, **kwargs):
+    def __init__(self, config: HRNetArchConfig, criterion: nn.Module, n_classes: int) -> None:
+        """ """
         extra = config.MODEL.EXTRA
         super(HighResolutionNet, self).__init__()
 
         self.criterion = criterion
-
         self.n_classes = n_classes
 
         # stem net
@@ -274,30 +280,30 @@ class HighResolutionNet(nn.Module):
         self.bn2 = BatchNorm2d(64, momentum=BN_MOMENTUM)
         self.relu = nn.ReLU(inplace=True)
 
-        self.stage1_cfg = extra["STAGE1"]
-        num_channels = self.stage1_cfg["NUM_CHANNELS"][0]
-        block = blocks_dict[self.stage1_cfg["BLOCK"]]
-        num_blocks = self.stage1_cfg["NUM_BLOCKS"][0]
+        self.stage1_cfg = extra.STAGE1
+        num_channels = self.stage1_cfg.NUM_CHANNELS[0]
+        block = blocks_dict[self.stage1_cfg.BLOCK]
+        num_blocks = self.stage1_cfg.NUM_BLOCKS[0]
         self.layer1 = self._make_layer(block, 64, num_channels, num_blocks)
         stage1_out_channel = block.expansion * num_channels
 
-        self.stage2_cfg = extra["STAGE2"]
-        num_channels = self.stage2_cfg["NUM_CHANNELS"]
-        block = blocks_dict[self.stage2_cfg["BLOCK"]]
+        self.stage2_cfg = extra.STAGE2
+        num_channels = self.stage2_cfg.NUM_CHANNELS
+        block = blocks_dict[self.stage2_cfg.BLOCK]
         num_channels = [num_channels[i] * block.expansion for i in range(len(num_channels))]
         self.transition1 = self._make_transition_layer([stage1_out_channel], num_channels)
         self.stage2, pre_stage_channels = self._make_stage(self.stage2_cfg, num_channels)
 
-        self.stage3_cfg = extra["STAGE3"]
-        num_channels = self.stage3_cfg["NUM_CHANNELS"]
-        block = blocks_dict[self.stage3_cfg["BLOCK"]]
+        self.stage3_cfg = extra.STAGE3
+        num_channels = self.stage3_cfg.NUM_CHANNELS
+        block = blocks_dict[self.stage3_cfg.BLOCK]
         num_channels = [num_channels[i] * block.expansion for i in range(len(num_channels))]
         self.transition2 = self._make_transition_layer(pre_stage_channels, num_channels)
         self.stage3, pre_stage_channels = self._make_stage(self.stage3_cfg, num_channels)
 
-        self.stage4_cfg = extra["STAGE4"]
-        num_channels = self.stage4_cfg["NUM_CHANNELS"]
-        block = blocks_dict[self.stage4_cfg["BLOCK"]]
+        self.stage4_cfg = extra.STAGE4
+        num_channels = self.stage4_cfg.NUM_CHANNELS
+        block = blocks_dict[self.stage4_cfg.BLOCK]
         num_channels = [num_channels[i] * block.expansion for i in range(len(num_channels))]
         self.transition3 = self._make_transition_layer(pre_stage_channels, num_channels)
         self.stage4, pre_stage_channels = self._make_stage(self.stage4_cfg, num_channels, multi_scale_output=True)
@@ -320,7 +326,7 @@ class HighResolutionNet(nn.Module):
             ),
         )
 
-    def _make_transition_layer(self, num_channels_pre_layer: List[int], num_channels_cur_layer: List[int]):
+    def _make_transition_layer(self, num_channels_pre_layer: List[int], num_channels_cur_layer: List[int]) -> nn.ModuleList:
         """
         Use 3x3 convolutions, with stride 2 and padding 1.
         """
@@ -356,7 +362,7 @@ class HighResolutionNet(nn.Module):
 
         return nn.ModuleList(transition_layers)
 
-    def _make_layer(self, block, inplanes: int, planes: int, blocks: int, stride: int = 1):
+    def _make_layer(self, block, inplanes: int, planes: int, blocks: int, stride: int = 1) -> nn.Module:
         """
         Identical to ResNet `_make_layer()`, except `inplanes` is an
         explicit argument rather than class attribute, and batch norm
@@ -377,13 +383,14 @@ class HighResolutionNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _make_stage(self, layer_config, num_inchannels, multi_scale_output=True):
-        num_modules = layer_config["NUM_MODULES"]
-        num_branches = layer_config["NUM_BRANCHES"]
-        num_blocks = layer_config["NUM_BLOCKS"]
-        num_channels = layer_config["NUM_CHANNELS"]
-        block = blocks_dict[layer_config["BLOCK"]]
-        fuse_method = layer_config["FUSE_METHOD"]
+    def _make_stage(self, layer_config: HRNetStageConfig, num_inchannels, multi_scale_output: bool = True) -> nn.Module:
+        """ """
+        num_modules = layer_config.NUM_MODULES
+        num_branches = layer_config.NUM_BRANCHES
+        num_blocks = layer_config.NUM_BLOCKS
+        num_channels = layer_config.NUM_CHANNELS
+        block = blocks_dict[layer_config.BLOCK]
+        fuse_method = layer_config.FUSE_METHOD
 
         modules = []
         for i in range(num_modules):
@@ -429,7 +436,7 @@ class HighResolutionNet(nn.Module):
         x = self.layer1(x)
 
         x_list = []
-        for i in range(self.stage2_cfg["NUM_BRANCHES"]):
+        for i in range(self.stage2_cfg.NUM_BRANCHES):
             if self.transition1[i] is not None:
                 x_list.append(self.transition1[i](x))
             else:
@@ -437,7 +444,7 @@ class HighResolutionNet(nn.Module):
         y_list = self.stage2(x_list)
 
         x_list = []
-        for i in range(self.stage3_cfg["NUM_BRANCHES"]):
+        for i in range(self.stage3_cfg.NUM_BRANCHES):
             if self.transition2[i] is not None:
                 x_list.append(self.transition2[i](y_list[-1]))
             else:
@@ -445,7 +452,7 @@ class HighResolutionNet(nn.Module):
         y_list = self.stage3(x_list)
 
         x_list = []
-        for i in range(self.stage4_cfg["NUM_BRANCHES"]):
+        for i in range(self.stage4_cfg.NUM_BRANCHES):
             if self.transition3[i] is not None:
                 x_list.append(self.transition3[i](y_list[-1]))
             else:
@@ -504,7 +511,7 @@ class HighResolutionNet(nn.Module):
 
 
 def get_seg_model(
-    cfg, criterion, n_classes: int, load_imagenet_model: bool = False, imagenet_ckpt_fpath: str = "", **kwargs
+    cfg: HRNetArchConfig, criterion: nn.Module, n_classes: int, load_imagenet_model: bool = False, imagenet_ckpt_fpath: str = "", **kwargs
 ) -> nn.Module:
     model = HighResolutionNet(cfg, criterion, n_classes, **kwargs)
     model.init_weights(load_imagenet_model, imagenet_ckpt_fpath)
@@ -529,25 +536,13 @@ def get_configured_hrnet(
             and with specified number of classes and weights initialized
             (at training, init using imagenet-pretrained model).
     """
-    from yacs.config import CfgNode as CN
 
-    _C = CN()
-
-    # common params for NETWORK
-    _C.MODEL = CN()
-    _C.MODEL.NAME = "seg_hrnet"
-    _C.MODEL.EXTRA = CN(new_allowed=True)
-
-    # training
-    _C.TRAIN = CN()
-    _C.TRAIN.MULTI_SCALE = True
-
-    # testing
-    _C.TEST = CN()
-    _C.TEST.MULTI_SCALE = False
-
-    _C.merge_from_file(f"{_ROOT}/seg_hrnet.yaml")
-    config = _C
+    with hydra.initialize_config_module(config_module="mseg_semantic.model"):
+        # config is relative to the gtsfm module
+        cfg = hydra.compose(config_name="seg_hrnet.yaml")
+        logger.info("Using config: ")
+        logger.info(OmegaConf.to_yaml(cfg))
+        config: HRNetArchConfig = instantiate(cfg.SceneOptimizer)
 
     criterion = nn.CrossEntropyLoss(ignore_index=255)
     model = get_seg_model(config, criterion, n_classes, load_imagenet_model, imagenet_ckpt_fpath)
