@@ -22,6 +22,8 @@ import numpy as np
 # import scipy.stats.hmean as hmean
 from scipy.stats.mstats import gmean
 
+ROW_LEFT_JUSTIFY_OFFSET = 50
+
 
 class PrintOutputFormat(str, Enum):
     """syntax for STDOUT table formatting."""
@@ -46,7 +48,7 @@ training_datasets = [
 ]
 
 # universal taxonomy models
-u_models = [
+UNIVERSAL_TAX_MODEL_FNAMES = [
     "coco-panoptic-133-1m",
     "ade20k-150-1m",
     "mapillary-65-1m",
@@ -62,7 +64,7 @@ u_models = [
     "mseg-3m",
 ]
 
-u_names = [
+UNIVERSAL_TAX_MODEL_PRETTYPRINT_NAMES = [
     "COCO",
     "ADE20K",
     "Mapillary",
@@ -166,7 +168,7 @@ def collect_results_at_res(
 ) -> None:
     """Collect results from inference at a single resolution."""
     print(" " * 60, (" " * 5).join(datasets), " " * 10 + "mean")
-    for m, name in zip(u_models, u_names):
+    for m, name in zip(UNIVERSAL_TAX_MODEL_FNAMES, UNIVERSAL_TAX_MODEL_PRETTYPRINT_NAMES):
         results = []
         for d in datasets:
 
@@ -199,14 +201,14 @@ def dump_results_latex(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in LaTeX syntax."""
     results = ["{:.1f}".format(r).rjust(5) for r in results]
     results = ["$ " + r + " $" for r in results]
-    print(name.rjust(50), " & ", " & ".join(results) + "\\\\")
+    print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), " & ", " & ".join(results) + "\\\\")
 
 
 def dump_results_markdown(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in Markdown syntax."""
     results = ["{:.1f}".format(r).rjust(5) for r in results]
     results = ["| " + r + "" for r in results]
-    print(name.rjust(50), "  ", " ".join(results) + "|")
+    print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), "  ", " ".join(results) + "|")
 
 
 def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:

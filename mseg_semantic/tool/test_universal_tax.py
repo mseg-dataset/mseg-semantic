@@ -19,6 +19,7 @@ from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.config import CfgNode
+from mseg_semantic.utils.logger_utils import get_logger
 
 
 """
@@ -35,22 +36,7 @@ and then evaluate only classes jointly present in the
 training dataset taxonomy and universal taxonomy.
 """
 
-
 cv2.ocl.setUseOpenCL(False)
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
-
 
 logger = get_logger()
 

@@ -19,22 +19,9 @@ import mseg.utils.names_utils as names_utils
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
 from mseg_semantic.tool.inference_task import InferenceTask
-
+from mseg_semantic.utils.logger_utils import get_logger
 
 _ROOT = Path(__file__).resolve().parent.parent
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
 
 
 logger = get_logger()

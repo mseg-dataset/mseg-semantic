@@ -17,9 +17,9 @@ import torch.nn.functional as F
 import torch.utils.data
 
 import mseg.utils.names_utils as names_utils
+import mseg.utils.resize_util as resize_util
 from mseg.utils.dir_utils import check_mkdir, create_leading_fpath_dirs
 from mseg.utils.mask_utils_detectron2 import Visualizer
-from mseg.utils.resize_util import resize_img_by_short_side
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 
@@ -30,6 +30,7 @@ from mseg_semantic.utils.cv2_video_utils import VideoWriter, VideoReader
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.img_path_utils import dump_relpath_txt, get_unique_stem_from_last_k_strs
 from mseg_semantic.tool.mseg_dataloaders import create_test_loader
+from mseg_semantic.utils.logger_utils import get_logger
 
 
 """
@@ -71,19 +72,6 @@ There are 4 possible configurations for
 """
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
 
 
 logger = get_logger()
@@ -341,7 +329,7 @@ class InferenceTask:
 
         logger.info("<<<<<<<<<<< Inference task completed <<<<<<<<<<<<<<")
 
-    def render_single_img_pred(self, min_resolution: int = 1080):
+    def render_single_img_pred(self, min_resolution: int = 1080) -> None:
         """Since overlaid class text is difficult to read below 1080p, we upsample predictions."""
         in_fname_stem = Path(self.input_file).stem
         output_gray_fpath = f"{in_fname_stem}_gray.jpg"
@@ -353,8 +341,8 @@ class InferenceTask:
 
         # avoid blurry images by upsampling RGB before overlaying text
         if np.amin(rgb_img.shape[:2]) < min_resolution:
-            rgb_img = resize_img_by_short_side(rgb_img, min_resolution, "rgb")
-            pred_label_img = resize_img_by_short_side(pred_label_img, min_resolution, "label")
+            rgb_img = resize_util.resize_img_by_short_side(rgb_img, min_resolution, "rgb")
+            pred_label_img = resize_util.resize_img_by_short_side(pred_label_img, min_resolution, "label")
 
         metadata = None
         frame_visualizer = Visualizer(rgb_img, metadata)
@@ -433,8 +421,8 @@ class InferenceTask:
 
             # avoid blurry images by upsampling RGB before overlaying text
             if np.amin(rgb_img.shape[:2]) < min_resolution:
-                rgb_img = resize_img_by_short_side(rgb_img, min_resolution, "rgb")
-                pred_label_img = resize_img_by_short_side(pred_label_img, min_resolution, "label")
+                rgb_img = resize_util.resize_img_by_short_side(rgb_img, min_resolution, "rgb")
+                pred_label_img = resize_util.resize_img_by_short_side(pred_label_img, min_resolution, "label")
 
             metadata = None
             frame_visualizer = Visualizer(rgb_img, metadata)
