@@ -12,7 +12,6 @@ Results are expected in the following folder structure,
 
 import argparse
 import os
-import pdb
 from enum import Enum
 from typing import List
 
@@ -195,7 +194,6 @@ def collect_results_at_res(
 
 def dump_results_latex(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in LaTeX syntax."""
-    import pdb; pdb.set_trace()
     results = [ "{:.1f}".format(r).rjust(5) for r in results]
     results = ["$ " + r + " $" for r in results]
     print(name.rjust(50), " & ", " & ".join(results) + "\\\\")
