@@ -254,12 +254,11 @@ class HighResolutionModule(nn.Module):
 
         return nn.ModuleList(fuse_layers)
 
-    def get_num_inchannels(self):
-        import pdb; pdb.set_trace()
+    def get_num_inchannels(self) -> List[int]:
         return self.num_inchannels
 
     def forward(self, x):
-        import pdb; pdb.set_trace()
+        print("forward x shape: ", x.shape, x.dtype)
         if self.num_branches == 1:
             return [self.branches[0](x[0])]
 
@@ -282,7 +281,7 @@ class HighResolutionModule(nn.Module):
                     y = y + self.fuse_layers[i][j](x[j])
             x_fuse.append(self.relu(y))
 
-        import pdb; pdb.set_trace()
+        print("end forward x_fuse shape: ", x_fuse.shape, x_fuse.dtype)
         return x_fuse
 
 
@@ -342,7 +341,6 @@ class HighResolutionNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(
                 in_channels=last_inp_channels,
-                # out_channels=config.DATASET.NUM_CLASSES,
                 out_channels=self.n_classes,
                 kernel_size=config.FINAL_CONV_KERNEL,
                 stride=1,
@@ -388,13 +386,12 @@ class HighResolutionNet(nn.Module):
 
         return nn.ModuleList(transition_layers)
 
-    def _make_layer(self, block, inplanes: int, planes: int, blocks: int, stride: int = 1) -> nn.Module:
+    def _make_layer(self, block: Union[BasicBlock, Bottleneck], inplanes: int, planes: int, blocks: int, stride: int = 1) -> nn.Module:
         """
         Identical to ResNet `_make_layer()`, except `inplanes` is an
         explicit argument rather than class attribute, and batch norm
         implementation and momentum are hardcoded.
         """
-        import pdb; pdb.set_trace()
         downsample = None
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
