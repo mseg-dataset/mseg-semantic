@@ -257,7 +257,14 @@ class HighResolutionModule(nn.Module):
     def get_num_inchannels(self) -> List[int]:
         return self.num_inchannels
 
-    def forward(self, x):
+    def forward(self, x: List[torch.Tensor]):
+        """
+        Args:
+            x: list of Pytorch tensors.
+
+        Returns:
+            x_fuse: 
+        """
         print("forward x shape: ", len(x))
         for x_ in x:
             print("shape: ", x_.shape)
@@ -284,7 +291,9 @@ class HighResolutionModule(nn.Module):
                     y = y + self.fuse_layers[i][j](x[j])
             x_fuse.append(self.relu(y))
 
-        print("end forward x_fuse shape: ", x_fuse.shape, x_fuse.dtype)
+        print("end forward x_fuse shape: ", len(x_fuse))
+        for x_ in x_fuse:
+            print("shape: ", x_.shape)
         return x_fuse
 
 
