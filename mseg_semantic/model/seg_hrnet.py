@@ -28,7 +28,6 @@ from omegaconf import OmegaConf
 
 from mseg_semantic.model.seg_hrnet_config import HRNetArchConfig, HRNetStageConfig
 
-import pdb
 
 BatchNorm2d = torch.nn.SyncBatchNorm
 BN_MOMENTUM = 0.01
@@ -134,9 +133,6 @@ class HighResolutionModule(nn.Module):
         multi_scale_output: bool = True,
     ) -> None:
         """ """
-        import pdb
-
-        pdb.set_trace()
         super(HighResolutionModule, self).__init__()
         self._check_branches(
             num_branches=num_branches, num_blocks=num_blocks, num_inchannels=num_inchannels, num_channels=num_channels
@@ -259,9 +255,11 @@ class HighResolutionModule(nn.Module):
         return nn.ModuleList(fuse_layers)
 
     def get_num_inchannels(self):
+        import pdb; pdb.set_trace()
         return self.num_inchannels
 
     def forward(self, x):
+        import pdb; pdb.set_trace()
         if self.num_branches == 1:
             return [self.branches[0](x[0])]
 
@@ -284,6 +282,7 @@ class HighResolutionModule(nn.Module):
                     y = y + self.fuse_layers[i][j](x[j])
             x_fuse.append(self.relu(y))
 
+        import pdb; pdb.set_trace()
         return x_fuse
 
 
@@ -395,6 +394,7 @@ class HighResolutionNet(nn.Module):
         explicit argument rather than class attribute, and batch norm
         implementation and momentum are hardcoded.
         """
+        import pdb; pdb.set_trace()
         downsample = None
         if stride != 1 or inplanes != planes * block.expansion:
             downsample = nn.Sequential(
