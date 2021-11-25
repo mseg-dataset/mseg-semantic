@@ -126,7 +126,7 @@ class HighResolutionModule(nn.Module):
     def __init__(
         self,
         num_branches: int,
-        blocks: Union[BasicBlock, Bottleneck],
+        block: Union[BasicBlock, Bottleneck],
         num_blocks: List[int],
         num_inchannels: List[int],
         num_channels: List[int],
@@ -138,7 +138,9 @@ class HighResolutionModule(nn.Module):
 
         pdb.set_trace()
         super(HighResolutionModule, self).__init__()
-        self._check_branches(num_branches, blocks, num_blocks, num_inchannels, num_channels)
+        self._check_branches(
+            num_branches=num_branches, num_blocks=num_blocks, num_inchannels=num_inchannels, num_channels=num_channels
+        )
 
         self.num_inchannels = num_inchannels
         self.fuse_method = fuse_method
@@ -146,12 +148,14 @@ class HighResolutionModule(nn.Module):
 
         self.multi_scale_output = multi_scale_output
 
-        self.branches = self._make_branches(num_branches, blocks, num_blocks, num_channels)
+        self.branches = self._make_branches(
+            num_branches=num_branches, block=block, num_blocks=num_blocks, num_channels=num_channels
+        )
         self.fuse_layers = self._make_fuse_layers()
         self.relu = nn.ReLU(inplace=True)
 
     def _check_branches(
-        self, num_branches: int, blocks, num_blocks: List[int], num_inchannels: List[int], num_channels: List[int]
+        self, num_branches: int, num_blocks: List[int], num_inchannels: List[int], num_channels: List[int]
     ) -> None:
         """ """
         if num_branches != len(num_blocks):
@@ -209,7 +213,8 @@ class HighResolutionModule(nn.Module):
 
         return nn.ModuleList(branches)
 
-    def _make_fuse_layers(self):
+    def _make_fuse_layers(self) -> nn.ModuleList:
+        """ """
         if self.num_branches == 1:
             return None
 
