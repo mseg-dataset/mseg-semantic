@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --gpus 3
-#SBATCH --partition=short
+#SBATCH --partition=overcap
 #SBATCH --signal=USR1@300
 #SBATCH --requeue
 #SBATCH --account=overcap
