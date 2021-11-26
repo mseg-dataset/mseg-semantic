@@ -1,4 +1,11 @@
-"""Test a model w/ that makes predictions in the "naive merge" taxonomy."""
+"""Test a model w/ that makes predictions in the "naive merge" taxonomy.
+
+Example CLI usage:
+python -u ../tool/test_naive_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
+
+python mseg_semantic/tool/test_naive_tax.py --config=mseg_semantic/config/test/default_config_360_ms.yaml model_path 
+    ../pretrained-semantic-models/mseg-naive-baseline-1m model_name mseg-naive-baseline-1m dataset camvid-11
+"""
 
 import argparse
 import logging
@@ -21,12 +28,7 @@ logger = logger_utils.get_logger()
 
 def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     """
-    python -u ../tool/test_naive_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
-    
-    python mseg_semantic/tool/test_naive_tax.py --config=mseg_semantic/config/test/default_config_360_ms.yaml model_path ../pretrained-semantic-models/mseg-3m/mseg-3m.pth model_name mseg-3m dataset camvid-11
-    """
 
-    """
     args.save_folder, str)
     args.dataset, str)
     args.img_name_unique, bool)
@@ -90,7 +92,6 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     )
     logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
     ac.compute_metrics()
-
 
 
 def get_parser() -> CfgNode:
