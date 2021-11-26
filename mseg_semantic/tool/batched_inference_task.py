@@ -34,8 +34,8 @@ def pad_to_crop_sz_batched(
         batch
         crop_h
         crop_w
-        mean
-        std
+        mean: RGB mean pixel values
+        std: RGB standard deviation of pixel values
 
     Returns:
         padded_batch
@@ -150,6 +150,7 @@ class BatchedInferenceTask(InferenceTask):
             batch: NCHW tensor
             native_h: image height @ native/raw image resolution, as found originally on disk
             native_w: image width @ native/raw image resolution, as found originally on disk
+            stride_rate:
         
         Returns:
             NCHW tensor where dimensions are (N, num_classes, H, W)

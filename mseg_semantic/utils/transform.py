@@ -36,7 +36,7 @@ class Compose(object):
 
 class ToTensor(object):
     # Converts numpy.ndarray (H x W x C) to a torch.FloatTensor of shape (C x H x W).
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor]:
         if not isinstance(image, np.ndarray) or not isinstance(label, np.ndarray):
             raise (
                 RuntimeError("segtransform.ToTensor() only handle np.ndarray" "[eg: data readed by cv2.imread()].\n")
@@ -371,13 +371,13 @@ class RandomGaussianBlur(object):
 
 class RGB2BGR(object):
     # Converts image from RGB order to BGR order, for model initialized from Caffe
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         return image, label
 
 
 class BGR2RGB(object):
     # Converts image from BGR order to RGB order, for model initialized from Pytorch
-    def __call__(self, image, label):
+    def __call__(self, image: np.ndarray, label: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image, label

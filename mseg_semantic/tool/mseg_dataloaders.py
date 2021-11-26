@@ -3,8 +3,8 @@
 import torch.utils.data
 from typing import List, Tuple
 
+import mseg_semantic.utils.normalization_utils as normalization_utils
 from mseg_semantic.utils import dataset, transform, config
-from mseg_semantic.utils.normalization_utils import get_imagenet_mean_std
 
 
 def create_test_loader(
@@ -24,7 +24,7 @@ def create_test_loader(
 
     if preprocess_imgs_in_loader:
         # resize and normalize images in advance
-        mean, std = get_imagenet_mean_std()
+        mean, std = normalization_utils.get_imagenet_mean_std()
         test_transform = transform.Compose(
             [transform.ResizeShort(args.base_size), transform.ToTensor(), transform.Normalize(mean=mean, std=std)]
         )
