@@ -4,6 +4,7 @@ import argparse
 import logging
 
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
+from mseg.utils.dataset_config import infos
 
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
