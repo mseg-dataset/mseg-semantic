@@ -2,6 +2,7 @@
 
 import argparse
 import logging
+from pathlib import Path
 
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 from mseg.utils.dataset_config import infos
