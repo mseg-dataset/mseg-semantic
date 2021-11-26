@@ -3,18 +3,15 @@
 import argparse
 import cv2
 import logging
-import numpy as np
 import os
 from pathlib import Path
-import pdb
 import torch
 import torch.nn as nn
 from types import SimpleNamespace
 from typing import List, Optional, Tuple
-import time
 
 from mseg.utils.dataset_config import infos
-from mseg.utils.names_utils import load_class_names, get_universal_class_names
+import mseg.utils.names_utils as names_utils
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter, DEFAULT_TRAIN_DATASETS, TEST_DATASETS
 
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
@@ -22,6 +19,7 @@ from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.config import CfgNode
+from mseg_semantic.utils.logger_utils import get_logger
 
 
 """
@@ -38,22 +36,7 @@ and then evaluate only classes jointly present in the
 training dataset taxonomy and universal taxonomy.
 """
 
-
 cv2.ocl.setUseOpenCL(False)
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
-
 
 logger = get_logger()
 
@@ -112,7 +95,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
     if args.split == "test":
         args.vis_freq = 1
 
-    args.num_model_classes = len(get_universal_class_names())
+    args.num_model_classes = len(names_utils.get_universal_class_names())
 
     if not args.has_prediction:
         itask = InferenceTask(
@@ -138,10 +121,10 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         excluded_ids = []
 
     if eval_taxonomy == "universal":
-        class_names = get_universal_class_names()
+        class_names = names_utils.get_universal_class_names()
         num_eval_classes = len(class_names)
     elif eval_taxonomy == "test_dataset":
-        class_names = load_class_names(args.dataset)
+        class_names = names_utils.load_class_names(args.dataset)
         num_eval_classes = len(class_names)
     elif eval_taxonomy == "naive":
         # get from NaiveTaxonomyConverter class attributes

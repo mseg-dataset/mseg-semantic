@@ -6,10 +6,8 @@ import os
 from pathlib import Path
 from typing import List
 
-
 import cv2
 import mseg.utils.names_utils as names_utils
-import numpy as np
 import torch
 import torch.nn.functional as F
 from mseg.utils.dataset_config import infos
@@ -20,6 +18,7 @@ from mseg_semantic.utils.config import CfgNode
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.tool.mseg_dataloaders import create_test_loader
+from mseg_semantic.utils.logger_utils import get_logger
 
 cv2.ocl.setUseOpenCL(False)
 
@@ -27,20 +26,6 @@ cv2.ocl.setUseOpenCL(False)
 Test an `oracle` model -- trained and tested on the same taxonomy/dataset.
 Thus, is designed for testing a single model's performance on a single-dataset.
 """
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
-
 
 logger = get_logger()
 
@@ -75,7 +60,6 @@ def test_oracle_taxonomy_model(args, use_gpu: bool = True) -> None:
     Args:
         args:
         use_gpu: whether to use GPU for inference.
-
     """
     if "scannet" in args.dataset:
         args.img_name_unique = False

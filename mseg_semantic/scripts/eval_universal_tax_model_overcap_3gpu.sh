@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --gres gpu:3
-#SBATCH --partition=short
+#SBATCH --gpus 3
+#SBATCH --partition=overcap
 #SBATCH --signal=USR1@300
 #SBATCH --requeue
 #SBATCH --account=overcap
@@ -20,7 +20,7 @@ dataset_folder=$4
 config_fpath=../config/test/default_config_${base_size}_ss.yaml
 model_fpath=../../../pretrained-semantic-models/${model_name}/${model_name}.pth
 
-results_path=../../..pretrained-semantic-models/${model_name}/${model_name}/${dataset_folder}/${base_size}/ss/results.txt
+results_path=../../../pretrained-semantic-models/${model_name}/${model_name}/${dataset_folder}/${base_size}/ss/results.txt
 
 if [ -f ${results_path} ]
 then

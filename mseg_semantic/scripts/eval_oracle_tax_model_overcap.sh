@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --gres gpu:1
-#SBATCH --partition=short
+#SBATCH --gpus 1
+#SBATCH --partition=overcap
 #SBATCH --signal=USR1@300
 #SBATCH --requeue
 #SBATCH --account=overcap

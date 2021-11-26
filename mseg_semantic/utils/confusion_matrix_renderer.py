@@ -9,7 +9,7 @@ import mseg_semantic.utils.confusion_matrix_utils as confusion_matrix_utils
 
 
 class ConfusionMatrixRenderer:
-    def __init__(self, save_folder, class_names: List[str], dataset_name: str) -> None:
+    def __init__(self, save_folder: str, class_names: List[str], dataset_name: str) -> None:
         """ """
         self.save_folder = save_folder
         self.class_names = np.array(class_names)
