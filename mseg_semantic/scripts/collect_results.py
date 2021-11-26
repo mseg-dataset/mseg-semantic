@@ -188,12 +188,10 @@ def collect_naive_merge_results_at_res(resolution: str, scale: str, output_forma
             either 'ss' or 'ms' (single-scale or multi-scale)
         output_format: syntax for STDOUT result table formatting.
     """
-    results = []
     print(" " * 60, (" " * 5).join(ZERO_SHOT_DATASETS), " " * 10 + "mean")
-    for m, name, d in zip(ORACLE_MODELS, ORACLE_NAMES, ORACLE_DATASETS):
-
     m = "mseg-naive-baseline-1m"
-    name = "Naive Merge"
+
+    results = []
     for d in ZERO_SHOT_DATASETS:
         folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
         miou = parse_folder(folder, resolution, scale)
@@ -274,7 +272,6 @@ def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> N
     for resolution in ["360", "720", "1080", "max"]:  #  '480', '2160',
         print(f"At resolution {resolution}")
         collect_results_at_res(ZERO_SHOT_DATASETS, resolution, scale, output_format)
-
 
 
 def collect_naive_merge_results(scale: str, output_format: PrintOutputFormat) -> None:
