@@ -15,12 +15,11 @@ from typing import List, Mapping, Tuple
 
 import cv2
 import imageio
-import numpy as np
-import torch
-
 import mseg.utils.cv2_utils as cv2_utils
 import mseg.utils.dir_utils as dir_utils
 import mseg.utils.names_utils as names_utils
+import numpy as np
+import torch
 from mseg.utils.mask_utils import (
     save_pred_vs_label_7tuple,
     save_pred_vs_label_4tuple,
@@ -28,15 +27,16 @@ from mseg.utils.mask_utils import (
 )
 from mseg.utils.mask_utils_detectron2 import Visualizer
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter, DEFAULT_TRAIN_DATASETS
+
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.tool.relabeled_eval_utils import eval_rel_model_pred_on_unrel_data
 from mseg_semantic.utils.avg_meter import AverageMeter, SegmentationAverageMeter
 from mseg_semantic.utils.confusion_matrix_renderer import ConfusionMatrixRenderer
 from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
 from mseg_semantic.utils.transform import ToUniversalLabel
-from mseg_semantic.utils.logger_utils import get_logger
 
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 
 class AccuracyCalculator:

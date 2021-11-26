@@ -14,12 +14,12 @@ from mseg.utils.dataset_config import infos
 import mseg.utils.names_utils as names_utils
 from mseg.taxonomy.taxonomy_converter import TaxonomyConverter, DEFAULT_TRAIN_DATASETS, TEST_DATASETS
 
+import mseg_semantic.tool.mseg_dataloaders as dataloader_utils
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
-from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 from mseg_semantic.utils import dataset, transform, config
 from mseg_semantic.utils.config import CfgNode
-from mseg_semantic.utils.logger_utils import get_logger
 
 
 """
@@ -38,7 +38,7 @@ training dataset taxonomy and universal taxonomy.
 
 cv2.ocl.setUseOpenCL(False)
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 
 def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
@@ -130,7 +130,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
         # get from NaiveTaxonomyConverter class attributes
         raise NotImplementedError
 
-    _, test_data_list = create_test_loader(args)
+    _, test_data_list = dataloader_utils.create_test_loader(args)
     ac = AccuracyCalculator(
         args=args,
         data_list=test_data_list,
@@ -154,7 +154,7 @@ def evaluate_universal_tax_model(args, use_gpu: bool = True) -> None:
             "workers": args.workers,
         }
         relabeled_args = SimpleNamespace(**relabeled_args)
-        _, test_data_relabeled_list = create_test_loader(relabeled_args)
+        _, test_data_relabeled_list = dataloader_utils.create_test_loader(relabeled_args)
         # AccuracyCalculator is constructed for the unrelabeled dataset
         # we will pass relabeled dataset info as args later
         ac.compute_metrics_relabeled_data(test_data_relabeled_list)
