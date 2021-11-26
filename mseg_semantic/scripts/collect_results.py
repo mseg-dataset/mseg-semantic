@@ -163,40 +163,6 @@ def geometric_mean(x: np.ndarray) -> float:
     return prod ** (1 / n)
 
 
-def collect_results_at_res(
-    datasets: List[str], resolution: str, scale: str, output_format: PrintOutputFormat, mean_type: str = "harmonic"
-) -> None:
-    """Collect results from inference at a single resolution."""
-    print(" " * 60, (" " * 5).join(datasets), " " * 10 + "mean")
-    for m, name in zip(UNIVERSAL_TAX_MODEL_FNAMES, UNIVERSAL_TAX_MODEL_PRETTYPRINT_NAMES):
-        results = []
-        for d in datasets:
-
-            # rename
-            if ("mseg" in m) and ("unrelabeled" not in m) and (d in training_datasets):
-                d += "_relabeled"
-
-            folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
-            miou = parse_folder(folder, resolution, scale)
-            results.append(miou)
-
-        tmp_results = np.array(results)
-        if mean_type == "harmonic":
-            # results.append([len(tmp_results) / np.sum(1.0/np.array(tmp_results))])
-            results.append(harmonic_mean(tmp_results))
-        elif mean_type == "arithmetic":
-            results.append(arithmetic_mean(tmp_results))
-        elif mean_type == "geometric":
-            results.append(geometric_mean(tmp_results))
-        else:
-            print("Unknown mean type")
-            exit()
-        if output_format == PrintOutputFormat.LaTeX:
-            dump_results_latex(name, results)
-        elif output_format == PrintOutputFormat.MARKDOWN:
-            dump_results_markdown(name, results)
-
-
 def dump_results_latex(name: str, results: List[float]) -> None:
     """Dump a table to STDOUT in LaTeX syntax."""
     results = ["{:.1f}".format(r).rjust(5) for r in results]
@@ -233,6 +199,43 @@ def collect_oracle_results_at_res(resolution: str, scale: str, output_format: Pr
         dump_results_latex("Oracle", results)
     elif output_format == PrintOutputFormat.MARKDOWN:
         dump_results_markdown("Oracle", results)
+
+
+def collect_results_at_res(
+    datasets: List[str], resolution: str, scale: str, output_format: PrintOutputFormat, mean_type: str = "harmonic"
+) -> None:
+    """Collect results from inference at a single resolution.
+
+    In the result table, each row will represent a single model. Columns represent different evaluation datasets.
+    """
+    print(" " * 60, (" " * 5).join(datasets), " " * 10 + "mean")
+    for m, name in zip(UNIVERSAL_TAX_MODEL_FNAMES, UNIVERSAL_TAX_MODEL_PRETTYPRINT_NAMES):
+        results = []
+        for d in datasets:
+
+            # rename
+            if ("mseg" in m) and ("unrelabeled" not in m) and (d in training_datasets):
+                d += "_relabeled"
+
+            folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
+            miou = parse_folder(folder, resolution, scale)
+            results.append(miou)
+
+        tmp_results = np.array(results)
+        if mean_type == "harmonic":
+            # results.append([len(tmp_results) / np.sum(1.0/np.array(tmp_results))])
+            results.append(harmonic_mean(tmp_results))
+        elif mean_type == "arithmetic":
+            results.append(arithmetic_mean(tmp_results))
+        elif mean_type == "geometric":
+            results.append(geometric_mean(tmp_results))
+        else:
+            print("Unknown mean type")
+            exit()
+        if output_format == PrintOutputFormat.LaTeX:
+            dump_results_latex(name, results)
+        elif output_format == PrintOutputFormat.MARKDOWN:
+            dump_results_markdown(name, results)
 
 
 def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> None:
