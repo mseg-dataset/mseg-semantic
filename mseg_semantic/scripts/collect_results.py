@@ -338,7 +338,7 @@ if __name__ == "__main__":
     elif args.regime == "training_datasets":
         collect_training_dataset_results(args.scale, output_format)
 
-    elif args.regime == "naive_merge"
+    elif args.regime == "naive_merge":
         collect_naive_merge_results(args.scale, output_format)
 
     else:
