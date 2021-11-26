@@ -60,20 +60,18 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
 
     eval_taxonomy = "test_dataset"
 
-    # itask = InferenceTask(
-    #     args=args,
-    #     base_size=args.base_size,
-    #     crop_h=args.test_h,
-    #     crop_w=args.test_w,
-    #     input_file=None,
-    #     model_taxonomy="naive",
-    #     eval_taxonomy=eval_taxonomy,
-    #     scales=args.scales,
-    #     use_gpu=use_gpu,
-    # )
-    # itask.execute()
-
-    import pdb; pdb.set_trace()
+    itask = InferenceTask(
+        args=args,
+        base_size=args.base_size,
+        crop_h=args.test_h,
+        crop_w=args.test_w,
+        input_file=None,
+        model_taxonomy="naive",
+        eval_taxonomy=eval_taxonomy,
+        scales=args.scales,
+        use_gpu=use_gpu,
+    )
+    itask.execute()
     
     class_names = names_utils.load_class_names(args.dataset)
     num_eval_classes = len(class_names)
