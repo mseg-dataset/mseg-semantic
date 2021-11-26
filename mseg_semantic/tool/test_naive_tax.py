@@ -31,15 +31,31 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     args.model_path, str)
     """
 
+    if "scannet" in args.dataset:
+        args.img_name_unique = False
+    else:
+        args.img_name_unique = True
 
-    import pdb; pdb.set_trace()
+    args.data_root = infos[args.dataset].dataroot
+    dataset_name = args.dataset
+
+    if len(args.scales) > 1:
+        scale_type = "ms"  # multi-scale
+    else:
+        scale_type = "ss"  # single-scale
+
+    model_results_root = f"{Path(args.model_path).parent}/{Path(args.model_path).stem}"
+    args.save_folder = f"{model_results_root}/{args.dataset}/{args.base_size}/{scale_type}/"
 
     ntc = NaiveTaxonomyConverter()
     class_names = ntc.get_naive_taxonomy_classnames()
+    args.num_model_classes = len(class_names)
+    num_eval_classes = len(class_names)
+
+    args.print_freq = 100
+    args.test_list = infos[args.dataset].vallist
 
     eval_taxonomy = "test_dataset"
-    args.print_freq = 1
-    args.num_model_classes = len(class_names)
 
     itask = InferenceTask(
         args=args,
@@ -54,9 +70,8 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     )
     itask.execute()
 
+    import pdb; pdb.set_trace()
     
-    num_eval_classes = 9999
-    dataset_name = None
     test_data_list = None
     excluded_ids = None
     ac = AccuracyCalculator(
