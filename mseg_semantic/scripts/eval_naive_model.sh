@@ -21,7 +21,7 @@ base_sizes=(
 	# 2160
 	)
 
-model_name="mseg-naive-baseline"
+model_name="mseg-naive-baseline-1m"
 
 
 for base_size in ${base_sizes[@]}; do
