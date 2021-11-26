@@ -7,14 +7,15 @@ from pathlib import Path
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 from mseg.utils.dataset_config import infos
 
+import mseg_semantic.tool.mseg_dataloaders as dataloader_utils
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
-from mseg_semantic.utils.logger_utils import get_logger
 
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 
 def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
@@ -59,23 +60,23 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
 
     eval_taxonomy = "test_dataset"
 
-    itask = InferenceTask(
-        args=args,
-        base_size=args.base_size,
-        crop_h=args.test_h,
-        crop_w=args.test_w,
-        input_file=None,
-        model_taxonomy="naive",
-        eval_taxonomy=eval_taxonomy,
-        scales=args.scales,
-        use_gpu=use_gpu,
-    )
-    itask.execute()
+    # itask = InferenceTask(
+    #     args=args,
+    #     base_size=args.base_size,
+    #     crop_h=args.test_h,
+    #     crop_w=args.test_w,
+    #     input_file=None,
+    #     model_taxonomy="naive",
+    #     eval_taxonomy=eval_taxonomy,
+    #     scales=args.scales,
+    #     use_gpu=use_gpu,
+    # )
+    # itask.execute()
 
     import pdb; pdb.set_trace()
     
-    test_data_list = None
-    excluded_ids = None
+    excluded_ids = []
+    _, test_data_list = dataloader_utils.create_test_loader(args)
     ac = AccuracyCalculator(
         args=args,
         data_list=test_data_list,
@@ -86,6 +87,9 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
         num_eval_classes=num_eval_classes,
         excluded_ids=excluded_ids,
     )
+    logger.info(">>>>>>>>> Calculating accuracy from cached results >>>>>>>>>>")
+    ac.compute_metrics()
+
 
 
 def get_parser() -> CfgNode:
