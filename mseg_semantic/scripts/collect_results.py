@@ -19,6 +19,7 @@ from enum import Enum
 from typing import List
 
 import numpy as np
+
 # import scipy.stats.hmean as hmean
 from scipy.stats.mstats import gmean
 
@@ -198,9 +199,9 @@ def collect_naive_merge_results_at_res(resolution: str, scale: str, output_forma
         results.append(miou)
 
     if output_format == PrintOutputFormat.LaTeX:
-        dump_results_latex("Oracle", results)
+        dump_results_latex("Naive Merge", results)
     elif output_format == PrintOutputFormat.MARKDOWN:
-        dump_results_markdown("Oracle", results)
+        dump_results_markdown("Naive Merge", results)
 
 
 def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
@@ -265,9 +266,7 @@ def collect_results_at_res(
 
 
 def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> None:
-    """Collect the results of zero-shot cross-dataset generalization experiments.
-
-    """
+    """Collect the results of zero-shot cross-dataset generalization experiments."""
     # 'ms' vs. 'ss'
     for resolution in ["360", "720", "1080", "max"]:  #  '480', '2160',
         print(f"At resolution {resolution}")
