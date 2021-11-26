@@ -57,10 +57,10 @@ class AccuracyCalculator:
             args,
             data_list
             dataset_name:
-            class_names:
+            class_names: names of classes in the evaluation taxonomy (not necessarily the model taxonomy).
             save_folder:
             num_eval_classes:
-            render_confusion_matrix:
+            render_confusion_matrix: whether to render a confusion matrix plot.
         """
         assert isinstance(eval_taxonomy, str)
         self.args = args
