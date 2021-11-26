@@ -16,15 +16,16 @@ import cv2
 import numpy as np
 import mseg.utils.names_utils as names_utils
 
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
 from mseg_semantic.tool.inference_task import InferenceTask
-from mseg_semantic.utils.logger_utils import get_logger
+
 
 _ROOT = Path(__file__).resolve().parent.parent
 
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 cv2.ocl.setUseOpenCL(False)
 

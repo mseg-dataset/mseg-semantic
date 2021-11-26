@@ -35,7 +35,7 @@ class PrintOutputFormat(str, Enum):
 RESULTS_BASE_ROOT = "/srv/scratch/jlambert30/MSeg/pretrained-semantic-models"
 
 # zero_shot_datasets
-zs_datasets = ["voc2012", "pascal-context-60", "camvid-11", "wilddash-19", "kitti-19", "scannet-20"]
+ZERO_SHOT_DATASETS = ["voc2012", "pascal-context-60", "camvid-11", "wilddash-19", "kitti-19", "scannet-20"]
 
 training_datasets = [
     "coco-panoptic-133_universal",
@@ -163,10 +163,77 @@ def geometric_mean(x: np.ndarray) -> float:
     return prod ** (1 / n)
 
 
+def dump_results_latex(name: str, results: List[float]) -> None:
+    """Dump a table to STDOUT in LaTeX syntax."""
+    results = ["{:.1f}".format(r).rjust(5) for r in results]
+    results = ["$ " + r + " $" for r in results]
+    print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), " & ", " & ".join(results) + "\\\\")
+
+
+def dump_results_markdown(name: str, results: List[float]) -> None:
+    """Dump a table to STDOUT in Markdown syntax."""
+    results = ["{:.1f}".format(r).rjust(5) for r in results]
+    results = ["| " + r + "" for r in results]
+    print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), "  ", " ".join(results) + "|")
+
+
+def collect_naive_merge_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
+    """For all test datasets, aggregate the results of the naive-merge model at a specific evaluation resolution
+    (from resolution-specific .txt files in subfolders).
+
+    Args:
+        resolution: either "360", "720", "1080", or "max", which represents the best result
+            over all 3 aforementioned resolutions.
+        scale: string representing inference scale option,
+            either 'ss' or 'ms' (single-scale or multi-scale)
+        output_format: syntax for STDOUT result table formatting.
+    """
+    print(" " * 60, (" " * 5).join(ZERO_SHOT_DATASETS), " " * 10 + "mean")
+    m = "mseg-naive-baseline-1m"
+
+    results = []
+    for d in ZERO_SHOT_DATASETS:
+        folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
+        miou = parse_folder(folder, resolution, scale)
+        results.append(miou)
+
+    if output_format == PrintOutputFormat.LaTeX:
+        dump_results_latex("Oracle", results)
+    elif output_format == PrintOutputFormat.MARKDOWN:
+        dump_results_markdown("Oracle", results)
+
+
+def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
+    """For all test datasets (except WildDash), aggregate the results of the corresponding
+    oracle models at a specific evaluation resolution (from resolution-specific .txt files in subfolders).
+
+    Args:
+        resolution: either "360", "720", "1080", or "max", which represents the best result
+            over all 3 aforementioned resolutions.
+        scale: string representing inference scale option,
+            either 'ss' or 'ms' (single-scale or multi-scale)
+        output_format: syntax for STDOUT result table formatting.
+    """
+    results = []
+    print(" " * 60, (" " * 5).join(o_datasets), " " * 10 + "mean")
+    for m, name, d in zip(ORACLE_MODELS, ORACLE_NAMES, ORACLE_DATASETS):
+        folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
+        miou = parse_folder(folder, resolution, scale)
+        results.append(miou)
+
+    if output_format == PrintOutputFormat.LaTeX:
+        dump_results_latex("Oracle", results)
+    elif output_format == PrintOutputFormat.MARKDOWN:
+        dump_results_markdown("Oracle", results)
+
+
 def collect_results_at_res(
     datasets: List[str], resolution: str, scale: str, output_format: PrintOutputFormat, mean_type: str = "harmonic"
 ) -> None:
-    """Collect results from inference at a single resolution."""
+    """Collect results from inference at a single evaluation resolution.
+
+    In the result table, each row will represent a single model. Columns represent different evaluation datasets.
+    """
     print(" " * 60, (" " * 5).join(datasets), " " * 10 + "mean")
     for m, name in zip(UNIVERSAL_TAX_MODEL_FNAMES, UNIVERSAL_TAX_MODEL_PRETTYPRINT_NAMES):
         results = []
@@ -197,44 +264,6 @@ def collect_results_at_res(
             dump_results_markdown(name, results)
 
 
-def dump_results_latex(name: str, results: List[float]) -> None:
-    """Dump a table to STDOUT in LaTeX syntax."""
-    results = ["{:.1f}".format(r).rjust(5) for r in results]
-    results = ["$ " + r + " $" for r in results]
-    print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), " & ", " & ".join(results) + "\\\\")
-
-
-def dump_results_markdown(name: str, results: List[float]) -> None:
-    """Dump a table to STDOUT in Markdown syntax."""
-    results = ["{:.1f}".format(r).rjust(5) for r in results]
-    results = ["| " + r + "" for r in results]
-    print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), "  ", " ".join(results) + "|")
-
-
-def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
-    """For all test datasets (except WildDash), aggregate the results of the corresponding
-    oracle models at a specific resolution (from resolution-specific .txt files in subfolders).
-
-    Args:
-        resolution: either "360", "720", "1080", or "max", which represents the best result
-            over all 3 aforementioned resolutions.
-        scale: string representing inference scale option,
-            either 'ss' or 'ms' (single-scale or multi-scale)
-        output_format: syntax for STDOUT result table formatting.
-    """
-    results = []
-    print(" " * 60, (" " * 5).join(o_datasets), " " * 10 + "mean")
-    for m, name, d in zip(ORACLE_MODELS, ORACLE_NAMES, ORACLE_DATASETS):
-        folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
-        miou = parse_folder(folder, resolution, scale)
-        results.append(miou)
-
-    if output_format == PrintOutputFormat.LaTeX:
-        dump_results_latex("Oracle", results)
-    elif output_format == PrintOutputFormat.MARKDOWN:
-        dump_results_markdown("Oracle", results)
-
-
 def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> None:
     """Collect the results of zero-shot cross-dataset generalization experiments.
 
@@ -242,7 +271,14 @@ def collect_zero_shot_results(scale: str, output_format: PrintOutputFormat) -> N
     # 'ms' vs. 'ss'
     for resolution in ["360", "720", "1080", "max"]:  #  '480', '2160',
         print(f"At resolution {resolution}")
-        collect_results_at_res(zs_datasets, resolution, scale, output_format)
+        collect_results_at_res(ZERO_SHOT_DATASETS, resolution, scale, output_format)
+
+
+def collect_naive_merge_results(scale: str, output_format: PrintOutputFormat) -> None:
+    """Collect results of our single naive-merge model."""
+    for resolution in ["360", "720", "1080", "max"]:
+        print(f"At resolution {resolution}")
+        collect_naive_merge_results_at_res(resolution, scale, output_format)
 
 
 def collect_oracle_results(scale: str, output_format: PrintOutputFormat) -> None:
@@ -271,8 +307,8 @@ if __name__ == "__main__":
         "--regime",
         required=True,
         type=str,
-        help="Testing regime -- either `zero_shot`, `oracle`, or `training_datasets` ",
-        choices=["zero_shot", "oracle", "training_datasets"],
+        help="Testing regime -- either `zero_shot`, `oracle`, `training_datasets`, or `naive_merge' ",
+        choices=["zero_shot", "oracle", "training_datasets", "naive_merge"],
     )
     parser.add_argument(
         "--scale", required=True, type=str, help="ss (single-scale) or ms (multi-scale)", choices=["ss", "ms"]
@@ -301,6 +337,9 @@ if __name__ == "__main__":
 
     elif args.regime == "training_datasets":
         collect_training_dataset_results(args.scale, output_format)
+
+    elif args.regime == "naive_merge":
+        collect_naive_merge_results(args.scale, output_format)
 
     else:
         print("Unknown testing regime")

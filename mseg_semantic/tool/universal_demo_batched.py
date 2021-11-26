@@ -11,9 +11,9 @@ import cv2
 import numpy as np
 from mseg.utils.names_utils import load_class_names, get_universal_class_names
 
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
-from mseg_semantic.utils.logger_utils import get_logger
 from mseg_semantic.tool.batched_inference_task import BatchedInferenceTask
 
 
@@ -30,7 +30,7 @@ scaled up to the largest possible size while fitting within the crop.
 """
 
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 cv2.ocl.setUseOpenCL(False)
 

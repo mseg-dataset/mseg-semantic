@@ -13,16 +13,16 @@ import numpy as np
 import torch
 import mseg.utils.dir_utils as dir_utils
 
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.tool.mseg_dataloaders import create_test_loader
 from mseg_semantic.utils.avg_meter import AverageMeter
-from mseg_semantic.utils.logger_utils import get_logger
 from mseg_semantic.utils.img_path_utils import get_unique_stem_from_last_k_strs
 
 
 _ROOT = Path(__file__).resolve().parent.parent.parent
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 
 def pad_to_crop_sz_batched(

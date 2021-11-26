@@ -170,7 +170,7 @@ class ResNet(nn.Module):
         return x
 
 
-def resnet18(pretrained=False, **kwargs):
+def resnet18(pretrained: bool = False, **kwargs):
     """Constructs a ResNet-18 model.
 
     Args:
@@ -182,7 +182,7 @@ def resnet18(pretrained=False, **kwargs):
     return model
 
 
-def resnet34(pretrained=False, **kwargs):
+def resnet34(pretrained: bool = False, **kwargs):
     """Constructs a ResNet-34 model.
 
     Args:
@@ -194,7 +194,7 @@ def resnet34(pretrained=False, **kwargs):
     return model
 
 
-def resnet50(pretrained=False, **kwargs):
+def resnet50(pretrained: bool = False, **kwargs):
     """Constructs a ResNet-50 model.
 
     Args:

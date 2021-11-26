@@ -12,13 +12,14 @@ import torch
 import torch.nn.functional as F
 from mseg.utils.dataset_config import infos
 
+import mseg_semantic.utils.logger_utils as logger_utils
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
 # from mseg_semantic.utils.verification_utils import verify_architecture
 from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.tool.mseg_dataloaders import create_test_loader
-from mseg_semantic.utils.logger_utils import get_logger
+
 
 cv2.ocl.setUseOpenCL(False)
 
@@ -27,7 +28,7 @@ Test an `oracle` model -- trained and tested on the same taxonomy/dataset.
 Thus, is designed for testing a single model's performance on a single-dataset.
 """
 
-logger = get_logger()
+logger = logger_utils.get_logger()
 
 
 def get_parser() -> CfgNode:
