@@ -198,9 +198,9 @@ def collect_naive_merge_results_at_res(resolution: str, scale: str, output_forma
         results.append(miou)
 
     if output_format == PrintOutputFormat.LaTeX:
-        dump_results_latex("Oracle", results)
+        dump_results_latex("Naive Merge", results)
     elif output_format == PrintOutputFormat.MARKDOWN:
-        dump_results_markdown("Oracle", results)
+        dump_results_markdown("Naive Merge", results)
 
 
 def collect_oracle_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
