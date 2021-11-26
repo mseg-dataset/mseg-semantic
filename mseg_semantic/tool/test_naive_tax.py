@@ -4,6 +4,7 @@ import argparse
 import logging
 from pathlib import Path
 
+import mseg.utils.names_utils as names_utils
 from mseg.taxonomy.naive_taxonomy_converter import NaiveTaxonomyConverter
 from mseg.utils.dataset_config import infos
 
@@ -51,9 +52,8 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     args.save_folder = f"{model_results_root}/{args.dataset}/{args.base_size}/{scale_type}/"
 
     ntc = NaiveTaxonomyConverter()
-    class_names = ntc.get_naive_taxonomy_classnames()
-    args.num_model_classes = len(class_names)
-    num_eval_classes = len(class_names)
+    naive_class_names = ntc.get_naive_taxonomy_classnames()
+    args.num_model_classes = len(naive_class_names)
 
     args.print_freq = 100
     args.test_list = infos[args.dataset].vallist
@@ -75,6 +75,9 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
 
     import pdb; pdb.set_trace()
     
+    class_names = names_utils.load_class_names(args.dataset)
+    num_eval_classes = len(class_names)
+
     excluded_ids = []
     _, test_data_list = dataloader_utils.create_test_loader(args)
     ac = AccuracyCalculator(
