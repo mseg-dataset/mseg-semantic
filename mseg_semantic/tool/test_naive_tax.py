@@ -9,19 +9,7 @@ from mseg_semantic.tool.accuracy_calculator import AccuracyCalculator
 from mseg_semantic.tool.inference_task import InferenceTask
 from mseg_semantic.utils import config
 from mseg_semantic.utils.config import CfgNode
-
-
-def get_logger():
-    """ """
-    logger_name = "main-logger"
-    logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        fmt = "[%(asctime)s %(levelname)s %(filename)s line %(lineno)d %(process)d] %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-    return logger
+from mseg_semantic.utils.logger_utils import get_logger
 
 
 logger = get_logger()
@@ -30,6 +18,8 @@ logger = get_logger()
 def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     """
     python -u ../tool/test_naive_tax.py --config=${config_fpath} dataset ${dataset_name} model_path ${model_fpath} model_name ${model_name}
+    
+    python mseg_semantic/tool/test_naive_tax.py --config=mseg_semantic/config/test/default_config_360_ms.yaml model_path ../pretrained-semantic-models/mseg-3m/mseg-3m.pth model_name mseg-3m dataset camvid-11
     """
 
     """
@@ -51,7 +41,7 @@ def test_naive_taxonomy_model(args, use_gpu: bool) -> None:
     args.print_freq = 1
     args.num_model_classes = len(class_names)
 
-    it = InferenceTask(
+    itask = InferenceTask(
         args=args,
         base_size=args.base_size,
         crop_h=args.test_h,
