@@ -178,7 +178,9 @@ def dump_results_markdown(name: str, results: List[float]) -> None:
     print(name.rjust(ROW_LEFT_JUSTIFY_OFFSET), "  ", " ".join(results) + "|")
 
 
-def collect_naive_merge_results_at_res(resolution: str, scale: str, output_format: PrintOutputFormat) -> None:
+def collect_naive_merge_results_at_res(
+    resolution: str, scale: str, output_format: PrintOutputFormat, mean_type: str = "harmonic"
+) -> None:
     """For all test datasets, aggregate the results of the naive-merge model at a specific evaluation resolution
     (from resolution-specific .txt files in subfolders).
 
@@ -197,6 +199,10 @@ def collect_naive_merge_results_at_res(resolution: str, scale: str, output_forma
         folder = f"{RESULTS_BASE_ROOT}/{m}/{m}/{d}"
         miou = parse_folder(folder, resolution, scale)
         results.append(miou)
+
+    tmp_results = np.array(results)
+    if mean_type == "harmonic":
+        results.append(harmonic_mean(tmp_results))
 
     if output_format == PrintOutputFormat.LaTeX:
         dump_results_latex("Naive Merge", results)
