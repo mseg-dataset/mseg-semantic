@@ -12,6 +12,9 @@ This repo includes the **semantic segmentation pre-trained models, training and 
 <br>
 Presented at [CVPR 2020](http://cvpr2020.thecvf.com/). Link to [MSeg Video (3min) ](https://youtu.be/PzBK6K5gyyo)
 
+**NEWS**:
+- [Dec. 2021]: An updated journal-length version of our paper is now available on ArXiV [here](https://arxiv.org/abs/2112.13762).
+
 <p align="left">
   <img src="https://user-images.githubusercontent.com/62491525/83895683-094caa00-a721-11ea-8905-2183df60bc4f.gif" height="215">
   <img src="https://user-images.githubusercontent.com/62491525/83893966-aeb24e80-a71e-11ea-84cc-80e591f91ec0.gif" height="215">
