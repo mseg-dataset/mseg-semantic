@@ -2,7 +2,7 @@
 
 This repo includes the **semantic segmentation pre-trained models, training and inference code** for the paper:
 
-**MSeg: A Composite Dataset for Multi-domain Semantic Segmentation** (CVPR 2020, Official Repo) [[PDF]](http://vladlen.info/papers/MSeg.pdf)
+**MSeg: A Composite Dataset for Multi-domain Semantic Segmentation** (CVPR 2020, Official Repo) [[CVPR-version PDF]](http://vladlen.info/papers/MSeg.pdf) [[Journal-length version PDF]](https://arxiv.org/abs/2112.13762)
 <br>
 [John Lambert*](https://johnwlambert.github.io/),
 [Zhuang Liu*](https://liuzhuang13.github.io/),
