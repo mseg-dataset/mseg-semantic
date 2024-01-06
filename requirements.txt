@@ -1,5 +1,5 @@
-imageio
 hydra-core
+imageio
 matplotlib
 numpy>=1.19.5
 opencv-python>=4.1.0.25
@@ -7,7 +7,7 @@ pandas>=1.2.0
 Pillow
 PyYAML
 scipy>=1.2.1
-sklearn
+scikit-learn
 torch
 tqdm
 typing_extensions
