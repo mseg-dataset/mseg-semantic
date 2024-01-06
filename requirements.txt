@@ -1,5 +1,5 @@
-imageio
 hydra-core
+imageio
 matplotlib
 numpy>=1.19.5
 opencv-python>=4.1.0.25
